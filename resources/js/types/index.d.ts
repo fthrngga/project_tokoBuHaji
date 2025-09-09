@@ -65,3 +65,29 @@ export interface Pagination<T> {
         active: boolean;
     }[];
 }
+
+export interface Category {
+    id: number;
+    name: string;
+    slug: string;
+    parent_id: number | null; // Jika Anda menggunakan sub-kategori
+}
+
+export interface Product {
+    id: number;
+    name: string;
+    slug: string;
+    sku: string | null;
+    description: string | null;
+    price: number; // Laravel mengirim ini sebagai string, tapi kita bisa definisikan sebagai number
+    stock: number;
+    category_id: number;
+    weight: number;
+    specifications: Record<string, unknown> | null;
+    is_featured: boolean;
+    is_published: boolean;
+    created_at: string;
+    updated_at: string;
+    images: ProductImage[]; // Relasi ke gambar
+    category: Category; // Relasi ke kategori
+}
