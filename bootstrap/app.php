@@ -21,7 +21,14 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
+
+        $middleware->alias([
+            'role' => \App\Http\Middleware\RoleMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
-    })->create();
+    })->withCommands([
+        \App\Console\Commands\MakeFeatureCommand::class,
+        \App\Console\Commands\SyncFeatureCommand::class,
+    ])->create();

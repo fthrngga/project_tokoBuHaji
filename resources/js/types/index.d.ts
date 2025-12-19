@@ -40,3 +40,54 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+
+export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {
+    auth: Auth;
+};
+
+/**
+ * Mendefinisikan struktur objek Paginasi dari Laravel.
+ * 'T' adalah placeholder untuk tipe data yang dipaginasi (misal: Product, User, dll).
+ */
+export interface Pagination<T> {
+    data: T[];
+    from: number;
+    to: number;
+    total: number;
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    prev_page_url: string | null;
+    next_page_url: string | null;
+    links: {
+        url: string | null;
+        label: string;
+        active: boolean;
+    }[];
+}
+
+export interface Category {
+    id: number;
+    name: string;
+    slug: string;
+    parent_id: number | null; // Jika Anda menggunakan sub-kategori
+}
+
+export interface Product {
+    id: number;
+    name: string;
+    slug: string;
+    sku: string | null;
+    description: string | null;
+    price: number; // Laravel mengirim ini sebagai string, tapi kita bisa definisikan sebagai number
+    stock: number;
+    category_id: number;
+    weight: number;
+    specifications: Record<string, unknown> | null;
+    is_featured: boolean;
+    is_published: boolean;
+    created_at: string;
+    updated_at: string;
+    images: ProductImage[]; // Relasi ke gambar
+    category: Category; // Relasi ke kategori
+}
