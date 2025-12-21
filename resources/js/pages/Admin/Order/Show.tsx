@@ -1,0 +1,295 @@
+import { useRef, useState, useEffect } from "react";
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import AppLayout from '@/layouts/app-layout';
+import { BreadcrumbItem, SharedData, Product } from '@/types';
+import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
+import { route } from 'ziggy-js';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Send, ArrowLeft, TrendingUp, DollarSign, Truck } from "lucide-react";
+import { toast } from "sonner";
+
+interface OrderItem {
+    id: number;
+    product: Product;
+    quantity: number;
+    price: number;
+}
+
+interface Message {
+    id: number;
+    user_id: number;
+    message: string;
+    created_at: string;
+    user: {
+        id: number;
+        name: string;
+    }
+}
+
+interface Order {
+    id: number;
+    user_id: number;
+    user: { name: string; email: string };
+    status: string;
+    total_amount: number;
+    shipping_cost: number | null;
+    province: string;
+    city: string;
+    postal_code: string;
+    address_detail: string;
+    notes: string;
+    items: OrderItem[];
+    messages: Message[];
+    created_at: string;
+}
+
+interface Props {
+    order: Order;
+}
+
+const formatCurrency = (value: number | string) => {
+    return new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        minimumFractionDigits: 0,
+    }).format(Number(value));
+};
+
+const getStatusBadge = (status: string) => {
+    switch (status) {
+        case 'negotiation': return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Negosiasi</Badge>;
+        case 'pending': return <Badge variant="secondary" className="bg-gray-100 text-gray-800">Menunggu</Badge>;
+        case 'awaiting_payment': return <Badge variant="secondary" className="bg-blue-100 text-blue-800">Menunggu Pembayaran</Badge>;
+        case 'processing': return <Badge variant="secondary" className="bg-orange-100 text-orange-800">Diproses</Badge>;
+        case 'completed': return <Badge variant="default" className="bg-green-600 hover:bg-green-700">Selesai</Badge>;
+        case 'cancelled': return <Badge variant="destructive">Dibatalkan</Badge>;
+        default: return <Badge variant="outline">{status}</Badge>;
+    }
+}
+
+export default function Show({ order }: Props) {
+    const { auth } = usePage<SharedData>().props;
+    const scrollRef = useRef<HTMLDivElement>(null);
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Dashboard', href: '/dashboard' },
+        { title: 'Orders', href: route('admin.orders.index') },
+        { title: `Order #${order.id}`, href: '#' },
+    ];
+
+    // Chat Form
+    const { data: msgData, setData: setMsgData, post: postMsg, processing: msgProcessing, reset: resetMsg } = useForm({
+        message: '',
+    });
+
+    // Update Form (Invoice/Shipping)
+    const { data: updateData, setData: setUpdateData, put: putUpdate, processing: updateProcessing } = useForm({
+        shipping_cost: order.shipping_cost || '',
+        status: order.status,
+    });
+
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+    }, [order.messages]);
+
+    const handleSendMessage = (e: React.FormEvent) => {
+        e.preventDefault();
+        postMsg(route('orders.messages.store', order.id), { // Using the same route logic as user
+            preserveScroll: true,
+            onSuccess: () => resetMsg('message'),
+            onError: () => toast.error("Failed to send message"),
+        });
+    }
+
+    const handleSendInvoice = (e: React.FormEvent) => {
+        e.preventDefault();
+        putUpdate(route('admin.orders.update', order.id), {
+            onSuccess: () => toast.success("Invoice sent / Order updated successfully"),
+            onError: () => toast.error("Failed to update order"),
+        });
+    }
+
+    return (
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title={`Admin - Order #${order.id}`} />
+
+            <div className="flex flex-col space-y-4 p-4 h-[calc(100vh-4rem)]"> {/* Adjusted height to fit viewport minus header */}
+                <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border">
+                    <div>
+                        <h1 className="text-2xl font-bold flex items-center gap-3">
+                            Order #{order.id}
+                            {getStatusBadge(order.status)}
+                        </h1>
+                        <p className="text-sm text-muted-foreground mt-1">
+                            Customer: <span className="font-semibold text-foreground">{order.user.name}</span> ({order.user.email})
+                        </p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 overflow-hidden">
+                    {/* LEFT COLUMN: Chat */}
+                    <Card className="lg:col-span-2 flex flex-col h-full overflow-hidden">
+                        <CardHeader className="border-b py-3">
+                            <CardTitle className="text-base flex items-center gap-2">
+                                <TrendingUp className="h-4 w-4" /> Negotiation Chat
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 relative" ref={scrollRef}>
+                            {order.messages.length === 0 && (
+                                <div className="text-center text-sm text-gray-400 py-10">
+                                    No messages yet. Start the conversation.
+                                </div>
+                            )}
+                            {order.messages.map((msg) => {
+                                const isAdmin = msg.user.id !== order.user_id; // Simple check: message is from admin logic
+                                const isMe = msg.user_id === auth.user.id; // Check if it's CURRENT logged in admin
+
+                                return (
+                                    <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                                        <div className={`max-w-[80%] rounded-lg p-3 text-sm shadow-sm ${isMe
+                                                ? 'bg-primary text-primary-foreground rounded-br-none'
+                                                : 'bg-white border rounded-bl-none'
+                                            }`}>
+                                            <p>{msg.message}</p>
+                                            <div className={`text-[10px] mt-1 flex justify-between gap-4 ${isMe ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                                                <span className="font-semibold">{msg.user.name} {isAdmin && !(msg.user.id === order.user.id) && '(Admin)'}</span>
+                                                <span>{format(new Date(msg.created_at), "HH:mm")}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </CardContent>
+                        <CardFooter className="p-3 border-t bg-background">
+                            <form onSubmit={handleSendMessage} className="flex w-full gap-2">
+                                <Input
+                                    value={msgData.message}
+                                    onChange={e => setMsgData('message', e.target.value)}
+                                    placeholder="Reply as Admin..."
+                                    className="flex-1"
+                                    disabled={msgProcessing}
+                                />
+                                <Button type="submit" size="icon" disabled={msgProcessing || !msgData.message.trim()}>
+                                    <Send className="h-4 w-4" />
+                                </Button>
+                            </form>
+                        </CardFooter>
+                    </Card>
+
+                    {/* RIGHT COLUMN: Details & Actions */}
+                    <div className="space-y-6 overflow-y-auto h-full pr-1">
+                        {/* Action Panel: Set Invoice */}
+                        <Card className="border-blue-200 bg-blue-50/50">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-bold text-blue-900 flex items-center gap-2">
+                                    <DollarSign className="h-4 w-4" /> Submit Invoice / Update Order
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <form onSubmit={handleSendInvoice} className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="shipping_cost">Shipping Cost (Rp)</Label>
+                                        <Input
+                                            id="shipping_cost"
+                                            type="number"
+                                            placeholder="e.g. 50000"
+                                            value={updateData.shipping_cost}
+                                            onChange={e => setUpdateData('shipping_cost', e.target.value)}
+                                            className="bg-white"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Order Status</Label>
+                                        <select
+                                            className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                            value={updateData.status}
+                                            onChange={e => setUpdateData('status', e.target.value)}
+                                        >
+                                            <option value="negotiation">Negotiation</option>
+                                            <option value="awaiting_payment">Awaiting Payment (Send Invoice)</option>
+                                            <option value="processing">Processing</option>
+                                            <option value="completed">Completed</option>
+                                            <option value="cancelled">Cancelled</option>
+                                        </select>
+                                    </div>
+                                    <Button type="submit" className="w-full" disabled={updateProcessing}>
+                                        {updateProcessing ? "Updating..." : "Update Order"}
+                                    </Button>
+                                </form>
+                            </CardContent>
+                        </Card>
+
+                        {/* Order Summary */}
+                        <Card>
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-base">Order Items ({order.items.length})</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                {order.items.map((item) => (
+                                    <div key={item.id} className="flex justify-between items-center text-sm">
+                                        <div className="flex gap-2 items-center">
+                                            <div className="h-8 w-8 bg-gray-100 rounded overflow-hidden">
+                                                <img
+                                                    src={item.product.images?.[0]?.image_path ? `/storage/${item.product.images[0].image_path}` : 'https://placehold.co/40'}
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            </div>
+                                            <div>
+                                                <p className="font-medium line-clamp-1 max-w-[120px]">{item.product.name}</p>
+                                                <p className="text-xs text-muted-foreground">{item.quantity} x {formatCurrency(item.price)}</p>
+                                            </div>
+                                        </div>
+                                        <span className="font-medium">{formatCurrency(item.quantity * item.price)}</span>
+                                    </div>
+                                ))}
+                                <Separator />
+                                <div className="space-y-1 text-sm">
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Items Subtotal</span>
+                                        <span>{formatCurrency(order.items.reduce((acc, item) => acc + item.quantity * item.price, 0))}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Shipping Cost</span>
+                                        <span className="text-blue-600 font-medium">{order.shipping_cost ? formatCurrency(order.shipping_cost) : '-'}</span>
+                                    </div>
+                                    <div className="flex justify-between font-bold text-lg pt-2 mt-2 border-t">
+                                        <span>Total Amount</span>
+                                        <span>{formatCurrency(order.total_amount)}</span>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Shipping Address */}
+                        <Card>
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-base flex items-center gap-2">
+                                    <Truck className="h-4 w-4" /> Shipping Address
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="text-sm space-y-1">
+                                <p className="font-semibold">{order.address_detail}</p>
+                                <p>{order.village}, {order.district}</p>
+                                <p>{order.city}, {order.province}</p>
+                                <p>Postal Code: {order.postal_code || '-'}</p>
+                                {order.notes && (
+                                    <div className="mt-3 bg-yellow-50 p-2 rounded border border-yellow-100 text-xs text-yellow-800">
+                                        <span className="font-bold">Note:</span> {order.notes}
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </div>
+                </div>
+            </div>
+        </AppLayout>
+    );
+}

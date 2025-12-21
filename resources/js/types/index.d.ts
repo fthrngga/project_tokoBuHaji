@@ -17,15 +17,17 @@ export interface NavGroup {
 
 export interface NavItem {
     title: string;
-    href: NonNullable<InertiaLinkProps['href']>;
+    href: string;
     icon?: LucideIcon | null;
     isActive?: boolean;
+    items?: NavItem[];
 }
 
 export interface SharedData {
     name: string;
     quote: { message: string; author: string };
     auth: Auth;
+    cartCount: number;
     sidebarOpen: boolean;
     [key: string]: unknown;
 }
@@ -90,4 +92,21 @@ export interface Product {
     updated_at: string;
     images: ProductImage[]; // Relasi ke gambar
     category: Category; // Relasi ke kategori
+}
+
+export interface ProductImage {
+    id: number;
+    product_id: number;
+    image_path: string;
+    is_primary: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface CartItem {
+    id: number;
+    cart_id: number;
+    product_id: number;
+    quantity: number;
+    product: Product;
 }

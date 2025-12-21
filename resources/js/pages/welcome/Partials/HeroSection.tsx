@@ -95,13 +95,13 @@ export default function HeroSection() {
                     title="Elektronik"
                     description="Peralatan canggih untuk hidup Anda."
                     imageUrl="https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?q=80&w=1778&auto=format&fit=crop"
-                    href="/elektronik"
+                    href="/kategori/elektronik"
                 />
                 <ProductCategoryCard
                     title="Mebel"
                     description="Furnitur modern untuk setiap sudut."
                     imageUrl="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=2070&auto=format&fit=crop"
-                    href="/mebel"
+                    href="/kategori/mebel"
                 />
             </div>
         </section>

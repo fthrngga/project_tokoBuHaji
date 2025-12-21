@@ -1,10 +1,10 @@
-import { type User } from '@/types';
-import { Link } from '@inertiajs/react';
+import { type User, type SharedData } from '@/types';
+import { Link, usePage, router } from '@inertiajs/react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '@/components/ui/navigation-menu';
-import { ShoppingCart, User as UserIcon, LayoutDashboard, Search, LogOut, X } from 'lucide-react';
+import { ShoppingCart, User as UserIcon, LayoutDashboard, Search, LogOut, X, ShoppingBag } from 'lucide-react';
 import { route } from 'ziggy-js';
 import { useState, useEffect } from 'react';
 import React from 'react';
@@ -21,13 +21,22 @@ function BrandLogo() {
 }
 
 function HeaderActions({ user }: { user: User | null }) {
+    const { cartCount } = usePage<SharedData>().props;
+
     if (user) {
         return (
             <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" className="h-10 w-10">
-                    <ShoppingCart className="h-6 w-6" />
-                    <span className="sr-only">Keranjang</span>
-                </Button>
+                <Link href={route('cart.index')}>
+                    <Button variant="ghost" size="icon" className="h-10 w-10 relative">
+                        <ShoppingCart className="h-6 w-6" />
+                        <span className="sr-only">Keranjang</span>
+                        {cartCount > 0 && (
+                            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white">
+                                {cartCount}
+                            </span>
+                        )}
+                    </Button>
+                </Link>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-10 w-10">
@@ -43,6 +52,7 @@ function HeaderActions({ user }: { user: User | null }) {
                         ) : (
                             <DropdownMenuItem asChild><Link href="#"><UserIcon className="mr-2 h-4 w-4" /><span>Profil</span></Link></DropdownMenuItem>
                         )}
+                        <DropdownMenuItem asChild><Link href={route('orders.index')}><ShoppingBag className="mr-2 h-4 w-4" /><span>Pesanan Saya</span></Link></DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild><Link href={route('logout')} method="post" as="button" className="w-full text-left"><LogOut className="mr-2 h-4 w-4" /><span>Log Out</span></Link></DropdownMenuItem>
                     </DropdownMenuContent>
@@ -52,12 +62,12 @@ function HeaderActions({ user }: { user: User | null }) {
     }
     return (
         <div className="hidden items-center gap-2 md:flex">
-             <Link
+            <Link
                 href={route('login')}
                 className={cn(buttonVariants({ variant: 'outline' }), "rounded-full px-6 border-gray-300 dark:border-gray-700")}
-             >
+            >
                 Log In
-             </Link>
+            </Link>
             <Link
                 href={route('register')}
                 className={cn(buttonVariants({ variant: 'default' }), "bg-gray-900 text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 rounded-full px-6")}
@@ -70,28 +80,28 @@ function HeaderActions({ user }: { user: User | null }) {
 
 // Komponen helper untuk item di dalam dropdown navigasi
 const ListItem = React.forwardRef<
-  React.ElementRef<"a">,
-  React.ComponentPropsWithoutRef<"a">
+    React.ElementRef<"a">,
+    React.ComponentPropsWithoutRef<"a">
 >(({ className, title, children, ...props }, ref) => {
-  return (
-    <li>
-      <NavigationMenuLink asChild>
-        <a
-          ref={ref}
-          className={cn(
-            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-            className
-          )}
-          {...props}
-        >
-          <div className="text-sm font-medium leading-none">{title}</div>
-          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-            {children}
-          </p>
-        </a>
-      </NavigationMenuLink>
-    </li>
-  )
+    return (
+        <li>
+            <NavigationMenuLink asChild>
+                <a
+                    ref={ref}
+                    className={cn(
+                        "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+                        className
+                    )}
+                    {...props}
+                >
+                    <div className="text-sm font-medium leading-none">{title}</div>
+                    <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                        {children}
+                    </p>
+                </a>
+            </NavigationMenuLink>
+        </li>
+    )
 })
 ListItem.displayName = "ListItem"
 
@@ -100,6 +110,7 @@ ListItem.displayName = "ListItem"
 
 export default function Header({ user }: { user: User | null }) {
     const [isTopBarVisible, setIsTopBarVisible] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         const isDismissed = sessionStorage.getItem('topBarDismissed') === 'true';
@@ -111,6 +122,13 @@ export default function Header({ user }: { user: User | null }) {
     const handleDismissTopBar = () => {
         setIsTopBarVisible(false);
         sessionStorage.setItem('topBarDismissed', 'true');
+    };
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            router.get(route('search.index'), { q: searchQuery });
+        }
     };
 
     return (
@@ -137,10 +155,10 @@ export default function Header({ user }: { user: User | null }) {
                                         <NavigationMenuTrigger className="bg-transparent">Produk</NavigationMenuTrigger>
                                         <NavigationMenuContent>
                                             <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
-                                                <ListItem href="/produk/elektronik" title="Elektronik">
+                                                <ListItem href="/kategori/elektronik" title="Elektronik">
                                                     Peralatan canggih untuk mempermudah kehidupan sehari-hari Anda.
                                                 </ListItem>
-                                                <ListItem href="/produk/mebel" title="Mebel">
+                                                <ListItem href="/kategori/mebel" title="Mebel">
                                                     Koleksi furnitur modern dan minimalis untuk setiap sudut rumah Anda.
                                                 </ListItem>
                                             </ul>
@@ -156,14 +174,16 @@ export default function Header({ user }: { user: User | null }) {
 
                     <div className="flex-1 flex justify-center">
                         <div className="w-full max-w-lg">
-                            <div className="relative">
+                            <form onSubmit={handleSearch} className="relative">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                                 <Input
                                     type="search"
                                     placeholder="Cari produk elektronik atau mebel..."
                                     className="pl-12 pr-4 h-12 w-full rounded-full bg-gray-100 dark:bg-gray-800 border-transparent focus:border-gray-300 focus:bg-white focus:ring-0"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
                                 />
-                            </div>
+                            </form>
                         </div>
                     </div>
 

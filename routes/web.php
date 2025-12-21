@@ -11,6 +11,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
+
+    Route::resource('admin/orders', \App\Http\Controllers\Admin\OrderController::class)->names('admin.orders');
 });
 
 Route::middleware(['auth', 'verified', 'role:customer'])->group(function () {
@@ -21,8 +23,8 @@ Route::middleware(['auth', 'verified', 'role:customer'])->group(function () {
 
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';
 
 foreach (glob(base_path('routes/features/*.php')) as $route) {
     require $route;

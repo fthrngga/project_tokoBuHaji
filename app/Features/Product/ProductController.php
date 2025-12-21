@@ -21,10 +21,10 @@ class ProductController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('sku', 'like', "%{$search}%")
-                  ->orWhereHas('category', function ($catQuery) use ($search) {
-                      $catQuery->where('name', 'like', "%{$search}%");
-                  });
+                    ->orWhere('sku', 'like', "%{$search}%")
+                    ->orWhereHas('category', function ($catQuery) use ($search) {
+                        $catQuery->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -61,6 +61,11 @@ class ProductController extends Controller
             'images' => 'nullable|array', // Validasi untuk gambar baru
             'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048', // Aturan untuk setiap file gambar
         ]);
+
+        // Dekode specifications sebelum membuat model
+        if (isset($validated['specifications']) && is_string($validated['specifications'])) {
+            $validated['specifications'] = json_decode($validated['specifications'], true);
+        }
 
         $product = Product::create($validated + ['slug' => Str::slug($validated['name'])]);
 
@@ -101,6 +106,11 @@ class ProductController extends Controller
             'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
+        // Dekode specifications jika itu adalah string JSON (karena casts 'array' di model)
+        if (isset($validated['specifications']) && is_string($validated['specifications'])) {
+            $validated['specifications'] = json_decode($validated['specifications'], true);
+        }
+
         $product->update($validated);
 
         if ($request->hasFile('images')) {
@@ -129,6 +139,22 @@ class ProductController extends Controller
         $image->delete();
 
         return redirect()->back()->with('message', 'Gambar berhasil dihapus.');
+    }
+
+    /**
+     * Menampilkan halaman detail produk (Public).
+     */
+    public function show(string $slug)
+    {
+        $product = Product::query()
+            ->where('slug', $slug)
+            ->where('is_published', true)
+            ->with(['images', 'category'])
+            ->firstOrFail();
+
+        return Inertia::render('Features/Product/Show', [
+            'product' => $product,
+        ]);
     }
 }
 
