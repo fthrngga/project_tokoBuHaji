@@ -34,4 +34,9 @@ class Order extends Model
     {
         return $this->hasMany(OrderMessage::class);
     }
+
+    public function payment()
+    {
+        return $this->hasOne(\App\Models\Payment::class);
+    }
 }

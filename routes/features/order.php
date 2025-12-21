@@ -10,4 +10,6 @@ Route::middleware(['auth'])->group(function () {
 
     Route::resource('orders', OrderController::class)->only(['index', 'show']);
     Route::post('/orders/{order}/messages', [App\Http\Controllers\Features\Order\OrderMessageController::class, 'store'])->name('orders.messages.store');
+    Route::post('/orders/{order}/payment', [OrderController::class, 'storePayment'])->name('orders.payment.store');
+    Route::post('/orders/{order}/payment/proof', [OrderController::class, 'uploadProof'])->name('orders.payment.proof');
 });

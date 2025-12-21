@@ -4,7 +4,7 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '@/components/ui/navigation-menu';
-import { ShoppingCart, User as UserIcon, LayoutDashboard, Search, LogOut, X, ShoppingBag } from 'lucide-react';
+import { ShoppingCart, User as UserIcon, LayoutDashboard, Search, LogOut, X, ShoppingBag, CreditCard } from 'lucide-react';
 import { route } from 'ziggy-js';
 import { useState, useEffect } from 'react';
 import React from 'react';
@@ -53,6 +53,9 @@ function HeaderActions({ user }: { user: User | null }) {
                             <DropdownMenuItem asChild><Link href="#"><UserIcon className="mr-2 h-4 w-4" /><span>Profil</span></Link></DropdownMenuItem>
                         )}
                         <DropdownMenuItem asChild><Link href={route('orders.index')}><ShoppingBag className="mr-2 h-4 w-4" /><span>Pesanan Saya</span></Link></DropdownMenuItem>
+                        {user.role !== 'admin' && (
+                            <DropdownMenuItem asChild><Link href={route('customer.installments.index')}><CreditCard className="mr-2 h-4 w-4" /><span>Cek Angsuran</span></Link></DropdownMenuItem>
+                        )}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild><Link href={route('logout')} method="post" as="button" className="w-full text-left"><LogOut className="mr-2 h-4 w-4" /><span>Log Out</span></Link></DropdownMenuItem>
                     </DropdownMenuContent>
