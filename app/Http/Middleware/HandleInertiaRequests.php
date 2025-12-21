@@ -50,9 +50,10 @@ class HandleInertiaRequests extends Middleware
                     'role' => $request->user()->role,
                 ] : null
             ],
-            'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'cartCount' => $request->user() ? \App\Features\Cart\Cart::where('user_id', $request->user()->id)->first()?->items()->count() ?? 0 : 0,
+            'sidebarOpen' => !$request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'flash' => [
-                'message' => fn () => $request->session()->get('message'),
+                'message' => fn() => $request->session()->get('message'),
             ],
         ];
     }

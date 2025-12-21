@@ -31,12 +31,11 @@ class Product extends Model
         'is_published'
     ];
     // SYNC_FILLABLE_END
-    
+
     // SYNC_CASTS_START
     protected $casts = [
         'specifications' => 'array',
         'price' => 'decimal:2',
-        'specifications' => 'array',
         'is_featured' => 'boolean',
         'is_published' => 'boolean',
     ];

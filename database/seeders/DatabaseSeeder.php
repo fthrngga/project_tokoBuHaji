@@ -23,6 +23,13 @@ class DatabaseSeeder extends Seeder
             'role' => 'admin',
         ]);
 
+        User::factory()->create([
+            'name' => 'customer',
+            'email' => 'customer@gmail.com',
+            'password' => Hash::make('11223344'),
+            'role' => 'customer',
+        ]);
+
         $this->call([
             CategorySeeder::class,
             ProductSeeder::class,
