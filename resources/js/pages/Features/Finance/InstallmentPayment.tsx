@@ -1,7 +1,7 @@
 
-import { Head, usePage, useForm } from '@inertiajs/react';
+import { Head, usePage, useForm, router } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,9 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Printer } from "lucide-react";
+import { Printer, CheckCircle2 } from "lucide-react";
 import { useState, useEffect } from 'react';
 import { route } from 'ziggy-js';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const breadcrumbs = [
     {
@@ -32,18 +33,34 @@ interface Customer {
     current_installment: number;
     remaining_months: number;
     installment_amount: number;
+    product_name?: string;
 }
 
-export default function InstallmentPayment({ customers }: { customers: Customer[] }) {
+// Add History Interface
+interface HistoryLog {
+    id: number;
+    paid_at: string; // H:i
+    customer_name: string;
+    installment_number: number;
+    amount: number;
+    notes: string;
+    months_paid: number;
+}
+
+export default function InstallmentPayment({ customers, history = [], filters = { date: '' } }: { customers: Customer[], history?: HistoryLog[], filters?: { date: string } }) {
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
-    // Form handling
+    // Ensure filter date fallsback to today if empty
+    const defaultDate = filters.date || new Date().toISOString().split('T')[0];
+
+    // Initialize form with the current Filter Date if possible, or today
     const { data, setData, post, processing, errors, reset } = useForm({
         payment_id: '',
         amount: '',
-        payment_date: new Date().toISOString().split('T')[0],
+        payment_date: defaultDate,
         payment_method: 'tunai',
         notes: '',
+        months_paid: 1,
     });
 
     const handleCustomerChange = (val: string) => {
@@ -56,207 +73,263 @@ export default function InstallmentPayment({ customers }: { customers: Customer[
             ...prev,
             payment_id: val,
             amount: customer ? customer.installment_amount.toString() : '',
-            notes: customer ? `Pembayaran Angsuran ke-${customer.current_installment}` : ''
+            notes: customer ? `Pembayaran Angsuran ke-${customer.current_installment}` : '',
+            months_paid: 1,
         }));
     };
 
-    // Auto-calculate amount when months change
-    const handleMonthsChange = (months: number) => {
-        // Prevent NaN or undefined effectively.
-        // If user input is empty, parseInt might return NaN.
-        // We force it to be at least 1, or if it's NaN we treat it as 1.
-        const val = isNaN(months) ? 1 : Math.max(1, months);
+    const handleMonthsChange = (val: number) => {
+        const months = isNaN(val) ? 1 : Math.max(1, val);
+        setData(prev => {
+            const baseAmount = selectedCustomer ? selectedCustomer.installment_amount : 0;
+            const newAmount = baseAmount * months;
 
-        if (selectedCustomer) {
-            const total = selectedCustomer.installment_amount * val;
-            setData(prev => ({
+            let newNote = '';
+            if (selectedCustomer) {
+                const start = selectedCustomer.current_installment;
+                const end = start + months - 1;
+                newNote = months > 1
+                    ? `Pembayaran Angsuran ke-${start} s/d ${end}`
+                    : `Pembayaran Angsuran ke-${start}`;
+            }
+
+            return {
                 ...prev,
-                months_paid: val,
-                amount: total.toString(),
-                notes: `Pembayaran Angsuran ke-${selectedCustomer.current_installment} s/d ${selectedCustomer.current_installment + val - 1}`
-            }));
-        } else {
-            setData(prev => ({
-                ...prev,
-                months_paid: val
-            }));
-        }
+                months_paid: months,
+                amount: newAmount > 0 ? newAmount.toString() : '',
+                notes: newNote
+            };
+        });
     };
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
         post(route('finance.payment.store-installment'), {
             onSuccess: () => {
-                reset(); // This resets to initial values (payment_id='', months_paid=1)
+                reset();
                 setSelectedCustomer(null);
-            }
+                // Force a visit to current page to refresh history if back() doesn't work as expected
+                // But typically back() is enough.
+            },
+        });
+    };
+
+    const handleDateFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        router.get(route('finance.payment.manual'), { date: e.target.value }, {
+            preserveState: true,
+            preserveScroll: true,
         });
     };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Input Pembayaran Angsuran" />
-            <div className="flex flex-col gap-6 p-4">
-                <div className="flex flex-col gap-2 rounded-xl border bg-card p-6 text-card-foreground shadow">
-                    <h1 className="text-2xl font-bold tracking-tight">Pembayaran Angsuran</h1>
-                    <p className="text-muted-foreground">
-                        Input pembayaran angsuran manual pelanggan.
-                    </p>
-                </div>
+            <Head title="Input Angsuran" />
+            <div className="flex flex-col gap-8 p-4">
 
+                {/* FORM INPUT SECTION */}
                 <div className="grid gap-6 md:grid-cols-2">
-                    {/* LEft: Form Input Tagihan */}
+                    {/* LEFT: FORM INPUT */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Form Input Tagihan</CardTitle>
+                            <CardTitle>Form Pembayaran</CardTitle>
+                            <CardDescription>Pastikan data pelanggan dan nominal sesuai.</CardDescription>
                         </CardHeader>
-                        <CardContent className="grid gap-4">
-                            <form onSubmit={submit} id="installment-form">
-                                <div className="grid grid-cols-2 gap-4 mb-4">
+                        <CardContent>
+                            <form onSubmit={submit} className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label>Pilih Pelanggan (Kredit Aktif)</Label>
+                                    <Select
+                                        value={data.payment_id}
+                                        onValueChange={handleCustomerChange}
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Cari pelanggan..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {customers.length === 0 ? (
+                                                <SelectItem value="empty" disabled>Tidak ada kredit aktif</SelectItem>
+                                            ) : (
+                                                customers.map((c) => (
+                                                    <SelectItem key={c.id} value={c.id.toString()}>
+                                                        {c.customer_name} {c.customer_address ? `(${c.customer_address})` : ''}
+                                                    </SelectItem>
+                                                ))
+                                            )}
+                                        </SelectContent>
+                                    </Select>
+                                    {errors.payment_id && <p className="text-red-500 text-xs">{errors.payment_id}</p>}
+                                </div>
+
+                                {/* Remove the old small blue box since we have the big card on the right now */}
+
+                                <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label>Nama Pelanggan</Label>
-                                        <Select onValueChange={handleCustomerChange} value={data.payment_id}>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Pilih Pelanggan" />
-                                            </SelectTrigger>
-                                            <SelectContent max-h="200px">
-                                                {customers.length > 0 ? (
-                                                    customers.map(c => (
-                                                        <SelectItem key={c.id} value={c.id.toString()}>
-                                                            {c.customer_name} (ID: {c.id})
-                                                        </SelectItem>
-                                                    ))
-                                                ) : (
-                                                    <SelectItem value="none" disabled>Tidak ada kredit aktif</SelectItem>
-                                                )}
-                                            </SelectContent>
-                                        </Select>
-                                        {errors.payment_id && <p className="text-sm text-red-500">{errors.payment_id}</p>}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Jumlah Bulan</Label>
+                                        <Label>Jml Bulan</Label>
                                         <Input
                                             type="number"
                                             min={1}
-                                            value={data.months_paid}
-                                            onChange={e => handleMonthsChange(parseInt(e.target.value) || 1)}
+                                            value={data.months_paid ?? 1}
+                                            onChange={e => handleMonthsChange(parseInt(e.target.value))}
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>Total Pembayaran</Label>
+                                        <Label>Total</Label>
                                         <Input
-                                            placeholder="Rp 0"
                                             type="number"
-                                            value={data.amount}
+                                            value={data.amount ?? ''}
                                             onChange={e => setData('amount', e.target.value)}
                                         />
-                                        {errors.amount && <p className="text-sm text-red-500">{errors.amount}</p>}
+                                        {errors.amount && <p className="text-red-500 text-xs">{errors.amount}</p>}
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4 mb-4">
+                                <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label>Tanggal Bayar</Label>
+                                        <Label>Tanggal</Label>
                                         <Input
                                             type="date"
-                                            value={data.payment_date}
+                                            value={data.payment_date ?? ''}
                                             onChange={e => setData('payment_date', e.target.value)}
                                         />
-                                        {errors.payment_date && <p className="text-sm text-red-500">{errors.payment_date}</p>}
+                                        {errors.payment_date && <p className="text-red-500 text-xs">{errors.payment_date}</p>}
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>Metode Pembayaran</Label>
-                                        <Select
-                                            value={data.payment_method}
-                                            onValueChange={val => setData('payment_method', val)}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Pilih Metode" />
-                                            </SelectTrigger>
+                                        <Label>Metode</Label>
+                                        <Select value={data.payment_method} onValueChange={(val) => setData('payment_method', val)}>
+                                            <SelectTrigger><SelectValue /></SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="tunai">Tunai</SelectItem>
                                                 <SelectItem value="transfer">Transfer</SelectItem>
                                             </SelectContent>
                                         </Select>
-                                        {errors.payment_method && <p className="text-sm text-red-500">{errors.payment_method}</p>}
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label>Catatan</Label>
-                                    <Textarea
-                                        placeholder="Tambahkan catatan pembayaran..."
+                                    <Label>Catatan (Opsional)</Label>
+                                    <Input
+                                        placeholder="Contoh: Titip tetangga, dsb."
                                         value={data.notes}
                                         onChange={e => setData('notes', e.target.value)}
                                     />
                                 </div>
+
+                                <Button type="submit" className="w-full" disabled={processing || !selectedCustomer}>
+                                    {processing ? 'Simpan' : 'Simpan'}
+                                </Button>
                             </form>
                         </CardContent>
-                        <CardFooter className="justify-end gap-2">
-                            <Button variant="outline" type="button" onClick={() => reset()}>Cancel</Button>
-                            <Button type="submit" form="installment-form" disabled={processing}>
-                                {processing ? 'Menyimpan...' : 'Simpan'}
-                            </Button>
-                        </CardFooter>
                     </Card>
 
-                    {/* Right: Info Pelanggan */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Info Pelanggan</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            {selectedCustomer ? (
-                                <>
-                                    <div className="space-y-1">
-                                        <Label className="text-muted-foreground">Nama:</Label>
-                                        <p className="font-medium text-lg">{selectedCustomer.customer_name}</p>
+                    {/* RIGHT COLUMN: DYNAMIC CONTENT */}
+                    <div className="hidden md:block space-y-6">
+                        {selectedCustomer ? (
+                            <Card className="border-blue-200 bg-blue-50/50">
+                                <CardHeader>
+                                    <CardTitle className="text-blue-900">Detail Pelanggan</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4 text-blue-800">
+                                    <div>
+                                        <p className="text-xs text-blue-600 uppercase font-semibold">Nama Pelanggan</p>
+                                        <p className="text-lg font-medium">{selectedCustomer.customer_name}</p>
+                                        <p className="text-sm opacity-80">{selectedCustomer.customer_address}</p>
                                     </div>
-                                    <div className="space-y-1 border-t pt-2">
-                                        <Label className="text-muted-foreground">Alamat:</Label>
-                                        <p className="font-medium">{selectedCustomer.customer_address}</p>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <p className="text-xs text-blue-600 uppercase font-semibold">Sisa Tenor</p>
+                                            <p className="text-2xl font-bold">{selectedCustomer.remaining_months} <span className="text-sm font-normal">Bulan</span></p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-blue-600 uppercase font-semibold">Angsuran/Bln</p>
+                                            <p className="text-lg font-medium">
+                                                {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(selectedCustomer.installment_amount)}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div className="space-y-1 border-t pt-2">
-                                        <Label className="text-muted-foreground">Total Angsuran:</Label>
-                                        <p className="font-medium">{selectedCustomer.total_installments} Bulan</p>
+                                    <div className="pt-4 border-t border-blue-200">
+                                        <p className="text-xs text-blue-600 uppercase font-semibold">Status Pembayaran</p>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <CheckCircle2 className="w-5 h-5 text-green-600" />
+                                            <span className="font-medium">Kredit Aktif (Lancar)</span>
+                                        </div>
                                     </div>
-                                    <div className="space-y-1 border-t pt-2">
-                                        <Label className="text-muted-foreground">Angsuran Saat Ini:</Label>
-                                        <p className="font-medium">Ke-{selectedCustomer.current_installment}</p>
-                                    </div>
-                                    <div className="space-y-1 border-t pt-2">
-                                        <Label className="text-muted-foreground">Nominal Angsuran:</Label>
-                                        <p className="font-medium">
-                                            {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(selectedCustomer.installment_amount)}
-                                        </p>
-                                    </div>
-                                    <div className="space-y-1 border-t pt-2">
-                                        <Label className="text-muted-foreground">Sisa Tagihan:</Label>
-                                        <p className="font-medium text-red-600">{selectedCustomer.remaining_months} Bulan Lagi</p>
-                                    </div>
-                                </>
-                            ) : (
-                                <div className="flex flex-col items-center justify-center h-48 text-muted-foreground italic">
-                                    <p>Pilih pelanggan untuk melihat detail.</p>
+                                </CardContent>
+                            </Card>
+                        ) : (
+                            <Alert className="bg-green-50 border-green-200 text-green-800">
+                                <CheckCircle2 className="h-4 w-4" />
+                                <AlertTitle>Tips Admin</AlertTitle>
+                                <AlertDescription className="mt-2">
+                                    Pilih pelanggan dari dropdown di sebelah kiri untuk melihat detail tagihan.
+                                    Pastikan uang tunai sudah diterima sebelum menyimpan data.
+                                </AlertDescription>
+                            </Alert>
+                        )}
+                    </div>
+
+                    {/* FULL WIDTH TABLE */}
+                    <div className="md:col-span-2">
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between">
+                                <div>
+                                    <CardTitle>Riwayat Pembayaran Harian</CardTitle>
+                                    <CardDescription>Daftar pembayaran yang masuk pada tanggal: <strong>{new Date(defaultDate).toLocaleDateString('id-ID', { dateStyle: 'full' })}</strong></CardDescription>
                                 </div>
-                            )}
-                        </CardContent>
-                    </Card>
+                                <div>
+                                    <Input
+                                        type="date"
+                                        className="w-40"
+                                        value={defaultDate}
+                                        onChange={handleDateFilterChange}
+                                    />
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Jam</TableHead>
+                                            <TableHead>Pelanggan</TableHead>
+                                            <TableHead>Angsuran Ke</TableHead>
+                                            <TableHead>Jumlah Bayar</TableHead>
+                                            <TableHead>Keterangan</TableHead>
+                                            <TableHead className="text-right">Aksi</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {history.length === 0 ? (
+                                            <TableRow>
+                                                <TableCell colSpan={6} className="text-center h-24 text-muted-foreground">
+                                                    Tidak ada pembayaran pada tanggal ini.
+                                                </TableCell>
+                                            </TableRow>
+                                        ) : (
+                                            history.map((log) => (
+                                                <TableRow key={log.id}>
+                                                    <TableCell>{log.paid_at}</TableCell>
+                                                    <TableCell className="font-medium">{log.customer_name}</TableCell>
+                                                    <TableCell>
+                                                        #{log.installment_number}
+                                                        {log.months_paid > 1 && <span className="text-xs text-muted-foreground ml-1">({log.months_paid} Bln)</span>}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(log.amount)}
+                                                    </TableCell>
+                                                    <TableCell className="text-sm text-muted-foreground">{log.notes || '-'}</TableCell>
+                                                    <TableCell className="text-right">
+                                                        <Button variant="outline" size="sm" onClick={() => window.print()}>
+                                                            <Printer className="w-4 h-4 mr-1" /> Cetak
+                                                        </Button>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
-
-                {/* Bottom: Riwayat Pembayaran (Coming soon, for now showing placeholder or we can fetch real history if needed) */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Riwayat Pembayaran</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-muted-foreground text-center py-8">
-                            Fitur riwayat detail per pelanggan akan muncul di sini setelah update berikutnya.
-                            <br />
-                            (Saat ini data tersimpan di Laporan Keuangan).
-                        </div>
-                    </CardContent>
-                </Card>
             </div>
         </AppLayout>
     );

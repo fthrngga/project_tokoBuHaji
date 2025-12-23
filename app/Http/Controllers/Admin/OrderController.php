@@ -43,6 +43,15 @@ class OrderController extends Controller
             $data['total_amount'] = $itemsTotal + $shippingCost;
         }
 
+        // Decrement stock if status changes to completed
+        if ($request->status === 'completed' && $order->status !== 'completed') {
+            foreach ($order->items as $item) {
+                if ($item->product) {
+                    $item->product->decrement('stock', $item->quantity);
+                }
+            }
+        }
+
         $order->update($data);
 
         return back();

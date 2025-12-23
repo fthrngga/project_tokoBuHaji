@@ -145,14 +145,15 @@ class FinanceController extends Controller
 
 
 
-    public function installmentPayment()
+    public function installmentPayment(\Illuminate\Http\Request $request)
     {
+        // Filter Date (Default Today)
+        $date = $request->input('date', now()->format('Y-m-d'));
+
         // Fetch customers with active credits (payment_method = credit)
-        // We need the Payment ID to attach the log to.
-        // Let's get Payments directly, filtered by credit.
         $activeCredits = \App\Models\Payment::with(['customer.user', 'order'])
             ->where('payment_method', 'credit')
-            ->whereIn('status', ['ongoing', 'pending_approval']) // Adjust status as needed
+            ->whereIn('status', ['ongoing', 'pending_approval']) 
             ->get()
             ->map(function ($credit) {
                 return [
@@ -166,19 +167,44 @@ class FinanceController extends Controller
                 ];
             });
 
+        // 2. Fetch Daily Logs
+        $history = \App\Models\PaymentLog::with(['payment.customer.user'])
+            ->where('type', 'installment')
+            ->where('status', 'verified')
+            ->whereDate('paid_at', $date)
+            ->latest('paid_at')
+            ->get()
+            ->map(function ($log) {
+                return [
+                    'id' => $log->id,
+                    'created_at' => $log->created_at->format('H:i'), 
+                    'paid_at' => $log->paid_at->format('H:i'), 
+                    'customer_name' => $log->payment->customer->user->name ?? 'Unknown',
+                    'installment_number' => $log->installment_number,
+                    'amount' => $log->amount,
+                    'notes' => $log->admin_notes,
+                    'months_paid' => $log->months_paid, 
+                ];
+            });
+
         return Inertia::render('Features/Finance/InstallmentPayment', [
             'customers' => $activeCredits,
+            'history' => $history,
+            'filters' => [
+                'date' => $date
+            ],
             'pageParams' => [
                 'title' => 'Input Pembayaran Angsuran',
             ]
         ]);
     }
+
     public function storeInstallment(\Illuminate\Http\Request $request)
     {
         $validated = $request->validate([
             'payment_id' => 'required|exists:payments,id',
             'amount' => 'required|numeric|min:0',
-            'months_paid' => 'required|integer|min:1', // New field
+            'months_paid' => 'required|integer|min:1', 
             'payment_date' => 'required|date',
             'payment_method' => 'required|string',
             'notes' => 'nullable|string',
@@ -187,7 +213,6 @@ class FinanceController extends Controller
         $payment = \App\Models\Payment::findOrFail($validated['payment_id']);
 
         // 1. Create Payment Log (Verified)
-        // Note: installment_number tracks the STARTING installment of this batch
         $log = $payment->paymentLogs()->create([
             'type' => 'installment',
             'installment_number' => $payment->installments_paid + 1,
@@ -195,6 +220,7 @@ class FinanceController extends Controller
             'proof_path' => null,
             'status' => 'verified',
             'paid_at' => $validated['payment_date'],
+            'months_paid' => $validated['months_paid'], // Save explicit column
             'admin_notes' => $validated['notes'] . ($validated['months_paid'] > 1 ? " (Bayar {$validated['months_paid']} Bulan)" : ""),
         ]);
 
@@ -220,8 +246,61 @@ class FinanceController extends Controller
         return back()->with('success', 'Pembayaran angsuran berhasil disimpan.');
     }
 
-    public function reports()
+    public function reports(\Illuminate\Http\Request $request)
     {
-        return \Inertia\Inertia::render('Features/Finance/Reports');
+        // 1. Get Filters
+        $startDate = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
+        $endDate = $request->input('end_date', now()->endOfMonth()->format('Y-m-d'));
+        $category = $request->input('category', 'all');
+
+        // 2. Base Query
+        $query = \App\Models\FinancialTransaction::query()
+            ->whereBetween('transaction_date', [$startDate, $endDate]);
+
+        if ($category !== 'all') {
+            $query->where('category', $category);
+        }
+
+        // 3. Clone query for summary to avoid resetting bindings if we just get()
+        // Actually, better to run separate aggregations or use the same base if simple.
+        
+        // Income
+        $totalIncome = (clone $query)->where('type', 'income')->sum('amount');
+        
+        // Expense
+        $totalExpense = (clone $query)->where('type', 'expense')->sum('amount');
+        
+        // Net Profit
+        $netProfit = $totalIncome - $totalExpense;
+
+        // 4. Get Transactions List
+        $transactions = $query->latest('transaction_date')
+            ->latest('created_at')
+            ->get()
+            ->map(function ($t) {
+                return [
+                    'id' => $t->id,
+                    'date' => $t->transaction_date->format('d M Y'),
+                    'desc' => $t->description,
+                    'category' => ucfirst($t->category),
+                    'type' => ucfirst($t->type), // Income/Expense
+                    'amount' => $t->amount,
+                    'original_type' => $t->type, // For color coding
+                ];
+            });
+
+        return \Inertia\Inertia::render('Features/Finance/Reports', [
+            'summary' => [
+                'income' => $totalIncome,
+                'expense' => $totalExpense,
+                'profit' => $netProfit,
+            ],
+            'transactions' => $transactions,
+            'filters' => [
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'category' => $category,
+            ]
+        ]);
     }
 }
