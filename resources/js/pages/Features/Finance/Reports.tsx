@@ -20,7 +20,23 @@ const breadcrumbs = [
     },
 ];
 
-export default function Reports() {
+interface Transaction {
+    id: number;
+    date: string;
+    desc: string;
+    category: string;
+    type: string;
+    amount: number;
+    original_type: string;
+}
+
+interface Summary {
+    income: number;
+    expense: number;
+    profit: number;
+}
+
+export default function Reports({ summary = { income: 0, expense: 0, profit: 0 }, transactions = [], filters = {} }: { summary?: Summary, transactions?: Transaction[], filters?: any }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Laporan Keuangan" />
@@ -35,8 +51,7 @@ export default function Reports() {
                     <div className="flex flex-wrap gap-2">
                         <div className="flex items-center gap-2 border rounded-md px-3 py-2 bg-white dark:bg-gray-800">
                             <CalendarIcon className="w-4 h-4 text-gray-500" />
-                            <span className="text-sm">01 Mei - 31 Mei</span>
-                            {/* In real implement, use DateRangePicker */}
+                            <span className="text-sm">Bulan Ini</span>
                         </div>
                         <Select defaultValue="all">
                             <SelectTrigger className="w-[180px]">
@@ -44,9 +59,9 @@ export default function Reports() {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">Semua Kategori</SelectItem>
-                                <SelectItem value="cicilan">Cicilan</SelectItem>
+                                <SelectItem value="installment">Cicilan</SelectItem>
                                 <SelectItem value="restock">Restock</SelectItem>
-                                <SelectItem value="operasional">Operasional</SelectItem>
+                                <SelectItem value="operational">Operasional</SelectItem>
                             </SelectContent>
                         </Select>
                         <Button variant="outline" className="gap-2">
@@ -68,28 +83,30 @@ export default function Reports() {
                             <ArrowUpCircle className="h-4 w-4 text-green-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-green-600">IDR 15.000.000</div>
-                            <p className="text-xs text-muted-foreground">+20.1% dari bulan lalu</p>
+                            <div className="text-2xl font-bold text-green-600">
+                                {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(summary.income)}
+                            </div>
+                            <p className="text-xs text-muted-foreground">Seluruh jenis pemasukan (termasuk DP & Cicilan)</p>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Pengeluaran</CardTitle>
-                            <ArrowDownCircle className="h-4 w-4 text-red-500" />
+                            <CardTitle className="text-sm font-medium">Total Pengeluaran (Segera)</CardTitle>
+                            <ArrowDownCircle className="h-4 w-4 text-gray-400" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-red-600">IDR 8.500.000</div>
-                            <p className="text-xs text-muted-foreground">+4.5% dari bulan lalu</p>
+                            <div className="text-2xl font-bold text-gray-400">Rp 0</div>
+                            <p className="text-xs text-muted-foreground">Menunggu rilis fitur pengeluaran</p>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Laba Bersih</CardTitle>
-                            <ArrowRightCircle className="h-4 w-4 text-blue-500" />
+                            <CardTitle className="text-sm font-medium">Laba Bersih (Segera)</CardTitle>
+                            <ArrowRightCircle className="h-4 w-4 text-gray-400" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-blue-600">IDR 6.500.000</div>
-                            <p className="text-xs text-muted-foreground">+12.2% margin keuntungan</p>
+                            <div className="text-2xl font-bold text-gray-400">Rp 0</div>
+                            <p className="text-xs text-muted-foreground">Menunggu rilis fitur laba</p>
                         </CardContent>
                     </Card>
                 </div>
@@ -112,25 +129,24 @@ export default function Reports() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {/* Mock Data */}
-                                {[
-                                    { date: '01 Mei', desc: 'Cicilan Daryono', cat: 'Cicilan', type: 'Masuk', amount: 'IDR 320.000', color: 'text-green-600' },
-                                    { date: '03 Mei', desc: 'Beli Stok TV LED', cat: 'Restock', type: 'Keluar', amount: 'IDR 5.000.000', color: 'text-red-600' },
-                                    { date: '05 Mei', desc: 'Gaji Karyawan', cat: 'Operasional', type: 'Keluar', amount: 'IDR 1.500.000', color: 'text-red-600' },
-                                    { date: '07 Mei', desc: 'Cicilan Bu Siti', cat: 'Cicilan', type: 'Masuk', amount: 'IDR 500.000', color: 'text-green-600' },
-                                    { date: '10 Mei', desc: 'Penjualan Tunai Kulkas', cat: 'Penjualan', type: 'Masuk', amount: 'IDR 2.500.000', color: 'text-green-600' },
-                                ].map((item, i) => (
-                                    <TableRow key={i}>
+                                {transactions.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
+                                            Belum ada log transaksi yang tercatat.
+                                        </TableCell>
+                                    </TableRow>
+                                ) : transactions.map((item, i) => (
+                                    <TableRow key={item.id}>
                                         <TableCell>{item.date}</TableCell>
                                         <TableCell className="font-medium">{item.desc}</TableCell>
-                                        <TableCell>{item.cat}</TableCell>
+                                        <TableCell>{item.category}</TableCell>
                                         <TableCell>
-                                            <Badge variant={item.type === 'Masuk' ? 'default' : 'destructive'} className={item.type === 'Masuk' ? 'bg-green-100 text-green-800 hover:bg-green-100 border-none' : 'bg-red-100 text-red-800 hover:bg-red-100 border-none'}>
-                                                {item.type === 'Masuk' ? '↑ Masuk' : '↓ Keluar'}
+                                            <Badge variant={item.original_type === 'income' ? 'default' : 'destructive'} className={item.original_type === 'income' ? 'bg-green-100 text-green-800 hover:bg-green-100 border-none' : 'bg-red-100 text-red-800 hover:bg-red-100 border-none'}>
+                                                {item.original_type === 'income' ? '↑ Masuk' : '↓ Keluar'}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell className={`text-right font-bold ${item.color}`}>
-                                            {item.amount}
+                                        <TableCell className={`text-right font-bold ${item.original_type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+                                            {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(item.amount)}
                                         </TableCell>
                                     </TableRow>
                                 ))}

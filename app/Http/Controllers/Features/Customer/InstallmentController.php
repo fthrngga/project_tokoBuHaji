@@ -22,24 +22,29 @@ class InstallmentController extends Controller
         $installments = \App\Models\Payment::with(['order.items.product', 'paymentLogs'])
             ->where('customer_id', $customer->id)
             ->where('payment_method', 'credit')
+            ->whereHas('order', function ($query) {
+                $query->where('status', 'completed');
+            })
             ->latest()
             ->get()
             ->map(function ($payment) {
                 // Calculation logic
-                $totalPaid = $payment->installments_paid * $payment->installment_amount;
-                // If DP was paid, it's usually handled separately or part of total check?
-                // For "Remaining Debt", it's usually (Duration - Paid) * Amount.
+                $expectedPaidCycles = $payment->installments_paid;
+                $expectedTotalPaidForCycles = $expectedPaidCycles * $payment->installment_amount;
+
+                $actualVerifiedAmount = $payment->paymentLogs->where('type', 'installment')->where('status', 'verified')->sum('amount');
+                $tunggakan = max(0, $expectedTotalPaidForCycles - $actualVerifiedAmount);
+
                 $remainingMonths = max(0, $payment->duration_months - $payment->installments_paid);
-                $remainingDebt = $remainingMonths * $payment->installment_amount;
+                $remainingDebt = max(0, ($remainingMonths * $payment->installment_amount) + $tunggakan);
+                $totalBillThisMonth = $payment->installment_amount + $tunggakan;
 
                 // Determine Product Name (First Item)
                 $productName = $payment->order->items->first()?->product->name ?? 'Produk dihapus';
 
-                // Next Due Date: if ongoing, 25th of next month (simplified logic)
-                // Real logic might track last payment date.
-                // For now, let's say 1 month after last payment or created_at if none.
+                // Next Due Date
                 $lastLog = $payment->paymentLogs->sortByDesc('paid_at')->first();
-                $baseDate = $lastLog ? \Carbon\Carbon::parse($lastLog->paid_at) : $payment->created_at;
+                $baseDate = $lastLog && $lastLog->paid_at ? \Carbon\Carbon::parse($lastLog->paid_at) : $payment->created_at;
                 $nextDueDate = $remainingMonths > 0 ? $baseDate->addMonth()->format('d F Y') : '-';
 
                 return [
@@ -48,9 +53,11 @@ class InstallmentController extends Controller
                     'productName' => $productName,
                     'contractNumber' => 'CTR-' . str_pad($payment->id, 5, '0', STR_PAD_LEFT),
                     'remainingDebt' => $remainingDebt,
-                    'status' => $payment->status, // ongoing, paid_off
+                    'status' => $payment->status,
                     'dueDate' => $nextDueDate,
-                    'installment_amount' => $payment->installment_amount, // Needed for "Bayar" info
+                    'installment_amount' => $payment->installment_amount,
+                    'tunggakan' => $tunggakan,
+                    'totalBillThisMonth' => $totalBillThisMonth,
                     'history' => $payment->paymentLogs->map(function ($log) {
                         return [
                             'id' => $log->id,

@@ -34,6 +34,7 @@ interface Customer {
     remaining_months: number;
     installment_amount: number;
     product_name?: string;
+    tunggakan?: number;
 }
 
 // Add History Interface
@@ -44,7 +45,6 @@ interface HistoryLog {
     installment_number: number;
     amount: number;
     notes: string;
-    months_paid: number;
 }
 
 export default function InstallmentPayment({ customers, history = [], filters = { date: '' } }: { customers: Customer[], history?: HistoryLog[], filters?: { date: string } }) {
@@ -68,21 +68,25 @@ export default function InstallmentPayment({ customers, history = [], filters = 
         const customer = customers.find(c => c.id === customerId) || null;
         setSelectedCustomer(customer);
 
-        // Auto-fill form data
+        // Auto-fill form data with Pokok + Tunggakan
         setData(prev => ({
             ...prev,
             payment_id: val,
-            amount: customer ? customer.installment_amount.toString() : '',
+            amount: customer ? (Number(customer.installment_amount) + Number(customer.tunggakan || 0)).toString() : '',
             notes: customer ? `Pembayaran Angsuran ke-${customer.current_installment}` : '',
             months_paid: 1,
         }));
     };
 
-    const handleMonthsChange = (val: number) => {
+    const handleMonthsChange = (valStr: string) => {
+        const val = parseInt(valStr);
         const months = isNaN(val) ? 1 : Math.max(1, val);
         setData(prev => {
             const baseAmount = selectedCustomer ? selectedCustomer.installment_amount : 0;
-            const newAmount = baseAmount * months;
+            const tunggakan = selectedCustomer ? (selectedCustomer.tunggakan || 0) : 0;
+            
+            // Calculate new default total based on months
+            const newAmount = (baseAmount * months) + tunggakan;
 
             let newNote = '';
             if (selectedCustomer) {
@@ -100,6 +104,12 @@ export default function InstallmentPayment({ customers, history = [], filters = 
                 notes: newNote
             };
         });
+    };
+
+    const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        // Strip non-numeric chars for raw data
+        const numericValue = e.target.value.replace(/\D/g, '');
+        setData('amount', numericValue);
     };
 
     const submit = (e: React.FormEvent) => {
@@ -160,8 +170,6 @@ export default function InstallmentPayment({ customers, history = [], filters = 
                                     {errors.payment_id && <p className="text-red-500 text-xs">{errors.payment_id}</p>}
                                 </div>
 
-                                {/* Remove the old small blue box since we have the big card on the right now */}
-
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label>Jml Bulan</Label>
@@ -169,16 +177,20 @@ export default function InstallmentPayment({ customers, history = [], filters = 
                                             type="number"
                                             min={1}
                                             value={data.months_paid ?? 1}
-                                            onChange={e => handleMonthsChange(parseInt(e.target.value))}
+                                            onChange={e => handleMonthsChange(e.target.value)}
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>Total</Label>
-                                        <Input
-                                            type="number"
-                                            value={data.amount ?? ''}
-                                            onChange={e => setData('amount', e.target.value)}
-                                        />
+                                        <Label>Total (Rp)</Label>
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium.">Rp</span>
+                                            <Input
+                                                type="text"
+                                                value={data.amount ? new Intl.NumberFormat('id-ID').format(Number(data.amount)) : ''}
+                                                onChange={handleAmountChange}
+                                                className="pl-9 text-lg font-bold"
+                                            />
+                                        </div>
                                         {errors.amount && <p className="text-red-500 text-xs">{errors.amount}</p>}
                                     </div>
                                 </div>
@@ -240,10 +252,18 @@ export default function InstallmentPayment({ customers, history = [], filters = 
                                             <p className="text-2xl font-bold">{selectedCustomer.remaining_months} <span className="text-sm font-normal">Bulan</span></p>
                                         </div>
                                         <div>
-                                            <p className="text-xs text-blue-600 uppercase font-semibold">Angsuran/Bln</p>
-                                            <p className="text-lg font-medium">
+                                            <p className="text-xs text-blue-600 uppercase font-semibold">Angsuran / Bln</p>
+                                            <p className="text-lg font-medium text-blue-800">
                                                 {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(selectedCustomer.installment_amount)}
                                             </p>
+                                            {(selectedCustomer.tunggakan || 0) > 0 && (
+                                                <>
+                                                    <p className="text-xs mt-2 text-red-600 uppercase font-semibold">Tunggakan</p>
+                                                    <p className="text-sm font-bold text-red-600">
+                                                        + {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(selectedCustomer.tunggakan!)}
+                                                    </p>
+                                                </>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="pt-4 border-t border-blue-200">
@@ -310,7 +330,6 @@ export default function InstallmentPayment({ customers, history = [], filters = 
                                                     <TableCell className="font-medium">{log.customer_name}</TableCell>
                                                     <TableCell>
                                                         #{log.installment_number}
-                                                        {log.months_paid > 1 && <span className="text-xs text-muted-foreground ml-1">({log.months_paid} Bln)</span>}
                                                     </TableCell>
                                                     <TableCell>
                                                         {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(log.amount)}

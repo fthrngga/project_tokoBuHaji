@@ -88,25 +88,11 @@ export default function CreditMonitoring({ credits, cashPayments }: Props) {
     const [selectedCredit, setSelectedCredit] = useState<Credit | null>(null);
     const [selectedPayment, setSelectedPayment] = useState<Credit | null>(null);
     const [selectedLog, setSelectedLog] = useState<PaymentLog | null>(null);
-    const [isEditOpen, setIsEditOpen] = useState(false);
     const [isVerifyOpen, setIsVerifyOpen] = useState(false);
     const [isDetailOpen, setIsDetailOpen] = useState(false);
     const [isLogVerifyOpen, setIsLogVerifyOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<'credit' | 'cash'>('credit');
-
-    const { data, setData, put, processing, errors, reset } = useForm({
-        installment_amount: '',
-        duration_months: '',
-    });
-
-    const handleProcessClick = (credit: Credit) => {
-        setSelectedCredit(credit);
-        setData({
-            installment_amount: credit.installment_amount ? String(credit.installment_amount) : '',
-            duration_months: credit.duration_months ? String(credit.duration_months) : '',
-        });
-        setIsEditOpen(true);
-    };
+    const [actualAmount, setActualAmount] = useState<string>('');
 
     const handleValuesDetail = (credit: Credit) => {
         setSelectedCredit(credit);
@@ -120,6 +106,7 @@ export default function CreditMonitoring({ credits, cashPayments }: Props) {
 
     const handleVerifyLogClick = (log: PaymentLog) => {
         setSelectedLog(log);
+        setActualAmount(String(log.amount));
         setIsLogVerifyOpen(true);
     };
 
@@ -127,11 +114,13 @@ export default function CreditMonitoring({ credits, cashPayments }: Props) {
         if (!selectedLog) return;
 
         router.put(route('finance.payment-log.verify', selectedLog.id), {
-            action: action
+            action: action,
+            actual_amount: actualAmount,
         }, {
             onSuccess: () => {
                 setIsLogVerifyOpen(false);
                 setSelectedLog(null);
+                setActualAmount('');
                 setIsDetailOpen(false); // Close detail to force refresh
             }
         });
@@ -146,18 +135,6 @@ export default function CreditMonitoring({ credits, cashPayments }: Props) {
             onSuccess: () => {
                 setIsVerifyOpen(false);
                 setSelectedPayment(null);
-            }
-        });
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!selectedCredit) return;
-
-        put(route('finance.payment.terms.update', selectedCredit.id), {
-            onSuccess: () => {
-                setIsEditOpen(false);
-                reset();
             }
         });
     };
@@ -225,22 +202,15 @@ export default function CreditMonitoring({ credits, cashPayments }: Props) {
                                             ) : '-'}
                                         </TableCell>
                                         <TableCell>
-                                            <Badge variant={credit.status === 'pending_approval' ? 'secondary' : credit.status === 'ongoing' ? 'default' : 'outline'}>
-                                                {credit.status === 'pending_approval' ? 'Menunggu Persetujuan' :
-                                                    credit.status === 'ongoing' ? 'Berjalan' :
+                                            <Badge variant={credit.status === 'ongoing' ? 'default' : 'outline'}>
+                                                {credit.status === 'ongoing' ? 'Berjalan' :
                                                         credit.status === 'paid_off' ? 'Lunas' : credit.status}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            {credit.status === 'pending_approval' ? (
-                                                <Button size="sm" onClick={() => handleProcessClick(credit)}>
-                                                    Proses
-                                                </Button>
-                                            ) : (
-                                                <Button size="sm" variant="outline" onClick={() => handleValuesDetail(credit)}>
-                                                    Detail
-                                                </Button>
-                                            )}
+                                            <Button size="sm" variant="outline" onClick={() => handleValuesDetail(credit)}>
+                                                Detail
+                                            </Button>
                                         </TableCell>
                                     </TableRow>
                                 )) : (
@@ -321,66 +291,6 @@ export default function CreditMonitoring({ credits, cashPayments }: Props) {
                         </Table>
                     </div>
                 )}
-
-                <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Proses Pengajuan Kredit</DialogTitle>
-                            <DialogDescription>
-                                Masukkan nominal angsuran dan tenor untuk pesanan #{selectedCredit?.order_id}.
-                            </DialogDescription>
-                        </DialogHeader>
-
-                        {selectedCredit && (
-                            <div className="grid gap-4 py-4">
-                                <div className="grid grid-cols-2 gap-4 text-sm">
-                                    <div>
-                                        <span className="text-muted-foreground">Pelanggan:</span>
-                                        <p className="font-medium">{selectedCredit.customer?.user?.name}</p>
-                                    </div>
-                                    <div>
-                                        <span className="text-muted-foreground">Total Order:</span>
-                                        <p className="font-medium">{formatCurrency(selectedCredit.order.total_amount)}</p>
-                                    </div>
-                                    <div>
-                                        <span className="text-muted-foreground">Uang Muka:</span>
-                                        <p className="font-medium">{selectedCredit.down_payment ? formatCurrency(selectedCredit.down_payment) : '-'}</p>
-                                    </div>
-                                </div>
-
-                                <form id="credit-terms-form" onSubmit={handleSubmit} className="grid gap-4 border-t pt-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="installment_amount">Nominal Angsuran (Per Bulan)</Label>
-                                        <Input
-                                            id="installment_amount"
-                                            type="number"
-                                            value={data.installment_amount}
-                                            onChange={(e) => setData('installment_amount', e.target.value)}
-                                            placeholder="Contoh: 100000"
-                                        />
-                                        {errors.installment_amount && <p className="text-red-500 text-xs">{errors.installment_amount}</p>}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="duration_months">Lama Angsuran (Bulan)</Label>
-                                        <Input
-                                            id="duration_months"
-                                            type="number"
-                                            value={data.duration_months}
-                                            onChange={(e) => setData('duration_months', e.target.value)}
-                                            placeholder="Contoh: 10"
-                                        />
-                                        {errors.duration_months && <p className="text-red-500 text-xs">{errors.duration_months}</p>}
-                                    </div>
-                                </form>
-                            </div>
-                        )}
-
-                        <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>Batal</Button>
-                            <Button type="submit" form="credit-terms-form" disabled={processing}>Simpan Data</Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
 
                 {/* Detail Modal */}
                 <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
@@ -538,8 +448,17 @@ export default function CreditMonitoring({ credits, cashPayments }: Props) {
                                         <span className="font-medium capitalize">
                                             {selectedLog.type === 'down_payment' ? 'Uang Muka' : `Angsuran #${selectedLog.installment_number}`}
                                         </span>
-                                        <span className="text-muted-foreground">Nominal:</span>
+                                        <span className="text-muted-foreground">Nominal Sistem:</span>
                                         <span className="font-medium">{formatCurrency(selectedLog.amount)}</span>
+                                    </div>
+                                    <div className="mt-4 pt-4 border-t space-y-2">
+                                        <Label>Nominal Asli Diterima (bisa diedit jika kurang/lebih):</Label>
+                                        <Input
+                                            type="number"
+                                            value={actualAmount}
+                                            onChange={(e) => setActualAmount(e.target.value)}
+                                            placeholder="Contoh: 200000"
+                                        />
                                     </div>
                                 </div>
                                 <div className="border rounded-lg p-2 bg-slate-50 flex justify-center items-center min-h-[200px]">
@@ -553,12 +472,12 @@ export default function CreditMonitoring({ credits, cashPayments }: Props) {
                         )}
 
                         <DialogFooter className="gap-2 sm:gap-0">
-                            <Button variant="destructive" onClick={() => handleConfirmVerifyLog('reject')} disabled={processing}>
+                            <Button variant="destructive" onClick={() => handleConfirmVerifyLog('reject')}>
                                 Tolak
                             </Button>
                             <div className="flex-1"></div>
-                            <Button variant="outline" onClick={() => setIsLogVerifyOpen(false)} disabled={processing}>Batal</Button>
-                            <Button className="bg-green-600 hover:bg-green-700" onClick={() => handleConfirmVerifyLog('accept')} disabled={processing}>
+                            <Button variant="outline" onClick={() => setIsLogVerifyOpen(false)}>Batal</Button>
+                            <Button className="bg-green-600 hover:bg-green-700" onClick={() => handleConfirmVerifyLog('accept')}>
                                 Terima
                             </Button>
                         </DialogFooter>
@@ -606,12 +525,12 @@ export default function CreditMonitoring({ credits, cashPayments }: Props) {
                         )}
 
                         <DialogFooter className="gap-2 sm:gap-0">
-                            <Button type="button" variant="destructive" onClick={() => handleVerifyPayment('reject')} disabled={processing}>
+                            <Button type="button" variant="destructive" onClick={() => handleVerifyPayment('reject')}>
                                 Tolak Pembayaran
                             </Button>
                             <div className="flex-1"></div>
-                            <Button type="button" variant="outline" onClick={() => setIsVerifyOpen(false)} disabled={processing}>Batal</Button>
-                            <Button type="button" className="bg-green-600 hover:bg-green-700" onClick={() => handleVerifyPayment('accept')} disabled={processing}>
+                            <Button type="button" variant="outline" onClick={() => setIsVerifyOpen(false)}>Batal</Button>
+                            <Button type="button" className="bg-green-600 hover:bg-green-700" onClick={() => handleVerifyPayment('accept')}>
                                 Terima Pembayaran
                             </Button>
                         </DialogFooter>

@@ -30,16 +30,19 @@ class FinanceController extends Controller
 
     public function updateCreditTerms(\Illuminate\Http\Request $request, $id)
     {
-        $payment = \App\Models\Payment::findOrFail($id);
+        $payment = \App\Models\Payment::with('order')->findOrFail($id);
+
+        // Auto Calculate Installment Amount with Fixed 10 Months
+        $orderTotal = $payment->order->total_amount;
+        $totalCredit = $orderTotal * 1.5;
+        $remainingCredit = max(0, $totalCredit - $payment->down_payment);
         
-        $validated = $request->validate([
-            'installment_amount' => 'required|numeric|min:0',
-            'duration_months' => 'required|integer|min:1',
-        ]);
+        $durationMonths = 10;
+        $installmentAmount = $remainingCredit / $durationMonths;
 
         $payment->update([
-            'installment_amount' => $validated['installment_amount'],
-            'duration_months' => $validated['duration_months'],
+            'installment_amount' => $installmentAmount,
+            'duration_months' => $durationMonths,
             'status' => 'ongoing',
         ]);
 
@@ -55,12 +58,14 @@ class FinanceController extends Controller
         
         $validated = $request->validate([
             'action' => 'required|in:accept,reject',
+            'actual_amount' => 'nullable|numeric|min:0',
         ]);
 
         if ($validated['action'] === 'accept') {
             $log->update([
                 'status' => 'verified',
                 'paid_at' => now(),
+                'amount' => $validated['actual_amount'] ?? $log->amount,
             ]);
 
             // Logic to update main Payment status/counters
@@ -150,12 +155,15 @@ class FinanceController extends Controller
         // Filter Date (Default Today)
         $date = $request->input('date', now()->format('Y-m-d'));
 
-        // Fetch customers with active credits (payment_method = credit)
-        $activeCredits = \App\Models\Payment::with(['customer.user', 'order'])
+        $activeCredits = \App\Models\Payment::with(['customer.user', 'order', 'paymentLogs'])
             ->where('payment_method', 'credit')
             ->whereIn('status', ['ongoing', 'pending_approval']) 
             ->get()
             ->map(function ($credit) {
+                $expectedTotal = $credit->installments_paid * $credit->installment_amount;
+                $actualVerified = $credit->paymentLogs->where('type', 'installment')->where('status', 'verified')->sum('amount');
+                $tunggakan = max(0, $expectedTotal - $actualVerified);
+
                 return [
                     'id' => $credit->id, // Payment ID
                     'customer_name' => $credit->customer->user->name,
@@ -164,6 +172,7 @@ class FinanceController extends Controller
                     'current_installment' => $credit->installments_paid + 1,
                     'remaining_months' => max(0, $credit->duration_months - $credit->installments_paid),
                     'installment_amount' => $credit->installment_amount,
+                    'tunggakan' => $tunggakan,
                 ];
             });
 
@@ -204,7 +213,7 @@ class FinanceController extends Controller
         $validated = $request->validate([
             'payment_id' => 'required|exists:payments,id',
             'amount' => 'required|numeric|min:0',
-            'months_paid' => 'required|integer|min:1', 
+            'months_paid' => 'required|integer|min:1',
             'payment_date' => 'required|date',
             'payment_method' => 'required|string',
             'notes' => 'nullable|string',
@@ -220,11 +229,11 @@ class FinanceController extends Controller
             'proof_path' => null,
             'status' => 'verified',
             'paid_at' => $validated['payment_date'],
-            'months_paid' => $validated['months_paid'], // Save explicit column
-            'admin_notes' => $validated['notes'] . ($validated['months_paid'] > 1 ? " (Bayar {$validated['months_paid']} Bulan)" : ""),
+            'months_paid' => $validated['months_paid'],
+            'admin_notes' => $validated['notes'],
         ]);
 
-        // 2. Update Payment Status / Counter based on how many months paid
+        // 2. Update Payment Status / Counter
         $payment->increment('installments_paid', $validated['months_paid']);
         
         if ($payment->installments_paid >= $payment->duration_months) {

@@ -16,10 +16,11 @@ import { Input } from "@/components/ui/input";
 import { useState } from 'react';
 
 // Sub-component for File Upload (Copied/Adapted from Order/Show)
-function FileUploadForm({ orderId, label, showMonthsInput = false, installmentAmount = 0, onSuccess }: { orderId: number, label?: string, showMonthsInput?: boolean, installmentAmount?: number, onSuccess?: () => void }) {
-    const { data, setData, post, processing, errors, reset } = useForm<{ proof_of_payment: File | null; months_paid: number }>({
+function FileUploadForm({ orderId, label, showMonthsInput = false, installmentAmount = 0, tunggakan = 0, onSuccess }: { orderId: number, label?: string, showMonthsInput?: boolean, installmentAmount?: number, tunggakan?: number, onSuccess?: () => void }) {
+    const { data, setData, post, processing, errors, reset } = useForm<{ proof_of_payment: File | null; amount: number; months_paid: number }>({
         proof_of_payment: null,
-        months_paid: 1,
+        amount: installmentAmount + tunggakan,
+        months_paid: 1, // keeping this default for backend compatibility
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -33,31 +34,64 @@ function FileUploadForm({ orderId, label, showMonthsInput = false, installmentAm
         });
     };
 
-    const handleMonthsChange = (val: number) => {
-        const m = isNaN(val) ? 1 : Math.max(1, val);
-        setData('months_paid', m);
-    };
+    const minBelanja = installmentAmount / 2;
 
     return (
         <form onSubmit={handleSubmit} className="space-y-3">
             {showMonthsInput && (
-                <div className="space-y-2 bg-gray-50 dark:bg-gray-800 p-3 rounded border">
-                    <Label htmlFor="months_paid" className="text-sm">Jumlah Bulan yang Dibayar</Label>
-                    <div className="flex gap-2">
-                        <Input
-                            id="months_paid"
-                            type="number"
-                            min={1}
-                            value={data.months_paid}
-                            onChange={(e) => handleMonthsChange(parseInt(e.target.value))}
-                            className="bg-white dark:bg-gray-900 w-24"
-                        />
-                        <div className="flex items-center text-sm text-gray-500">
-                            x {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(installmentAmount)}
-                        </div>
-                    </div>
-                    <div className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                        Total Transfer: {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(installmentAmount * data.months_paid)}
+                <div className="space-y-4 bg-gray-50 dark:bg-gray-800 p-4 rounded border">
+                    <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Pilih Nominal Pembayaran:</h4>
+                    <div className="space-y-3">
+                        {tunggakan > 0 && (
+                            <label className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer bg-white dark:bg-gray-900 border-red-200">
+                                <input
+                                    type="radio"
+                                    name="payment_option"
+                                    checked={data.amount === installmentAmount + tunggakan}
+                                    onChange={() => setData('amount', installmentAmount + tunggakan)}
+                                    className="mt-1"
+                                />
+                                <div>
+                                    <div className="font-semibold text-red-700">Tagihan Penuh (+ Tunggakan)</div>
+                                    <div className="text-xs text-gray-500">Pokok + Sisa bulan lalu</div>
+                                    <div className="text-sm font-bold mt-1 text-gray-800 dark:text-gray-200">
+                                        {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(installmentAmount + tunggakan)}
+                                    </div>
+                                </div>
+                            </label>
+                        )}
+                        <label className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <input
+                                type="radio"
+                                name="payment_option"
+                                checked={data.amount === installmentAmount}
+                                onChange={() => setData('amount', installmentAmount)}
+                                className="mt-1"
+                            />
+                            <div>
+                                <div className="font-semibold text-blue-700">Angsuran Pokok Saja</div>
+                                <div className="text-xs text-gray-500">Angsuran bulan ini</div>
+                                <div className="text-sm font-bold mt-1 text-gray-800 dark:text-gray-200">
+                                    {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(installmentAmount)}
+                                </div>
+                            </div>
+                        </label>
+                        <label className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <input
+                                type="radio"
+                                name="payment_option"
+                                checked={data.amount === minBelanja}
+                                onChange={() => setData('amount', minBelanja)}
+                                className="mt-1"
+                            />
+                            <div>
+                                <div className="font-semibold text-orange-600">Bayar Setengah (Keringanan)</div>
+                                <div className="text-xs text-gray-500">Batas minimal pembayaran</div>
+                                <div className="text-sm font-bold mt-1 text-gray-800 dark:text-gray-200">
+                                    {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(minBelanja)}
+                                </div>
+                            </div>
+                        </label>
                     </div>
                 </div>
             )}
@@ -98,6 +132,8 @@ interface Installment {
         status: string;
         admin_notes: string;
     }[];
+    tunggakan: number;
+    totalBillThisMonth: number;
 }
 
 export default function InstallmentIndex({ auth, installments }: { auth: any, installments: Installment[] }) {
@@ -277,6 +313,7 @@ export default function InstallmentIndex({ auth, installments }: { auth: any, in
                                 label="Upload Bukti Transfer"
                                 showMonthsInput={true}
                                 installmentAmount={selectedPaymentItem.installment_amount}
+                                tunggakan={selectedPaymentItem.tunggakan}
                                 onSuccess={() => setSelectedPaymentItem(null)}
                             />
                         )}

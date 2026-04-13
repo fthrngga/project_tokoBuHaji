@@ -42,21 +42,34 @@ class OrderController extends Controller
             'down_payment' => 'nullable|numeric|min:0',
         ]);
 
+        if ($validated['payment_method'] === 'credit' && $order->total_amount < 1000000) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'payment_method' => 'Minimal total belanja untuk metode kredit adalah Rp 1.000.000'
+            ]);
+        }
+
+        // Auto Calculate Credit Terms
+        $status = 'ongoing';
+        $durationMonths = null;
+        $installmentAmount = null;
+
+        if ($validated['payment_method'] === 'credit') {
+            $durationMonths = 10;
+            $dp = $validated['down_payment'] ?? 0;
+            $totalCredit = $order->total_amount * 1.5;
+            $installmentAmount = ($totalCredit - $dp) / $durationMonths;
+        }
+
         $payment = \App\Models\Payment::create([
             'order_id' => $order->id,
-            'customer_id' => auth()->user()->customer->id, // Assuming user is customer and has this relation
+            'customer_id' => auth()->user()->customer->id,
             'payment_method' => $validated['payment_method'],
             'cash_type' => $validated['cash_type'] ?? null,
             'down_payment' => $validated['down_payment'] ?? 0,
-            'status' => 'pending_approval',
+            'duration_months' => $durationMonths,
+            'installment_amount' => $installmentAmount,
+            'status' => $status,
         ]);
-
-        // Update order status if needed, e.g. to 'processing' or stay 'awaiting_payment' until approved?
-        // Plan didn't specify strict status change here, but implies flow moves forward.
-        // Let's keep it awaiting_payment or change to a new status 'payment_submitted'?
-        // For now, let's keep order status as is or update to 'processing' if cash?
-        // User said: "Monitoring Kredit" -> Admin inputs Installment.
-        // So probably wait for Admin.
 
         return back()->with('success', 'Metode pembayaran berhasil disimpan.');
     }
@@ -70,7 +83,15 @@ class OrderController extends Controller
         $validated = $request->validate([
             'proof_of_payment' => 'required|image|max:2048', // Max 2MB
             'months_paid' => 'nullable|integer|min:1',
+            'amount' => 'nullable|numeric|min:0',
         ]);
+
+        if ($order->payment && $order->payment->payment_method === 'credit' && $request->has('amount')) {
+            $minAmount = $order->payment->installment_amount / 2;
+            if ($request->amount < $minAmount && !$request->has('dp_override')) {
+                return back()->withErrors(['amount' => 'Minimal pembayaran adalah Rp ' . number_format($minAmount, 0, ',', '.')]);
+            }
+        }
 
         if ($request->hasFile('proof_of_payment')) {
             \Illuminate\Support\Facades\Log::info('File present.');
@@ -97,62 +118,92 @@ class OrderController extends Controller
                         ->first();
 
                     if ($hasDp && !$dpLog) {
-                        \Illuminate\Support\Facades\Log::info('Creating DP Log.');
+                        \Illuminate\Support\Facades\Log::info('Creating DP Log (Auto Verified).');
                         // This is a DP upload
-                        $order->payment->paymentLogs()->create([
+                        $log = $order->payment->paymentLogs()->create([
                             'type' => 'down_payment',
                             'amount' => $order->payment->down_payment,
                             'proof_path' => $path,
-                            'status' => 'pending',
+                            'status' => 'verified',
+                            'paid_at' => now(),
                         ]);
+
+                        \App\Models\FinancialTransaction::create([
+                            'transaction_date' => now(),
+                            'type' => 'income',
+                            'category' => 'down_payment',
+                            'amount' => $log->amount,
+                            'description' => "Pembayaran down payment (Order #{$order->id})",
+                            'payment_method' => 'transfer',
+                            'related_id' => $log->id,
+                            'related_type' => \App\Models\PaymentLog::class,
+                        ]);
+
                     } else {
-                        \Illuminate\Support\Facades\Log::info('Processing Installment Log.');
+                        \Illuminate\Support\Facades\Log::info('Processing Installment Log (Auto Verified).');
                         // This is an installment upload
                         $nextInstallment = ($order->payment->installments_paid ?? 0) + 1;
                         $monthsPaid = $request->input('months_paid', 1);
 
-                        // Amount should be installment_amount * months_paid?
-                        // Usually proof upload just shows amount transferred. 
-                        // But strictly in system, we might want to record the full amount expected?
-                        // Let's store amount * months_paid.
-                        $totalAmount = $order->payment->installment_amount * $monthsPaid;
+                        $totalAmount = $request->input('amount') ?? ($order->payment->installment_amount * $monthsPaid);
                         
-                        // Prevent duplicate pending for same installment
-                        $pendingLog = $order->payment->paymentLogs()
-                            ->where('type', 'installment')
-                            ->where('installment_number', $nextInstallment)
-                            ->where('status', 'pending')
-                            ->first();
+                        $log = $order->payment->paymentLogs()->create([
+                            'type' => 'installment',
+                            'installment_number' => $nextInstallment,
+                            'amount' => $totalAmount,
+                            'proof_path' => $path,
+                            'status' => 'verified',
+                            'paid_at' => now(),
+                            'months_paid' => $monthsPaid,
+                        ]);
 
-                        if ($pendingLog) {
-                            \Illuminate\Support\Facades\Log::info('Updating pending installment log.');
-                            $pendingLog->update([
-                                'proof_path' => $path,
-                                'months_paid' => $monthsPaid,
-                                'amount' => $totalAmount 
-                            ]);
-                        } else {
-                            \Illuminate\Support\Facades\Log::info('Creating new installment log for #' . $nextInstallment . ' covering ' . $monthsPaid . ' months.');
-                            $order->payment->paymentLogs()->create([
-                                'type' => 'installment',
-                                'installment_number' => $nextInstallment,
-                                'amount' => $totalAmount,
-                                'proof_path' => $path,
-                                'status' => 'pending',
-                                'months_paid' => $monthsPaid,
-                            ]);
+                        $order->payment->increment('installments_paid');
+                        
+                        // If paid == duration, mark as paid_off
+                        if ($order->payment->fresh()->installments_paid >= $order->payment->duration_months) {
+                            $order->payment->update(['status' => 'paid_off']);
                         }
+
+                        \App\Models\FinancialTransaction::create([
+                            'transaction_date' => now(),
+                            'type' => 'income',
+                            'category' => 'installment',
+                            'amount' => $log->amount,
+                            'description' => "Pembayaran installment (Order #{$order->id})",
+                            'payment_method' => 'transfer',
+                            'related_id' => $log->id,
+                            'related_type' => \App\Models\PaymentLog::class,
+                        ]);
+                    }
+
+                    // Update order status if it's the first financial commitment completed
+                    if ($order->status === 'awaiting_payment') {
+                        $order->update(['status' => 'processing']);
                     }
                 } else {
                     // CASH Payment
-                    \Illuminate\Support\Facades\Log::info('Updating Cash Payment proof.');
+                    \Illuminate\Support\Facades\Log::info('Updating Cash Payment proof (Auto Verified).');
                     $order->payment->update([
                         'proof_of_payment_path' => $path,
+                        'status' => 'paid_off'
+                    ]);
+
+                    $order->update(['status' => 'processing']);
+
+                    \App\Models\FinancialTransaction::create([
+                        'transaction_date' => now(),
+                        'type' => 'income',
+                        'category' => 'cash_sale',
+                        'amount' => $order->total_amount,
+                        'description' => "Penjualan Cash (Order #{$order->id})",
+                        'payment_method' => $order->payment->cash_type ?? 'transfer',
+                        'related_id' => $order->payment->id,
+                        'related_type' => \App\Models\Payment::class,
                     ]);
                 }
             }
         }
 
-        return back()->with('success', 'Bukti pembayaran berhasil diupload. Mohon tunggu verifikasi admin.');
+        return back()->with('success', 'Pembayaran berhasil diproses otomatis.');
     }
 }

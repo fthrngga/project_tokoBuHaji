@@ -290,7 +290,9 @@ export default function Show({ order }: Props) {
                                                                     </SelectTrigger>
                                                                     <SelectContent>
                                                                         <SelectItem value="cash">Cash / Tunai</SelectItem>
-                                                                        <SelectItem value="credit">Kredit / Cicilan</SelectItem>
+                                                                        <SelectItem value="credit" disabled={order.total_amount < 1000000}>
+                                                                            Kredit / Cicilan {order.total_amount < 1000000 && "(Min. Rp 1.000.000)"}
+                                                                        </SelectItem>
                                                                     </SelectContent>
                                                                 </Select>
                                                             </div>
@@ -338,9 +340,25 @@ export default function Show({ order }: Props) {
                                                                             {paymentErrors.down_payment && <p className="text-red-500 text-xs">{paymentErrors.down_payment}</p>}
                                                                         </div>
                                                                     )}
-                                                                    <p className="text-xs text-gray-500">
-                                                                        *Besaran angsuran dan tenor akan ditentukan oleh Admin setelah pengajuan.
-                                                                    </p>
+                                                                    {/* Simulasi Kredit Otomatis */}
+                                                                    <div className="bg-blue-50/50 border border-blue-100 rounded p-3 mt-4">
+                                                                        <h4 className="text-xs font-semibold text-blue-800 uppercase mb-2">Simulasi Kredit (10 Bulan)</h4>
+                                                                        <div className="grid grid-cols-2 gap-1 text-xs">
+                                                                            <div className="text-muted-foreground">Sisa Dicicil:</div>
+                                                                            <div className="text-right font-medium">
+                                                                                {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(
+                                                                                    Math.max(0, (order.total_amount * 1.5) - (paymentData.with_down_payment ? (parseFloat(paymentData.down_payment) || 0) : 0))
+                                                                                )}
+                                                                            </div>
+                                                                            <div className="text-muted-foreground font-semibold mt-1">Estimasi Angsuran/Bulan:</div>
+                                                                            <div className="text-right font-bold text-sm text-green-600 mt-1">
+                                                                                {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(
+                                                                                    Math.max(0, (order.total_amount * 1.5) - (paymentData.with_down_payment ? (parseFloat(paymentData.down_payment) || 0) : 0)) / 10
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                        <p className="text-[10px] text-gray-500 mt-2">*Cicilan default 10 bulan. Nominal riil sepenuhnya ditentukan oleh Admin.</p>
+                                                                    </div>
                                                                 </div>
                                                             )}
                                                         </form>
@@ -382,16 +400,9 @@ export default function Show({ order }: Props) {
                                             {/* CREDIT PAYMENT LOGIC */}
                                             {order.payment.payment_method === 'credit' && (
                                                 <div className="w-full border-t pt-4">
-                                                    {order.payment.status === 'pending_approval' ? (
-                                                        <div className="bg-gray-100 text-gray-700 p-3 rounded text-sm text-center border border-gray-200">
-                                                            Pengajuan kredit sedang ditinjau oleh Admin.
-                                                            <br />
-                                                            <span className="text-xs text-gray-500">Anda akan mendapatkan notifikasi setelah diterima untuk melanjutkan pembayaran DP/Angsuran.</span>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="space-y-4">
-                                                            {/* Logic to determine what to show: DP or Installment */}
-                                                            {(() => {
+                                                    <div className="space-y-4">
+                                                        {/* Logic to determine what to show: DP or Installment */}
+                                                        {(() => {
                                                                 const payment = order.payment!;
                                                                 const logs = payment.payment_logs || [];
 
@@ -471,7 +482,6 @@ export default function Show({ order }: Props) {
                                                                 );
                                                             })()}
                                                         </div>
-                                                    )}
                                                 </div>
                                             )}
                                         </CardFooter>
@@ -487,11 +497,13 @@ export default function Show({ order }: Props) {
     );
 }
 
-// Sub-component for File Upload to handle useForm hook cleanly
 function FileUploadForm({ orderId, label, showMonthsInput = false, installmentAmount = 0 }: { orderId: number, label?: string, showMonthsInput?: boolean, installmentAmount?: number }) {
-    const { data, setData, post, processing, errors } = useForm<{ proof_of_payment: File | null; months_paid: number }>({
+    const minBelanja = installmentAmount / 2;
+
+    const { data, setData, post, processing, errors } = useForm<{ proof_of_payment: File | null; amount: number; months_paid: number }>({
         proof_of_payment: null,
-        months_paid: 1,
+        amount: installmentAmount,
+        months_paid: 1, // keeping this default for backend compatibility
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -501,31 +513,13 @@ function FileUploadForm({ orderId, label, showMonthsInput = false, installmentAm
         });
     };
 
-    const handleMonthsChange = (val: number) => {
-        const m = isNaN(val) ? 1 : Math.max(1, val);
-        setData('months_paid', m);
-    };
-
     return (
         <form onSubmit={handleSubmit} className="space-y-3">
             {showMonthsInput && (
                 <div className="space-y-2 bg-gray-50 p-3 rounded border">
-                    <Label htmlFor="months_paid" className="text-sm">Jumlah Bulan yang Dibayar</Label>
-                    <div className="flex gap-2">
-                        <Input
-                            id="months_paid"
-                            type="number"
-                            min={1}
-                            value={data.months_paid}
-                            onChange={(e) => handleMonthsChange(parseInt(e.target.value))}
-                            className="bg-white w-24"
-                        />
-                        <div className="flex items-center text-sm text-gray-500">
-                            x {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(installmentAmount)}
-                        </div>
-                    </div>
-                    <div className="text-sm font-semibold text-gray-700">
-                        Total Transfer: {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(installmentAmount * data.months_paid)}
+                    <div className="text-sm font-medium text-gray-700">Nominal Tagihan:</div>
+                    <div className="text-xl font-bold text-blue-700">
+                        {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(data.amount)}
                     </div>
                 </div>
             )}
