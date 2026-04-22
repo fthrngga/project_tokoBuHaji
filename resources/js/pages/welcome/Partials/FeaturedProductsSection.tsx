@@ -32,33 +32,47 @@ export default function FeaturedProductsSection({ products, hideTitle = false }:
         <section className="bg-white dark:bg-black py-20 lg:py-28">
             <div className="container px-4 sm:px-6 lg:px-8">
                 {!hideTitle && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, amount: 0.5 }}
-                        transition={{ duration: 0.5 }}
-                    >
-                        <h2 className="mb-4 text-4xl font-extrabold tracking-tight text-center text-gray-900 dark:text-white lg:text-5xl">Produk Unggulan</h2>
-                        <p className="mb-12 text-lg text-center text-gray-500 dark:text-gray-400">Koleksi pilihan yang dirancang untuk Anda.</p>
-                    </motion.div>
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+                        <div>
+                            <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+                                Koleksi Unggulan
+                            </h2>
+                            <p className="mt-2 text-slate-500 dark:text-slate-400">
+                                Kurasi produk terbaik untuk rumah Anda.
+                            </p>
+                        </div>
+                        <Link href="/products" className="hidden md:flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white hover:text-blue-600 transition-colors group">
+                            Lihat Semua <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                        </Link>
+                    </div>
                 )}
 
                 {products && products.length > 0 ? (
                     <motion.div
-                        className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-4"
+                        className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4"
                         variants={containerVariants}
                         initial="hidden"
                         whileInView="visible"
-                        viewport={{ once: true, amount: 0.2 }}
+                        viewport={{ once: true, amount: 0.1 }}
                     >
                         {products.map((product, index) => (
                             <ProductCard key={product.id} product={product} index={index} />
                         ))}
                     </motion.div>
                 ) : (
-                    <p className="text-center text-gray-500">Produk unggulan akan segera hadir.</p>
+                    <div className="py-20 text-center">
+                        <p className="text-slate-500">Produk akan segera hadir.</p>
+                    </div>
                 )}
             </div>
+            
+            {!hideTitle && (
+                <div className="mt-10 flex justify-center md:hidden">
+                    <Link href="/products" className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white hover:text-blue-600 transition-colors">
+                        Lihat Semua <ArrowRight className="h-4 w-4" />
+                    </Link>
+                </div>
+            )}
         </section>
     );
 }

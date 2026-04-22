@@ -35,11 +35,11 @@ const PaymentIcons = () => (
 
 export default function Footer() {
     return (
-        <footer className="relative bg-gray-100 dark:bg-slate-900 pt-24">
+        <footer className="relative bg-gray-100 dark:bg-slate-900 pt-24 mt-32">
             {/* Banner CTA yang sekarang menjadi bagian dari footer */}
-            <div className="absolute left-1/2 -top-12 transform -translate-x-1/2 w-[90%] lg:w-4/5 max-w-6xl">
+            <div className="absolute left-1/2 -top-16 transform -translate-x-1/2 w-[90%] lg:w-4/5 max-w-6xl">
                  <div className="bg-slate-900 dark:bg-black rounded-3xl py-12 px-8 text-center shadow-2xl">
-                    <h2 className="text-4xl font-bold text-white">Toko Haji Elektronik</h2>
+                    <h2 className="text-3xl md:text-4xl font-bold text-white">Toko Haji Elektronik</h2>
                 </div>
             </div>
 

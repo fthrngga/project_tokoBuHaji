@@ -145,10 +145,11 @@ export default function Header({ user }: { user: User | null }) {
                 </div>
             )}
 
-            <header className="sticky top-0 z-50 w-full border-b border-gray-200/80 bg-white/90 backdrop-blur-sm dark:border-gray-800/80 dark:bg-gray-950/90">
-                <div className="container px-4 sm:px-6 lg:px-8 flex h-24 items-center justify-between gap-8">
+            <header className="fixed top-6 left-0 right-0 z-50 w-full px-4 sm:px-6 lg:px-8 pointer-events-none transition-all duration-300">
+                <div className="mx-auto max-w-7xl">
+                    <div className="pointer-events-auto flex h-20 items-center justify-between gap-8 rounded-full border border-slate-200/60 bg-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl dark:border-slate-800/60 dark:bg-slate-950/80 px-6 lg:px-8">
 
-                    <div className="flex items-center gap-8">
+                        <div className="flex items-center gap-8">
                         <BrandLogo />
                         {/* NAVIGASI UTAMA DIPERBARUI */}
                         <nav className="hidden items-center gap-4 text-sm font-medium text-gray-700 dark:text-gray-300 md:flex">
@@ -193,8 +194,12 @@ export default function Header({ user }: { user: User | null }) {
                     <div className="flex items-center">
                         <HeaderActions user={user} />
                     </div>
+                    </div>
                 </div>
             </header>
+            
+            {/* Global Spacer to offset the floating navbar on all pages */}
+            <div className="h-28 w-full shrink-0 lg:h-32"></div>
         </>
     );
 }

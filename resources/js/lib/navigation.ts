@@ -1,13 +1,18 @@
 import { type NavItem } from "@/types";
 import { dashboard } from "@/routes"; // Impor fungsi route dashboard
 import { route } from 'ziggy-js';
-import { LayoutGrid, Package, ClipboardList, ShoppingCart, Banknote } from "lucide-react"; // Impor ikon
+import { LayoutGrid, Package, ClipboardList, ShoppingCart, Banknote, Store } from "lucide-react"; // Impor ikon
 
 export const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: dashboard().url,
         icon: LayoutGrid,
+    },
+    {
+        title: 'Kasir (POS)',
+        href: route('admin.pos.index', undefined, false),
+        icon: Store,
     },
     {
         title: 'Sales',

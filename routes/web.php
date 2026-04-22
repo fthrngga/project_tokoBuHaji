@@ -13,6 +13,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     })->name('dashboard');
 
     Route::resource('admin/orders', \App\Http\Controllers\Admin\OrderController::class)->names('admin.orders');
+    
+    Route::get('admin/pos', [\App\Http\Controllers\Admin\POSController::class, 'index'])->name('admin.pos.index');
+    Route::post('admin/pos', [\App\Http\Controllers\Admin\POSController::class, 'store'])->name('admin.pos.store');
 });
 
 Route::middleware(['auth', 'verified', 'role:customer'])->group(function () {
