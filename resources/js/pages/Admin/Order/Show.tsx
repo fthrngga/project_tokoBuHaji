@@ -35,7 +35,7 @@ interface Message {
 interface Order {
     id: number;
     user_id: number;
-    user: { name: string; email: string };
+    user: { id: number; name: string; email: string };
     status: string;
     total_amount: number;
     shipping_cost: number | null;
@@ -43,9 +43,18 @@ interface Order {
     city: string;
     postal_code: string;
     address_detail: string;
+    village: string;
+    district: string;
     notes: string;
     items: OrderItem[];
     messages: Message[];
+    credit?: {
+        id: number;
+        payment_method: string;
+        status: string;
+        proof_of_payment_path?: string | null;
+        [key: string]: any;
+    } | null;
     created_at: string;
 }
 

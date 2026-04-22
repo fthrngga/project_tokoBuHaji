@@ -10,9 +10,10 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
         <SidebarGroup className="px-2 py-0">
             <SidebarGroupLabel>Platform</SidebarGroupLabel>
             <SidebarMenu>
-                {items.map((item) => (
-                    item.items?.length ? (
-                        <Collapsible key={item.title} asChild defaultOpen={item.isActive} className="group/collapsible">
+                {items.map((item) => {
+                    const isChildActive = item.items?.some(subItem => subItem.href && page.url.startsWith(subItem.href));
+                    return item.items?.length ? (
+                        <Collapsible key={item.title} asChild defaultOpen={item.isActive || isChildActive} className="group/collapsible">
                             <SidebarMenuItem>
                                 <CollapsibleTrigger asChild>
                                     <SidebarMenuButton tooltip={item.title}>
@@ -50,7 +51,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                             </SidebarMenuButton>
                         </SidebarMenuItem>
                     )
-                ))}
+                })}
             </SidebarMenu>
         </SidebarGroup>
     );
