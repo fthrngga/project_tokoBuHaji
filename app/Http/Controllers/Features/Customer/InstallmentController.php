@@ -42,10 +42,30 @@ class InstallmentController extends Controller
                 // Determine Product Name (First Item)
                 $productName = $payment->order->items->first()?->product->name ?? 'Produk dihapus';
 
-                // Next Due Date
+                // Next Due Date + Days Until Due (for US08 notification)
                 $lastLog = $payment->paymentLogs->sortByDesc('paid_at')->first();
-                $baseDate = $lastLog && $lastLog->paid_at ? \Carbon\Carbon::parse($lastLog->paid_at) : $payment->created_at;
-                $nextDueDate = $remainingMonths > 0 ? $baseDate->addMonth()->format('d F Y') : '-';
+                $baseDate = $lastLog && $lastLog->paid_at
+                    ? \Carbon\Carbon::parse($lastLog->paid_at)
+                    : $payment->created_at;
+
+                $nextDueDateCarbon = null;
+                $daysUntilDue = null;
+                $dueStatus = null;
+
+                if ($remainingMonths > 0) {
+                    $nextDueDateCarbon = $baseDate->copy()->addMonth();
+                    $daysUntilDue = (int) now()->startOfDay()->diffInDays($nextDueDateCarbon->startOfDay(), false);
+
+                    if ($daysUntilDue < 0) {
+                        $dueStatus = 'overdue';       // sudah lewat jatuh tempo
+                    } elseif ($daysUntilDue <= 7) {
+                        $dueStatus = 'warning';       // <= 7 hari lagi
+                    } else {
+                        $dueStatus = 'safe';          // masih aman
+                    }
+                }
+
+                $nextDueDateFormatted = $nextDueDateCarbon ? $nextDueDateCarbon->format('d F Y') : '-';
 
                 return [
                     'id' => $payment->id,
@@ -54,7 +74,9 @@ class InstallmentController extends Controller
                     'contractNumber' => 'CTR-' . str_pad($payment->id, 5, '0', STR_PAD_LEFT),
                     'remainingDebt' => $remainingDebt,
                     'status' => $payment->status,
-                    'dueDate' => $nextDueDate,
+                    'dueDate' => $nextDueDateFormatted,
+                    'daysUntilDue' => $daysUntilDue,
+                    'dueStatus' => $dueStatus,
                     'installment_amount' => $payment->installment_amount,
                     'tunggakan' => $tunggakan,
                     'totalBillThisMonth' => $totalBillThisMonth,

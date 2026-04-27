@@ -12,7 +12,24 @@ class FinanceController extends Controller
         $credits = \App\Models\Payment::with(['order', 'customer.user', 'order.items.product', 'paymentLogs'])
             ->where('payment_method', 'credit')
             ->latest()
-            ->get();
+            ->get()
+            ->map(function ($credit) {
+                // Kalkulasi Tunggakan Waktu Nyata berdasarkan umur kredit (Bulan)
+                $monthsElapsed = min($credit->duration_months, $credit->created_at->diffInMonths(now()));
+                
+                // Pada bulan 0, ekspektasi bayar = 0 (karena baru DP)
+                $expectedTotal = $monthsElapsed * $credit->installment_amount;
+                $actualVerified = $credit->paymentLogs->where('type', 'installment')->where('status', 'verified')->sum('amount');
+                
+                $tunggakan_amount = max(0, $expectedTotal - $actualVerified);
+                $tunggakan_months = $credit->installment_amount > 0 ? floor($tunggakan_amount / $credit->installment_amount) : 0;
+                
+                $credit->tunggakan_amount = $tunggakan_amount;
+                $credit->tunggakan_months = $tunggakan_months;
+                $credit->is_kritis = $tunggakan_months >= 3;
+                
+                return $credit;
+            });
 
         $cashPayments = \App\Models\Payment::with(['order', 'customer.user', 'order.items.product'])
             ->where('payment_method', 'cash')
@@ -24,6 +41,43 @@ class FinanceController extends Controller
             'cashPayments' => $cashPayments,
             'pageParams' => [
                 'title' => 'Monitoring Pembayaran',
+            ]
+        ]);
+    }
+
+    public function arrearsMonitoring()
+    {
+        $credits = \App\Models\Payment::with(['order', 'customer.user', 'order.items.product', 'paymentLogs'])
+            ->where('payment_method', 'credit')
+            ->where('status', 'ongoing')
+            ->latest()
+            ->get()
+            ->map(function ($credit) {
+                // Kalkulasi Tunggakan Waktu Nyata berdasarkan umur kredit (Bulan)
+                $monthsElapsed = min($credit->duration_months, $credit->created_at->diffInMonths(now()));
+                
+                $expectedTotal = $monthsElapsed * $credit->installment_amount;
+                $actualVerified = $credit->paymentLogs->where('type', 'installment')->where('status', 'verified')->sum('amount');
+                
+                $tunggakan_amount = max(0, $expectedTotal - $actualVerified);
+                $tunggakan_months = $credit->installment_amount > 0 ? floor($tunggakan_amount / $credit->installment_amount) : 0;
+                
+                $credit->tunggakan_amount = $tunggakan_amount;
+                $credit->tunggakan_months = $tunggakan_months;
+                $credit->is_kritis = $tunggakan_months >= 3;
+                
+                return $credit;
+            })
+            // Only return those with tunggakan
+            ->filter(function ($credit) {
+                return $credit->tunggakan_months > 0;
+            })
+            ->values();
+
+        return Inertia::render('Features/Finance/ArrearsMonitoring', [
+            'credits' => $credits,
+            'pageParams' => [
+                'title' => 'Monitoring Tunggakan',
             ]
         ]);
     }
@@ -50,6 +104,57 @@ class FinanceController extends Controller
         $payment->order->update(['status' => 'processing']);
 
         return back()->with('success', 'Ketentuan kredit berhasil diperbarui dan status pesanan diperbarui menjadi diproses.');
+    }
+
+    public function pelunasanDini(\Illuminate\Http\Request $request, $id)
+    {
+        $payment = \App\Models\Payment::findOrFail($id);
+
+        if ($payment->status !== 'ongoing') {
+            return back()->with('error', 'Kredit tidak dalam status berjalan.');
+        }
+
+        $remainingMonths = $payment->duration_months - ($payment->installments_paid ?? 0);
+        
+        if ($remainingMonths <= 0) {
+            return back()->with('error', 'Kredit ini sudah lunas.');
+        }
+
+        $remainingDebt = $remainingMonths * $payment->installment_amount;
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($payment, $remainingMonths, $remainingDebt) {
+            // 1. Buat log pembayaran diverifikasi
+            \App\Models\PaymentLog::create([
+                'payment_id' => $payment->id,
+                'type' => 'installment',
+                'installment_number' => ($payment->installments_paid ?? 0) + 1, // Anggap sebagai angsuran gabungan terakhir
+                'amount' => $remainingDebt,
+                'status' => 'verified',
+                'paid_at' => now(),
+            ]);
+
+            // 2. Catat pemasukan di laporan keuangan
+            \App\Models\FinancialTransaction::create([
+                'type' => 'income',
+                'category' => 'installment',
+                'amount' => $remainingDebt,
+                'description' => 'Pelunasan Dini Kredit - Order #' . $payment->order_id . ' (Sisa ' . $remainingMonths . ' bln)',
+                'transaction_date' => now(),
+                'related_type' => 'App\Models\Payment',
+                'related_id' => $payment->id,
+            ]);
+
+            // 3. Update status pembayaran menjadi lunas
+            $payment->update([
+                'installments_paid' => $payment->duration_months,
+                'status' => 'paid_off',
+            ]);
+            
+            // 4. Update status order menjadi completed jika perlu
+            $payment->order->update(['status' => 'completed']);
+        });
+
+        return back()->with('success', 'Pelunasan dini berhasil diproses. Nominal Rp ' . number_format($remainingDebt, 0, ',', '.') . ' telah tercatat di Laporan Keuangan.');
     }
 
     public function verifyPaymentLog(\Illuminate\Http\Request $request, $id)
@@ -311,5 +416,34 @@ class FinanceController extends Controller
                 'category' => $category,
             ]
         ]);
+    }
+
+    public function storeExpense(\Illuminate\Http\Request $request)
+    {
+        $validated = $request->validate([
+            'transaction_date' => 'required|date',
+            'category' => 'required|in:operational,salary,other',
+            'amount' => 'required|numeric|min:0',
+            'payment_method' => 'required|string',
+            'description' => 'required|string',
+        ]);
+
+        \App\Models\FinancialTransaction::create([
+            'transaction_date' => $validated['transaction_date'],
+            'type' => 'expense',
+            'category' => $validated['category'],
+            'amount' => $validated['amount'],
+            'description' => $validated['description'],
+            'payment_method' => $validated['payment_method'],
+        ]);
+
+        return back()->with('success', 'Pengeluaran berhasil dicatat ke dalam Laporan Keuangan.');
+    }
+
+    public function restockApproval()
+    {
+        // TODO: Integrasi dengan Modul Gudang setelah koordinasi dengan tim
+        // Saat ini me-render halaman dengan data kosong (frontend menggunakan dummy data)
+        return \Inertia\Inertia::render('Features/Finance/RestockApproval');
     }
 }

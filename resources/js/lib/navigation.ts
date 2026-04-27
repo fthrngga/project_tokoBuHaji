@@ -43,6 +43,10 @@ export const mainNavItems: NavItem[] = [
                 href: route('finance.payment-monitoring', undefined, false),
             },
             {
+                title: 'Tunggakan Kritis',
+                href: route('finance.arrears', undefined, false),
+            },
+            {
                 title: 'Input Angsuran',
                 href: route('finance.payment.manual', undefined, false),
             },
@@ -50,6 +54,10 @@ export const mainNavItems: NavItem[] = [
                 title: 'Laporan Keuangan',
                 icon: 'FileText',
                 href: route('finance.reports', undefined, false),
+            },
+            {
+                title: 'Konfirmasi Restock',
+                href: route('finance.restock.index', undefined, false),
             },
         ],
     },

@@ -42,7 +42,7 @@ function FileUploadForm({ orderId, label, showMonthsInput = false, installmentAm
                 <div className="space-y-4 bg-gray-50 dark:bg-gray-800 p-4 rounded border">
                     <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Pilih Nominal Pembayaran:</h4>
                     <div className="space-y-3">
-                        {tunggakan > 0 && (
+                        {tunggakan > 0 ? (
                             <label className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer bg-white dark:bg-gray-900 border-red-200">
                                 <input
                                     type="radio"
@@ -57,41 +57,45 @@ function FileUploadForm({ orderId, label, showMonthsInput = false, installmentAm
                                     <div className="text-sm font-bold mt-1 text-gray-800 dark:text-gray-200">
                                         {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(installmentAmount + tunggakan)}
                                     </div>
+                                    <div className="text-xs text-red-500 mt-1 font-medium">Pembayaran sebagian dinonaktifkan karena Anda memiliki tunggakan.</div>
                                 </div>
                             </label>
+                        ) : (
+                            <>
+                                <label className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800">
+                                    <input
+                                        type="radio"
+                                        name="payment_option"
+                                        checked={data.amount === installmentAmount}
+                                        onChange={() => setData('amount', installmentAmount)}
+                                        className="mt-1"
+                                    />
+                                    <div>
+                                        <div className="font-semibold text-blue-700">Angsuran Pokok Saja</div>
+                                        <div className="text-xs text-gray-500">Angsuran bulan ini</div>
+                                        <div className="text-sm font-bold mt-1 text-gray-800 dark:text-gray-200">
+                                            {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(installmentAmount)}
+                                        </div>
+                                    </div>
+                                </label>
+                                <label className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800">
+                                    <input
+                                        type="radio"
+                                        name="payment_option"
+                                        checked={data.amount === minBelanja}
+                                        onChange={() => setData('amount', minBelanja)}
+                                        className="mt-1"
+                                    />
+                                    <div>
+                                        <div className="font-semibold text-orange-600">Bayar Setengah (Keringanan)</div>
+                                        <div className="text-xs text-gray-500">Batas minimal pembayaran</div>
+                                        <div className="text-sm font-bold mt-1 text-gray-800 dark:text-gray-200">
+                                            {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(minBelanja)}
+                                        </div>
+                                    </div>
+                                </label>
+                            </>
                         )}
-                        <label className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800">
-                            <input
-                                type="radio"
-                                name="payment_option"
-                                checked={data.amount === installmentAmount}
-                                onChange={() => setData('amount', installmentAmount)}
-                                className="mt-1"
-                            />
-                            <div>
-                                <div className="font-semibold text-blue-700">Angsuran Pokok Saja</div>
-                                <div className="text-xs text-gray-500">Angsuran bulan ini</div>
-                                <div className="text-sm font-bold mt-1 text-gray-800 dark:text-gray-200">
-                                    {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(installmentAmount)}
-                                </div>
-                            </div>
-                        </label>
-                        <label className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800">
-                            <input
-                                type="radio"
-                                name="payment_option"
-                                checked={data.amount === minBelanja}
-                                onChange={() => setData('amount', minBelanja)}
-                                className="mt-1"
-                            />
-                            <div>
-                                <div className="font-semibold text-orange-600">Bayar Setengah (Keringanan)</div>
-                                <div className="text-xs text-gray-500">Batas minimal pembayaran</div>
-                                <div className="text-sm font-bold mt-1 text-gray-800 dark:text-gray-200">
-                                    {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(minBelanja)}
-                                </div>
-                            </div>
-                        </label>
                     </div>
                 </div>
             )}
@@ -122,6 +126,8 @@ interface Installment {
     remainingDebt: number;
     status: string;
     dueDate: string;
+    daysUntilDue: number | null;
+    dueStatus: 'safe' | 'warning' | 'overdue' | null;
     installment_amount: number;
     history: {
         id: number;
@@ -221,13 +227,30 @@ export default function InstallmentIndex({ auth, installments }: { auth: any, in
                                             <div>
                                                 <p className="text-sm font-medium">Jatuh Tempo Berikutnya</p>
                                                 <div className="flex items-center gap-2">
-                                                    <span className={`font-semibold ${item.status === 'paid_off' ? 'text-green-600' : 'text-red-600'}`}>
+                                                    <span className={`font-semibold ${
+                                                        item.status === 'paid_off' ? 'text-green-600' :
+                                                        item.dueStatus === 'overdue' ? 'text-red-600' :
+                                                        item.dueStatus === 'warning' ? 'text-orange-500' :
+                                                        'text-gray-700'
+                                                    }`}>
                                                         {item.dueDate}
                                                     </span>
-                                                    {item.status !== 'paid_off' && (
-                                                        <Badge variant="outline" className="text-xs border-red-200 bg-red-50 text-red-700">
+                                                    {item.status !== 'paid_off' && item.dueStatus === 'overdue' && (
+                                                        <Badge variant="outline" className="text-xs border-red-300 bg-red-50 text-red-700">
                                                             <AlertCircle className="w-3 h-3 mr-1" />
-                                                            Segera Bayar
+                                                            Sudah Jatuh Tempo!
+                                                        </Badge>
+                                                    )}
+                                                    {item.status !== 'paid_off' && item.dueStatus === 'warning' && (
+                                                        <Badge variant="outline" className="text-xs border-orange-300 bg-orange-50 text-orange-700">
+                                                            <AlertCircle className="w-3 h-3 mr-1" />
+                                                            Segera Bayar ({item.daysUntilDue} hari lagi)
+                                                        </Badge>
+                                                    )}
+                                                    {item.status !== 'paid_off' && item.dueStatus === 'safe' && (
+                                                        <Badge variant="outline" className="text-xs border-green-300 bg-green-50 text-green-700">
+                                                            <CheckCircle2 className="w-3 h-3 mr-1" />
+                                                            {item.daysUntilDue} hari lagi
                                                         </Badge>
                                                     )}
                                                 </div>

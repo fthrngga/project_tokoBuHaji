@@ -66,6 +66,9 @@ interface Credit {
         }[];
     };
     payment_logs?: PaymentLog[];
+    tunggakan_amount?: number;
+    tunggakan_months?: number;
+    is_kritis?: boolean;
 }
 
 interface Props {
@@ -93,6 +96,9 @@ export default function CreditMonitoring({ credits, cashPayments }: Props) {
     const [isLogVerifyOpen, setIsLogVerifyOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<'credit' | 'cash'>('credit');
     const [actualAmount, setActualAmount] = useState<string>('');
+
+    // State for Pelunasan Dini Modal
+    const [isPelunasanDiniOpen, setIsPelunasanDiniOpen] = useState(false);
 
     const handleValuesDetail = (credit: Credit) => {
         setSelectedCredit(credit);
@@ -139,6 +145,21 @@ export default function CreditMonitoring({ credits, cashPayments }: Props) {
         });
     };
 
+    const handlePelunasanDiniClick = (credit: Credit) => {
+        setSelectedCredit(credit);
+        setIsPelunasanDiniOpen(true);
+    };
+
+    const submitPelunasanDini = () => {
+        if (!selectedCredit) return;
+        router.put(route('finance.payment.pelunasan-dini', selectedCredit.id), {}, {
+            onSuccess: () => {
+                setIsPelunasanDiniOpen(false);
+                setIsDetailOpen(false);
+            }
+        });
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Monitoring Pembayaran" />
@@ -151,18 +172,18 @@ export default function CreditMonitoring({ credits, cashPayments }: Props) {
                 </div>
 
                 {/* Manual Tabs Implementation */}
-                <div className="flex space-x-2 border-b">
+                <div className="flex space-x-2 border-b overflow-x-auto">
                     <button
-                        className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'credit'
+                        className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === 'credit'
                             ? 'border-blue-600 text-blue-600'
                             : 'border-transparent text-gray-500 hover:text-gray-700'
                             }`}
                         onClick={() => setActiveTab('credit')}
                     >
-                        Kredit
+                        Kredit Aktif
                     </button>
                     <button
-                        className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'cash'
+                        className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === 'cash'
                             ? 'border-blue-600 text-blue-600'
                             : 'border-transparent text-gray-500 hover:text-gray-700'
                             }`}
@@ -202,15 +223,24 @@ export default function CreditMonitoring({ credits, cashPayments }: Props) {
                                             ) : '-'}
                                         </TableCell>
                                         <TableCell>
-                                            <Badge variant={credit.status === 'ongoing' ? 'default' : 'outline'}>
-                                                {credit.status === 'ongoing' ? 'Berjalan' :
-                                                        credit.status === 'paid_off' ? 'Lunas' : credit.status}
+                                            <Badge variant={credit.status === 'ongoing' ? 'default' : credit.status === 'paid_off' ? 'secondary' : 'outline'}>
+                                                {credit.status === 'awaiting_dp' ? 'Menunggu DP' : credit.status === 'ongoing' ? 'Cicilan Berjalan' : credit.status}
                                             </Badge>
+                                            {credit.tunggakan_months && credit.tunggakan_months > 0 ? (
+                                                <p className="text-[10px] text-red-500 mt-1 font-bold">Nunggak {credit.tunggakan_months} Bln</p>
+                                            ) : null}
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <Button size="sm" variant="outline" onClick={() => handleValuesDetail(credit)}>
-                                                Detail
-                                            </Button>
+                                            <div className="flex justify-end gap-2">
+                                                <Button variant="outline" size="sm" onClick={() => handleValuesDetail(credit)}>
+                                                    Detail
+                                                </Button>
+                                                {credit.status === 'awaiting_dp' ? (
+                                                    <Button size="sm" onClick={() => handleVerifyClick(credit)}>Setujui DP</Button>
+                                                ) : credit.status === 'ongoing' ? (
+                                                    <Button size="sm" variant="secondary" onClick={() => handlePelunasanDiniClick(credit)}>Pelunasan Dini</Button>
+                                                ) : null}
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 )) : (
@@ -224,6 +254,7 @@ export default function CreditMonitoring({ credits, cashPayments }: Props) {
                         </Table>
                     </div>
                 )}
+
 
                 {activeTab === 'cash' && (
                     <div className="rounded-xl border bg-card shadow overflow-hidden">
@@ -340,6 +371,9 @@ export default function CreditMonitoring({ credits, cashPayments }: Props) {
                                             <span className="font-bold">
                                                 {selectedCredit.installments_paid || 0} / {selectedCredit.duration_months} Bulan
                                             </span>
+                                            {selectedCredit.tunggakan_amount && selectedCredit.tunggakan_amount > 0 ? (
+                                                <span className="block text-xs font-bold text-red-500 mt-1">Nunggak: {formatCurrency(selectedCredit.tunggakan_amount)} ({selectedCredit.tunggakan_months} Bln)</span>
+                                            ) : null}
                                         </div>
                                         <div>
                                             <span className="text-muted-foreground block text-xs">Status</span>
@@ -537,6 +571,45 @@ export default function CreditMonitoring({ credits, cashPayments }: Props) {
                     </DialogContent>
                 </Dialog>
             </div>
+
+            {/* Pelunasan Dini Modal */}
+            <Dialog open={isPelunasanDiniOpen} onOpenChange={setIsPelunasanDiniOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Konfirmasi Pelunasan Dini</DialogTitle>
+                        <DialogDescription>
+                            Proses pelunasan sekaligus untuk Order #{selectedCredit?.order_id}.
+                        </DialogDescription>
+                    </DialogHeader>
+                    {selectedCredit && (
+                        <div className="grid gap-4 py-4">
+                            <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg space-y-2">
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-muted-foreground">Pelanggan:</span>
+                                    <span className="font-medium">{selectedCredit.customer?.user?.name}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-muted-foreground">Sisa Bulan:</span>
+                                    <span className="font-medium">{selectedCredit.duration_months - (selectedCredit.installments_paid || 0)} Bulan</span>
+                                </div>
+                                <div className="flex justify-between text-sm font-bold pt-2 border-t border-blue-200 mt-2">
+                                    <span>Total Harus Dibayar:</span>
+                                    <span className="text-blue-700">
+                                        {formatCurrency((selectedCredit.duration_months - (selectedCredit.installments_paid || 0)) * selectedCredit.installment_amount)}
+                                    </span>
+                                </div>
+                            </div>
+                            <p className="text-sm text-muted-foreground mt-2">
+                                Peringatan: Menekan tombol "Ya, Lunaskan" akan secara otomatis membuat transaksi pemasukan di Laporan Keuangan sesuai nominal di atas, dan status kredit akan berubah menjadi Lunas. Pastikan Anda telah menerima uang dari pelanggan.
+                            </p>
+                        </div>
+                    )}
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsPelunasanDiniOpen(false)}>Batal</Button>
+                        <Button className="bg-blue-600 hover:bg-blue-700" onClick={submitPelunasanDini}>Ya, Lunaskan</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </AppLayout>
     );
 }
