@@ -3,6 +3,11 @@
 namespace App\Http\Controllers\Features\Order;
 
 use App\Http\Controllers\Controller;
+use App\Models\Features\Order\Order;
+use App\Models\Features\Product\Product;
+use App\Models\Payment;
+use App\Models\PaymentLog;
+use App\Services\MidtransService;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -86,7 +91,19 @@ class OrderController extends Controller
             'amount' => 'nullable|numeric|min:0',
         ]);
 
-        if ($order->payment && $order->payment->payment_method === 'credit' && $request->has('amount')) {
+        $isDpUpload = false;
+        if ($order->payment && $order->payment->payment_method === 'credit') {
+            $hasDp = $order->payment->down_payment && $order->payment->down_payment > 0;
+            $dpVerifiedOrPending = $order->payment->paymentLogs()
+                ->where('type', 'down_payment')
+                ->whereIn('status', ['pending', 'verified'])
+                ->exists();
+            if ($hasDp && !$dpVerifiedOrPending) {
+                $isDpUpload = true;
+            }
+        }
+
+        if ($order->payment && $order->payment->payment_method === 'credit' && $request->has('amount') && !$isDpUpload) {
             $minAmount = $order->payment->installment_amount / 2;
             if ($request->amount < $minAmount && !$request->has('dp_override')) {
                 return back()->withErrors(['amount' => 'Minimal pembayaran adalah Rp ' . number_format($minAmount, 0, ',', '.')]);
@@ -205,5 +222,88 @@ class OrderController extends Controller
         }
 
         return back()->with('success', 'Pembayaran berhasil diproses otomatis.');
+    }
+
+    public function generateSnapToken(Request $request, string $id, MidtransService $midtrans)
+    {
+        $order = Order::where('user_id', auth()->id())->findOrFail($id);
+        $payment = $order->payment;
+
+        if (!$payment) {
+            return response()->json(['message' => 'Metode pembayaran belum dipilih'], 400);
+        }
+
+        $isDpUpload = false;
+        $amount = 0;
+        $paymentType = 'full_payment';
+        $installmentNumber = null;
+        $monthsPaid = 1;
+
+        if ($payment->payment_method === 'credit') {
+            $hasDp = $payment->down_payment && $payment->down_payment > 0;
+            $dpVerified = $payment->paymentLogs()
+                ->where('type', 'down_payment')
+                ->where('status', 'verified')
+                ->exists();
+                
+            if ($hasDp && !$dpVerified) {
+                $isDpUpload = true;
+                $amount = $payment->down_payment;
+                $paymentType = 'down_payment';
+            } else {
+                // Instalment
+                $nextInstallment = ($payment->installments_paid ?? 0) + 1;
+                $monthsPaid = $request->input('months_paid', 1);
+                $amount = $payment->installment_amount * $monthsPaid;
+                $paymentType = 'installment';
+                $installmentNumber = $nextInstallment;
+            }
+        } else {
+            // Cash
+            $amount = $order->total_amount;
+        }
+
+        // Create a pending payment log first to get an ID for midtrans
+        $paymentLog = $payment->paymentLogs()
+            ->where('type', $paymentType)
+            ->where('installment_number', $installmentNumber)
+            ->where('status', 'pending')
+            ->first();
+
+        if ($paymentLog) {
+            $paymentLog->update([
+                'amount' => $amount,
+                'months_paid' => $monthsPaid,
+            ]);
+        } else {
+            $paymentLog = $payment->paymentLogs()->create([
+                'type' => $paymentType,
+                'installment_number' => $installmentNumber,
+                'amount' => $amount,
+                'status' => 'pending',
+                'months_paid' => $monthsPaid,
+            ]);
+        }
+        
+        $orderId = 'PAYLOG-' . $paymentLog->id . '-' . time();
+
+        $params = [
+            'transaction_details' => [
+                'order_id' => $orderId,
+                'gross_amount' => (int) round($amount),
+            ],
+            'customer_details' => [
+                'first_name' => auth()->user()->name,
+                'email' => auth()->user()->email,
+            ],
+        ];
+
+        try {
+            $snapToken = $midtrans->createSnapToken($params);
+            $paymentLog->update(['snap_token' => $snapToken]);
+            return response()->json(['token' => $snapToken]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Gagal menghubungi Midtrans'], 500);
+        }
     }
 }

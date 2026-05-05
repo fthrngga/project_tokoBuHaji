@@ -16,3 +16,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin/finance')->
     Route::post('/expenses', [FinanceController::class, 'storeExpense'])->name('expenses.store');
     Route::get('/restock', [FinanceController::class, 'restockApproval'])->name('restock.index');
 });
+
+Route::post('/api/midtrans/callback', [\App\Http\Controllers\Features\Finance\PaymentCallbackController::class, 'handleCallback'])
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);

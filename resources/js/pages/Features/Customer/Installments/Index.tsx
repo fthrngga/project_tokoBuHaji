@@ -7,114 +7,148 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Download, Calendar, Package, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Download, Calendar, Package, AlertCircle, CheckCircle2, CreditCard } from "lucide-react";
 import { Link } from '@inertiajs/react';
 import { route } from 'ziggy-js';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { useState } from 'react';
+import axios from 'axios';
 
-// Sub-component for File Upload (Copied/Adapted from Order/Show)
-function FileUploadForm({ orderId, label, showMonthsInput = false, installmentAmount = 0, tunggakan = 0, onSuccess }: { orderId: number, label?: string, showMonthsInput?: boolean, installmentAmount?: number, tunggakan?: number, onSuccess?: () => void }) {
-    const { data, setData, post, processing, errors, reset } = useForm<{ proof_of_payment: File | null; amount: number; months_paid: number }>({
-        proof_of_payment: null,
-        amount: installmentAmount + tunggakan,
-        months_paid: 1, // keeping this default for backend compatibility
-    });
+function MidtransButton({ orderId, installmentAmount = 0, tunggakan = 0, onSuccess, onPayStart }: { orderId: number, installmentAmount?: number, tunggakan?: number, onSuccess?: () => void, onPayStart?: () => void }) {
+    const minBelanja = installmentAmount / 2;
+    const [amount, setAmount] = useState(installmentAmount + tunggakan);
+    const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        post(route('orders.payment.proof', orderId), {
-            forceFormData: true,
-            onSuccess: () => {
-                reset();
-                if (onSuccess) onSuccess();
-            },
-        });
+    const handlePay = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.post(route('orders.payment.snap', orderId), {
+                amount: amount
+            });
+            const snapToken = response.data.token;
+
+            if (window.snap) {
+                if (onPayStart) onPayStart();
+                window.snap.pay(snapToken, {
+                    onSuccess: async function (result: any) {
+                        await axios.post('/api/midtrans/callback', {
+                            transaction_status: result.transaction_status || 'settlement',
+                            payment_type: result.payment_type,
+                            order_id: result.order_id,
+                            fraud_status: result.fraud_status || 'accept'
+                        });
+                        if (onSuccess) onSuccess();
+                        window.location.reload();
+                    },
+                    onPending: async function (result: any) {
+                        await axios.post('/api/midtrans/callback', {
+                            transaction_status: result.transaction_status || 'pending',
+                            payment_type: result.payment_type,
+                            order_id: result.order_id,
+                            fraud_status: result.fraud_status || 'accept'
+                        });
+                        if (onSuccess) onSuccess();
+                        window.location.reload();
+                    },
+                    onError: function (result: any) {
+                        alert("Pembayaran gagal!");
+                    },
+                    onClose: function () {
+                        setLoading(false);
+                    }
+                });
+            } else {
+                alert("Midtrans script not loaded.");
+                setLoading(false);
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Gagal memproses pembayaran.");
+            setLoading(false);
+        }
     };
 
-    const minBelanja = installmentAmount / 2;
-
     return (
-        <form onSubmit={handleSubmit} className="space-y-3">
-            {showMonthsInput && (
-                <div className="space-y-4 bg-gray-50 dark:bg-gray-800 p-4 rounded border">
-                    <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Pilih Nominal Pembayaran:</h4>
-                    <div className="space-y-3">
-                        {tunggakan > 0 ? (
-                            <label className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer bg-white dark:bg-gray-900 border-red-200">
+        <div className="space-y-6">
+            <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <h4 className="text-base font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-blue-600" /> Pilih Nominal Pembayaran
+                </h4>
+                <div className="space-y-4">
+                    {tunggakan > 0 ? (
+                        <label className={`relative flex items-start gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${amount === installmentAmount + tunggakan ? 'border-red-500 bg-red-50 dark:bg-red-900/10 shadow-md ring-4 ring-red-500/20' : 'border-slate-200 bg-white dark:bg-slate-900 hover:border-red-300 hover:bg-red-50/50'}`}>
+                            <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white mt-0.5">
+                                {amount === installmentAmount + tunggakan && <div className="h-2.5 w-2.5 rounded-full bg-red-600" />}
+                            </div>
+                            <input
+                                type="radio"
+                                name="payment_option"
+                                checked={amount === installmentAmount + tunggakan}
+                                onChange={() => setAmount(installmentAmount + tunggakan)}
+                                className="sr-only"
+                            />
+                            <div className="flex-1">
+                                <div className={`font-bold ${amount === installmentAmount + tunggakan ? 'text-red-700 dark:text-red-400' : 'text-slate-700 dark:text-slate-300'}`}>Tagihan Penuh (+ Tunggakan)</div>
+                                <div className="text-xs text-slate-500 mt-0.5">Pokok + Sisa bulan lalu</div>
+                                <div className="text-lg font-black mt-2 text-slate-900 dark:text-white tracking-tight">
+                                    {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(installmentAmount + tunggakan)}
+                                </div>
+                                <div className="text-xs text-red-600 mt-2 font-medium bg-red-100 dark:bg-red-900/30 w-fit px-2 py-1 rounded-md">⚠️ Pembayaran sebagian dinonaktifkan karena tunggakan.</div>
+                            </div>
+                        </label>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <label className={`relative flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${amount === installmentAmount ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20 shadow-md ring-4 ring-blue-600/20' : 'border-slate-200 bg-white dark:bg-slate-900 hover:border-blue-300 hover:bg-blue-50/50'}`}>
+                                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white mt-0.5">
+                                    {amount === installmentAmount && <div className="h-2.5 w-2.5 rounded-full bg-blue-600" />}
+                                </div>
                                 <input
                                     type="radio"
                                     name="payment_option"
-                                    checked={data.amount === installmentAmount + tunggakan}
-                                    onChange={() => setData('amount', installmentAmount + tunggakan)}
-                                    className="mt-1"
+                                    checked={amount === installmentAmount}
+                                    onChange={() => setAmount(installmentAmount)}
+                                    className="sr-only"
                                 />
-                                <div>
-                                    <div className="font-semibold text-red-700">Tagihan Penuh (+ Tunggakan)</div>
-                                    <div className="text-xs text-gray-500">Pokok + Sisa bulan lalu</div>
-                                    <div className="text-sm font-bold mt-1 text-gray-800 dark:text-gray-200">
-                                        {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(installmentAmount + tunggakan)}
+                                <div className="flex-1">
+                                    <div className={`font-bold ${amount === installmentAmount ? 'text-blue-700 dark:text-blue-400' : 'text-slate-700 dark:text-slate-300'}`}>Angsuran Pokok Saja</div>
+                                    <div className="text-xs text-slate-500 mt-0.5">Angsuran bulan ini</div>
+                                    <div className="text-lg font-black mt-2 text-slate-900 dark:text-white tracking-tight">
+                                        {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(installmentAmount)}
                                     </div>
-                                    <div className="text-xs text-red-500 mt-1 font-medium">Pembayaran sebagian dinonaktifkan karena Anda memiliki tunggakan.</div>
                                 </div>
                             </label>
-                        ) : (
-                            <>
-                                <label className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800">
-                                    <input
-                                        type="radio"
-                                        name="payment_option"
-                                        checked={data.amount === installmentAmount}
-                                        onChange={() => setData('amount', installmentAmount)}
-                                        className="mt-1"
-                                    />
-                                    <div>
-                                        <div className="font-semibold text-blue-700">Angsuran Pokok Saja</div>
-                                        <div className="text-xs text-gray-500">Angsuran bulan ini</div>
-                                        <div className="text-sm font-bold mt-1 text-gray-800 dark:text-gray-200">
-                                            {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(installmentAmount)}
-                                        </div>
-                                    </div>
-                                </label>
-                                <label className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800">
-                                    <input
-                                        type="radio"
-                                        name="payment_option"
-                                        checked={data.amount === minBelanja}
-                                        onChange={() => setData('amount', minBelanja)}
-                                        className="mt-1"
-                                    />
-                                    <div>
-                                        <div className="font-semibold text-orange-600">Bayar Setengah (Keringanan)</div>
-                                        <div className="text-xs text-gray-500">Batas minimal pembayaran</div>
-                                        <div className="text-sm font-bold mt-1 text-gray-800 dark:text-gray-200">
-                                            {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(minBelanja)}
-                                        </div>
-                                    </div>
-                                </label>
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
 
-            <div className="space-y-2">
-                <Label htmlFor="proof_of_payment" className="text-sm">{label || "Upload Bukti Transfer"}</Label>
-                <Input
-                    id="proof_of_payment"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setData('proof_of_payment', e.target.files ? e.target.files[0] : null)}
-                    className="bg-white dark:bg-gray-900"
-                />
-                {errors.proof_of_payment && <p className="text-red-500 text-xs">{errors.proof_of_payment}</p>}
+                            <label className={`relative flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${amount === minBelanja ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20 shadow-md ring-4 ring-orange-500/20' : 'border-slate-200 bg-white dark:bg-slate-900 hover:border-orange-300 hover:bg-orange-50/50'}`}>
+                                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white mt-0.5">
+                                    {amount === minBelanja && <div className="h-2.5 w-2.5 rounded-full bg-orange-600" />}
+                                </div>
+                                <input
+                                    type="radio"
+                                    name="payment_option"
+                                    checked={amount === minBelanja}
+                                    onChange={() => setAmount(minBelanja)}
+                                    className="sr-only"
+                                />
+                                <div className="flex-1">
+                                    <div className={`font-bold ${amount === minBelanja ? 'text-orange-700 dark:text-orange-400' : 'text-slate-700 dark:text-slate-300'}`}>Keringanan (50%)</div>
+                                    <div className="text-xs text-slate-500 mt-0.5">Batas minimal bulan ini</div>
+                                    <div className="text-lg font-black mt-2 text-slate-900 dark:text-white tracking-tight">
+                                        {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(minBelanja)}
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    )}
+                </div>
             </div>
-            <Button type="submit" className="w-full" disabled={processing || !data.proof_of_payment}>
-                {processing ? 'Mengupload...' : (label || 'Upload Bukti Pembayaran')}
+
+            <Button onClick={handlePay} className="w-full h-14 text-lg font-bold shadow-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white transition-all transform hover:scale-[1.02] active:scale-95" disabled={loading}>
+                {loading ? 'Menghubungkan ke Midtrans...' : '💳 Lanjutkan ke Pembayaran'}
             </Button>
-        </form>
+        </div>
     );
 }
 
@@ -140,10 +174,20 @@ interface Installment {
     }[];
     tunggakan: number;
     totalBillThisMonth: number;
+    activePayments?: {
+        id: number;
+        amount: number;
+        type: string;
+        snap_token?: string;
+    }[];
 }
 
 export default function InstallmentIndex({ auth, installments }: { auth: any, installments: Installment[] }) {
     const [selectedPaymentItem, setSelectedPaymentItem] = useState<Installment | null>(null);
+
+    // Calculate total active payments across all installments
+    const totalActivePaymentsCount = installments.reduce((acc, curr) => acc + (curr.activePayments?.length || 0), 0);
+    const activeInstallmentsWithPending = installments.filter(i => (i.activePayments?.length || 0) > 0);
 
     return (
         <div className="flex min-h-screen w-full flex-col bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-200">
@@ -183,6 +227,59 @@ export default function InstallmentIndex({ auth, installments }: { auth: any, in
                             <div className="text-center py-12 bg-white rounded-lg border">
                                 <p className="text-muted-foreground">Anda belum memiliki tagihan angsuran aktif.</p>
                             </div>
+                        )}
+
+                        {totalActivePaymentsCount > 0 && (
+                            <Alert className="bg-amber-50 border-amber-200 text-amber-900 dark:bg-amber-950/40 dark:border-amber-800 dark:text-amber-300 shadow-md relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-amber-200 rounded-bl-full opacity-20 transform translate-x-1/3 -translate-y-1/3"></div>
+                                <AlertCircle className="h-6 w-6 !text-amber-600 dark:!text-amber-400" />
+                                <AlertTitle className="font-bold text-amber-800 dark:text-amber-300 text-lg mb-2">Tagihan Sedang Diproses</AlertTitle>
+                                <AlertDescription className="text-amber-800/90 dark:text-amber-400/90">
+                                    <p className="mb-4 text-sm leading-relaxed">
+                                        Anda memiliki <strong>{totalActivePaymentsCount}</strong> transaksi Midtrans yang belum diselesaikan. Jika Anda belum mentransfer uang, silakan selesaikan pembayaran di channel bank yang Anda pilih.
+                                    </p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {activeInstallmentsWithPending.map(inst => 
+                                            inst.activePayments?.map(payment => (
+                                                <Button 
+                                                    key={payment.id} 
+                                                    size="sm" 
+                                                    className="bg-amber-500 hover:bg-amber-600 text-white font-semibold shadow-sm transition-all hover:shadow"
+                                                    onClick={() => {
+                                                        if (payment.snap_token && window.snap) {
+                                                            window.snap.pay(payment.snap_token, {
+                                                                onSuccess: async function (result: any) {
+                                                                    await axios.post('/api/midtrans/callback', {
+                                                                        transaction_status: result.transaction_status || 'settlement',
+                                                                        payment_type: result.payment_type,
+                                                                        order_id: result.order_id,
+                                                                        fraud_status: result.fraud_status || 'accept'
+                                                                    });
+                                                                    window.location.reload();
+                                                                },
+                                                                onPending: async function (result: any) {
+                                                                    await axios.post('/api/midtrans/callback', {
+                                                                        transaction_status: result.transaction_status || 'pending',
+                                                                        payment_type: result.payment_type,
+                                                                        order_id: result.order_id,
+                                                                        fraud_status: result.fraud_status || 'accept'
+                                                                    });
+                                                                    window.location.reload();
+                                                                }
+                                                            });
+                                                        } else {
+                                                            alert('Mohon maaf, sesi pembayaran ini sudah kadaluarsa. Silakan klik "Bayar Sekarang" pada angsuran terkait untuk membuat tagihan baru.');
+                                                        }
+                                                    }}
+                                                >
+                                                    <CreditCard className="w-4 h-4 mr-2" />
+                                                    Lihat Tagihan {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(payment.amount)}
+                                                </Button>
+                                            ))
+                                        )}
+                                    </div>
+                                </AlertDescription>
+                            </Alert>
                         )}
 
                         {/* LIST OF INSTALLMENTS */}
@@ -322,24 +419,40 @@ export default function InstallmentIndex({ auth, installments }: { auth: any, in
 
                 {/* LOGIC MODAL PEMBAYARAN */}
                 <Dialog open={!!selectedPaymentItem} onOpenChange={(open) => !open && setSelectedPaymentItem(null)}>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Upload Bukti Pembayaran</DialogTitle>
-                            <DialogDescription>
-                                Upload bukti transfer untuk angsuran <strong>{selectedPaymentItem?.productName}</strong>.
+                    <DialogContent className="sm:max-w-xl p-0 overflow-hidden border-0 shadow-2xl">
+                        <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-6 text-white text-center">
+                            <DialogTitle className="text-2xl font-bold mb-2 text-white">Pembayaran Angsuran</DialogTitle>
+                            <DialogDescription className="text-blue-100 text-base">
+                                Selesaikan pembayaran untuk <strong>{selectedPaymentItem?.productName}</strong>
                             </DialogDescription>
-                        </DialogHeader>
+                        </div>
+                        
+                        <div className="p-6 bg-white dark:bg-gray-950">
+                            {selectedPaymentItem && (
+                                <div className="mb-6 pb-6 border-b border-dashed border-gray-300 dark:border-gray-800">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-sm text-gray-500">Nomor Kontrak</span>
+                                        <span className="font-medium">{selectedPaymentItem.contractNumber}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm text-gray-500">Sisa Tagihan Total</span>
+                                        <span className="font-bold text-gray-900 dark:text-white">
+                                            {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(selectedPaymentItem.remainingDebt)}
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
 
-                        {selectedPaymentItem && (
-                            <FileUploadForm
-                                orderId={selectedPaymentItem.order_id}
-                                label="Upload Bukti Transfer"
-                                showMonthsInput={true}
-                                installmentAmount={selectedPaymentItem.installment_amount}
-                                tunggakan={selectedPaymentItem.tunggakan}
-                                onSuccess={() => setSelectedPaymentItem(null)}
-                            />
-                        )}
+                            {selectedPaymentItem && (
+                                <MidtransButton
+                                    orderId={selectedPaymentItem.order_id}
+                                    installmentAmount={selectedPaymentItem.installment_amount}
+                                    tunggakan={selectedPaymentItem.tunggakan}
+                                    onSuccess={() => setSelectedPaymentItem(null)}
+                                    onPayStart={() => setSelectedPaymentItem(null)}
+                                />
+                            )}
+                        </div>
                     </DialogContent>
                 </Dialog>
 

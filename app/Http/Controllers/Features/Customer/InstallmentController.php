@@ -80,7 +80,9 @@ class InstallmentController extends Controller
                     'installment_amount' => $payment->installment_amount,
                     'tunggakan' => $tunggakan,
                     'totalBillThisMonth' => $totalBillThisMonth,
-                    'history' => $payment->paymentLogs->map(function ($log) {
+                    'history' => $payment->paymentLogs->filter(function ($log) {
+                        return $log->status !== 'pending' || !empty($log->proof_path);
+                    })->map(function ($log) {
                         return [
                             'id' => $log->id,
                             'installmentKe' => $log->installment_number,
@@ -90,7 +92,17 @@ class InstallmentController extends Controller
                             'status' => ucfirst($log->status),
                             'admin_notes' => $log->admin_notes
                         ];
-                    })
+                    })->values(),
+                    'activePayments' => $payment->paymentLogs->filter(function ($log) {
+                        return $log->status === 'pending' && empty($log->proof_path);
+                    })->map(function ($log) {
+                        return [
+                            'id' => $log->id,
+                            'amount' => $log->amount,
+                            'type' => $log->type,
+                            'snap_token' => $log->snap_token,
+                        ];
+                    })->values()
                 ];
             });
 

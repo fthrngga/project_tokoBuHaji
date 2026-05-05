@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import axios from 'axios';
 
 interface OrderItem {
     id: number;
@@ -43,6 +44,7 @@ interface PaymentLog {
     amount: number;
     proof_path: string;
     status: 'pending' | 'verified' | 'rejected';
+    snap_token?: string;
     paid_at?: string;
     created_at: string;
 }
@@ -382,18 +384,71 @@ export default function Show({ order }: Props) {
                                             {/* CASH PAYMENT LOGIC */}
                                             {order.payment.payment_method === 'cash' && order.payment.status !== 'paid_off' && (
                                                 <div className="w-full border-t pt-4">
-                                                    {order.payment.proof_of_payment_path ? (
-                                                        <div className="bg-yellow-50 text-yellow-800 p-3 rounded text-sm text-center border border-yellow-200">
-                                                            Bukti pembayaran telah diupload.<br />Mohon tunggu verifikasi admin.
-                                                        </div>
-                                                    ) : (
-                                                        <div className="space-y-3">
-                                                            <div className="bg-blue-50 text-blue-800 p-3 rounded text-sm mb-2 border border-blue-100">
-                                                                Silakan upload bukti pembayaran (Transfer/Lainnya) untuk diproses.
+                                                    {(() => {
+                                                        const logs = order.payment!.payment_logs || [];
+                                                        const cashManualPending = logs.some(l => l.type === 'full_payment' && l.status === 'pending' && l.proof_path);
+                                                        const cashMidtransPending = logs.some(l => l.type === 'full_payment' && l.status === 'pending' && !l.proof_path);
+
+                                                        if (cashManualPending) {
+                                                            return (
+                                                                <div className="bg-yellow-50 text-yellow-800 p-3 rounded text-sm text-center border border-yellow-200">
+                                                                    Bukti pembayaran telah diupload.<br />Mohon tunggu verifikasi admin.
+                                                                </div>
+                                                            );
+                                                        }
+
+                                                        return (
+                                                            <div className="space-y-3">
+                                                                {cashMidtransPending && (
+                                                                    <div className="bg-amber-50 text-amber-900 p-4 rounded-lg text-sm mb-3 border border-amber-200 shadow-sm relative overflow-hidden">
+                                                                        <div className="absolute top-0 right-0 w-16 h-16 bg-amber-200 rounded-bl-full opacity-20 transform translate-x-1/3 -translate-y-1/3"></div>
+                                                                        <div className="font-bold text-amber-800 text-base mb-1">Tagihan Sedang Diproses</div>
+                                                                        <p className="mb-3 text-amber-800/90 leading-relaxed">
+                                                                            Anda memiliki transaksi Midtrans yang belum diselesaikan. Selesaikan di aplikasi bank Anda.
+                                                                        </p>
+                                                                        {logs.filter(l => l.type === 'full_payment' && l.status === 'pending' && !l.proof_path && l.snap_token).map(payment => (
+                                                                            <Button 
+                                                                                key={payment.id} 
+                                                                                size="sm" 
+                                                                                className="bg-amber-500 hover:bg-amber-600 text-white font-semibold shadow-sm w-full sm:w-auto"
+                                                                                onClick={() => {
+                                                                                    if (window.snap) {
+                                                                                        window.snap.pay(payment.snap_token!, {
+                                                                                            onSuccess: async function (result: any) {
+                                                                                                await axios.post('/api/midtrans/callback', {
+                                                                                                    transaction_status: result.transaction_status || 'settlement',
+                                                                                                    payment_type: result.payment_type,
+                                                                                                    order_id: result.order_id,
+                                                                                                    fraud_status: result.fraud_status || 'accept'
+                                                                                                });
+                                                                                                window.location.reload();
+                                                                                            },
+                                                                                            onPending: async function (result: any) {
+                                                                                                await axios.post('/api/midtrans/callback', {
+                                                                                                    transaction_status: result.transaction_status || 'pending',
+                                                                                                    payment_type: result.payment_type,
+                                                                                                    order_id: result.order_id,
+                                                                                                    fraud_status: result.fraud_status || 'accept'
+                                                                                                });
+                                                                                                window.location.reload();
+                                                                                            }
+                                                                                        });
+                                                                                    }
+                                                                                }}
+                                                                            >
+                                                                                <CreditCard className="w-4 h-4 mr-2" />
+                                                                                Lihat Tagihan {formatCurrency(payment.amount)}
+                                                                            </Button>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+                                                                <div className="bg-blue-50 text-blue-800 p-3 rounded text-sm mb-2 border border-blue-100">
+                                                                    Silakan lakukan pembayaran Lunas.
+                                                                </div>
+                                                                <MidtransButton orderId={order.id} amount={order.total_amount} type="Pembayaran Lunas" />
                                                             </div>
-                                                            <FileUploadForm orderId={order.id} label="Upload Bukti Pembayaran" />
-                                                        </div>
-                                                    )}
+                                                        );
+                                                    })()}
                                                 </div>
                                             )}
 
@@ -409,11 +464,11 @@ export default function Show({ order }: Props) {
                                                                 // Check DP Status
                                                                 const hasDp = payment.down_payment > 0;
                                                                 const dpVerified = logs.some(l => l.type === 'down_payment' && l.status === 'verified');
-                                                                const dpPending = logs.some(l => l.type === 'down_payment' && l.status === 'pending');
+                                                                const dpManualPending = logs.some(l => l.type === 'down_payment' && l.status === 'pending' && l.proof_path);
+                                                                const dpMidtransPending = logs.some(l => l.type === 'down_payment' && l.status === 'pending' && !l.proof_path);
 
                                                                 if (hasDp && !dpVerified) {
-                                                                    // Show DP Upload
-                                                                    if (dpPending) {
+                                                                    if (dpManualPending) {
                                                                         return (
                                                                             <div className="bg-yellow-50 text-yellow-800 p-3 rounded text-sm text-center border border-yellow-200">
                                                                                 Bukti Uang Muka (DP) sebesar <strong>{formatCurrency(payment.down_payment)}</strong> sedang diverifikasi.
@@ -422,27 +477,67 @@ export default function Show({ order }: Props) {
                                                                     } else {
                                                                         return (
                                                                             <div className="space-y-3">
+                                                                                {dpMidtransPending && (
+                                                                                    <div className="bg-amber-50 text-amber-900 p-4 rounded-lg text-sm mb-3 border border-amber-200 shadow-sm relative overflow-hidden">
+                                                                                        <div className="absolute top-0 right-0 w-16 h-16 bg-amber-200 rounded-bl-full opacity-20 transform translate-x-1/3 -translate-y-1/3"></div>
+                                                                                        <div className="font-bold text-amber-800 text-base mb-1">Tagihan Sedang Diproses</div>
+                                                                                        <p className="mb-3 text-amber-800/90 leading-relaxed">
+                                                                                            Anda memiliki transaksi Midtrans yang belum diselesaikan. Selesaikan di aplikasi bank Anda.
+                                                                                        </p>
+                                                                                        {logs.filter(l => l.type === 'down_payment' && l.status === 'pending' && !l.proof_path && l.snap_token).map(payment => (
+                                                                                            <Button 
+                                                                                                key={payment.id} 
+                                                                                                size="sm" 
+                                                                                                className="bg-amber-500 hover:bg-amber-600 text-white font-semibold shadow-sm w-full sm:w-auto"
+                                                                                                onClick={() => {
+                                                                                                    if (window.snap) {
+                                                                                                        window.snap.pay(payment.snap_token!, {
+                                                                                                            onSuccess: async function (result: any) {
+                                                                                                                await axios.post('/api/midtrans/callback', {
+                                                                                                                    transaction_status: result.transaction_status || 'settlement',
+                                                                                                                    payment_type: result.payment_type,
+                                                                                                                    order_id: result.order_id,
+                                                                                                                    fraud_status: result.fraud_status || 'accept'
+                                                                                                                });
+                                                                                                                window.location.reload();
+                                                                                                            },
+                                                                                                            onPending: async function (result: any) {
+                                                                                                                await axios.post('/api/midtrans/callback', {
+                                                                                                                    transaction_status: result.transaction_status || 'pending',
+                                                                                                                    payment_type: result.payment_type,
+                                                                                                                    order_id: result.order_id,
+                                                                                                                    fraud_status: result.fraud_status || 'accept'
+                                                                                                                });
+                                                                                                                window.location.reload();
+                                                                                                            }
+                                                                                                        });
+                                                                                                    }
+                                                                                                }}
+                                                                                            >
+                                                                                                <CreditCard className="w-4 h-4 mr-2" />
+                                                                                                Lihat Tagihan {formatCurrency(payment.amount)}
+                                                                                            </Button>
+                                                                                        ))}
+                                                                                    </div>
+                                                                                )}
                                                                                 <div className="bg-blue-50 text-blue-800 p-3 rounded text-sm mb-2 border border-blue-100">
                                                                                     Silakan bayar Uang Muka (DP) sebesar <strong>{formatCurrency(payment.down_payment)}</strong>.
-                                                                                    <br />Upload bukti pembayaran di bawah ini.
                                                                                 </div>
-                                                                                <FileUploadForm orderId={order.id} label="Upload Bukti DP" />
+                                                                                <MidtransButton orderId={order.id} amount={payment.down_payment} type="Uang Muka (DP)" />
                                                                             </div>
                                                                         );
                                                                     }
                                                                 }
 
                                                                 // Installment Logic
-                                                                // If DP is verified OR no DP required
                                                                 if (payment.status !== 'paid_off') {
-                                                                    // Special Case: No DP selected and First Installment not yet paid.
-                                                                    // Show Upload for Installment #1 immediately.
                                                                     const installmentsPaid = payment.installments_paid || 0;
                                                                     if (!hasDp && installmentsPaid === 0) {
                                                                         const nextInstallment = 1;
-                                                                        const pendingInstallment = logs.find(l => l.type === 'installment' && l.installment_number === nextInstallment && l.status === 'pending');
+                                                                        const manualPendingInst = logs.find(l => l.type === 'installment' && l.installment_number === nextInstallment && l.status === 'pending' && l.proof_path);
+                                                                        const midtransPendingInst = logs.find(l => l.type === 'installment' && l.installment_number === nextInstallment && l.status === 'pending' && !l.proof_path);
 
-                                                                        if (pendingInstallment) {
+                                                                        if (manualPendingInst) {
                                                                             return (
                                                                                 <div className="bg-yellow-50 text-yellow-800 p-3 rounded text-sm text-center border border-yellow-200">
                                                                                     Bukti Angsuran Bulan ke-{nextInstallment} sedang diverifikasi.
@@ -451,15 +546,54 @@ export default function Show({ order }: Props) {
                                                                         } else {
                                                                             return (
                                                                                 <div className="space-y-3">
+                                                                                    {midtransPendingInst && (
+                                                                                        <div className="bg-amber-50 text-amber-900 p-4 rounded-lg text-sm mb-3 border border-amber-200 shadow-sm relative overflow-hidden">
+                                                                                            <div className="absolute top-0 right-0 w-16 h-16 bg-amber-200 rounded-bl-full opacity-20 transform translate-x-1/3 -translate-y-1/3"></div>
+                                                                                            <div className="font-bold text-amber-800 text-base mb-1">Tagihan Sedang Diproses</div>
+                                                                                            <p className="mb-3 text-amber-800/90 leading-relaxed">
+                                                                                                Anda memiliki transaksi Midtrans yang belum diselesaikan. Selesaikan di aplikasi bank Anda.
+                                                                                            </p>
+                                                                                            <Button 
+                                                                                                size="sm" 
+                                                                                                className="bg-amber-500 hover:bg-amber-600 text-white font-semibold shadow-sm w-full sm:w-auto"
+                                                                                                onClick={() => {
+                                                                                                    if (midtransPendingInst.snap_token && window.snap) {
+                                                                                                        window.snap.pay(midtransPendingInst.snap_token, {
+                                                                                                            onSuccess: async function (result: any) {
+                                                                                                                await axios.post('/api/midtrans/callback', {
+                                                                                                                    transaction_status: result.transaction_status || 'settlement',
+                                                                                                                    payment_type: result.payment_type,
+                                                                                                                    order_id: result.order_id,
+                                                                                                                    fraud_status: result.fraud_status || 'accept'
+                                                                                                                });
+                                                                                                                window.location.reload();
+                                                                                                            },
+                                                                                                            onPending: async function (result: any) {
+                                                                                                                await axios.post('/api/midtrans/callback', {
+                                                                                                                    transaction_status: result.transaction_status || 'pending',
+                                                                                                                    payment_type: result.payment_type,
+                                                                                                                    order_id: result.order_id,
+                                                                                                                    fraud_status: result.fraud_status || 'accept'
+                                                                                                                });
+                                                                                                                window.location.reload();
+                                                                                                            }
+                                                                                                        });
+                                                                                                    }
+                                                                                                }}
+                                                                                            >
+                                                                                                <CreditCard className="w-4 h-4 mr-2" />
+                                                                                                Lihat Tagihan {formatCurrency(midtransPendingInst.amount)}
+                                                                                            </Button>
+                                                                                        </div>
+                                                                                    )}
                                                                                     <div className="bg-blue-50 text-blue-800 p-3 rounded text-sm mb-2 border border-blue-100">
                                                                                         <strong>Tagihan Awal: Angsuran 1 (Tanpa DP)</strong>
                                                                                         <br />Nominal: <strong>{formatCurrency(payment.installment_amount)}</strong>
                                                                                     </div>
-                                                                                    <FileUploadForm
+                                                                                    <MidtransButton
                                                                                         orderId={order.id}
-                                                                                        label={`Upload Bukti Angsuran ke-${nextInstallment}`}
-                                                                                        showMonthsInput={true}
-                                                                                        installmentAmount={payment.installment_amount}
+                                                                                        amount={payment.installment_amount}
+                                                                                        type={`Angsuran ke-${nextInstallment}`}
                                                                                     />
                                                                                 </div>
                                                                             );
@@ -497,47 +631,65 @@ export default function Show({ order }: Props) {
     );
 }
 
-function FileUploadForm({ orderId, label, showMonthsInput = false, installmentAmount = 0 }: { orderId: number, label?: string, showMonthsInput?: boolean, installmentAmount?: number }) {
-    const minBelanja = installmentAmount / 2;
+function MidtransButton({ orderId, amount, type }: { orderId: number, amount: number, type: string }) {
+    const [loading, setLoading] = useState(false);
 
-    const { data, setData, post, processing, errors } = useForm<{ proof_of_payment: File | null; amount: number; months_paid: number }>({
-        proof_of_payment: null,
-        amount: installmentAmount,
-        months_paid: 1, // keeping this default for backend compatibility
-    });
+    const handlePay = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.post(route('orders.payment.snap', orderId));
+            const snapToken = response.data.token;
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        post(route('orders.payment.proof', orderId), {
-            forceFormData: true,
-        });
+            if (window.snap) {
+                window.snap.pay(snapToken, {
+                    onSuccess: async function (result: any) {
+                        await axios.post('/api/midtrans/callback', {
+                            transaction_status: result.transaction_status || 'settlement',
+                            payment_type: result.payment_type,
+                            order_id: result.order_id,
+                            fraud_status: result.fraud_status || 'accept'
+                        });
+                        window.location.reload();
+                    },
+                    onPending: async function (result: any) {
+                        await axios.post('/api/midtrans/callback', {
+                            transaction_status: result.transaction_status || 'pending',
+                            payment_type: result.payment_type,
+                            order_id: result.order_id,
+                            fraud_status: result.fraud_status || 'accept'
+                        });
+                        window.location.reload();
+                    },
+                    onError: function (result: any) {
+                        alert("Pembayaran gagal!");
+                    },
+                    onClose: function () {
+                        setLoading(false);
+                    }
+                });
+            } else {
+                alert("Midtrans script not loaded.");
+                setLoading(false);
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Gagal memproses pembayaran.");
+            setLoading(false);
+        }
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-3">
-            {showMonthsInput && (
-                <div className="space-y-2 bg-gray-50 p-3 rounded border">
-                    <div className="text-sm font-medium text-gray-700">Nominal Tagihan:</div>
-                    <div className="text-xl font-bold text-blue-700">
-                        {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(data.amount)}
-                    </div>
+        <div className="space-y-3">
+            <div className="space-y-2 bg-gray-50 p-3 rounded border">
+                <div className="text-sm font-medium text-gray-700">Nominal Tagihan ({type}):</div>
+                <div className="text-xl font-bold text-blue-700">
+                    {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(amount)}
                 </div>
-            )}
-
-            <div className="space-y-2">
-                <Label htmlFor="proof_of_payment" className="text-sm">{label || "Upload Bukti Transfer"}</Label>
-                <Input
-                    id="proof_of_payment"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setData('proof_of_payment', e.target.files ? e.target.files[0] : null)}
-                    className="bg-white"
-                />
-                {errors.proof_of_payment && <p className="text-red-500 text-xs">{errors.proof_of_payment}</p>}
             </div>
-            <Button type="submit" className="w-full" disabled={processing || !data.proof_of_payment}>
-                {processing ? 'Mengupload...' : (label || 'Upload Bukti Pembayaran')}
+
+            <Button onClick={handlePay} className="w-full" disabled={loading}>
+                {loading ? 'Memproses...' : 'Bayar Sekarang dengan Midtrans'}
             </Button>
-        </form>
+        </div>
     );
 }
