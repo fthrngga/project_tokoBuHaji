@@ -1,7 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { SharedData } from '@/types';
-import Header from '@/Pages/welcome/Partials/Header';
-import Footer from '@/Pages/welcome/Partials/Footer';
+import Header from '@/pages/welcome/Partials/Header';
+import Footer from '@/pages/welcome/Partials/Footer';
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";

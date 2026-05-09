@@ -1,8 +1,8 @@
 import { Head, usePage, Link, router } from "@inertiajs/react";
 import { type CartItem, type SharedData } from "@/types";
 import { route } from "ziggy-js";
-import Header from "@/Pages/welcome/Partials/Header";
-import Footer from "@/Pages/welcome/Partials/Footer";
+import Header from "@/pages/welcome/Partials/Header";
+import Footer from "@/pages/welcome/Partials/Footer";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Trash2, Minus, Plus, ArrowRight } from "lucide-react";
