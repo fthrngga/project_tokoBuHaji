@@ -13,7 +13,8 @@ export default defineConfig({
         }),
         react(),
         tailwindcss(),
-        wayfinder({
+        // Only run wayfinder if not on Railway, because wayfinder requires a database connection to boot Laravel
+        !process.env.RAILWAY_ENVIRONMENT_NAME && wayfinder({
             formVariants: true,
         }),
     ],
