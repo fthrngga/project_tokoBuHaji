@@ -137,7 +137,7 @@ export default function Header({ user }: { user: User | null }) {
     return (
         <>
             {isTopBarVisible && (
-                <div className="bg-black text-white text-center text-sm py-2 px-4 relative">
+                <div className="fixed top-0 left-0 right-0 z-[60] bg-black text-white text-center text-sm py-2 px-4">
                     <span>Untuk melakukan pembelian, silahkan login dahulu</span>
                     <button onClick={handleDismissTopBar} className="absolute top-1/2 right-4 -translate-y-1/2 text-white hover:opacity-75">
                         <X className="h-5 w-5" />
@@ -145,7 +145,10 @@ export default function Header({ user }: { user: User | null }) {
                 </div>
             )}
 
-            <header className="fixed top-6 left-0 right-0 z-50 w-full px-4 sm:px-6 lg:px-8 pointer-events-none transition-all duration-300">
+            <header className={cn(
+                "fixed left-0 right-0 z-50 w-full px-4 sm:px-6 lg:px-8 pointer-events-none transition-all duration-300",
+                isTopBarVisible ? "top-12 sm:top-14" : "top-6"
+            )}>
                 <div className="mx-auto max-w-7xl">
                     <div className="pointer-events-auto flex h-20 items-center justify-between gap-8 rounded-full border border-slate-200/60 bg-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl dark:border-slate-800/60 dark:bg-slate-950/80 px-6 lg:px-8">
 
@@ -199,7 +202,10 @@ export default function Header({ user }: { user: User | null }) {
             </header>
             
             {/* Global Spacer to offset the floating navbar on all pages */}
-            <div className="h-28 w-full shrink-0 lg:h-32"></div>
+            <div className={cn(
+                "w-full shrink-0 transition-all duration-300",
+                isTopBarVisible ? "h-36 lg:h-40" : "h-28 lg:h-32"
+            )}></div>
         </>
     );
 }
