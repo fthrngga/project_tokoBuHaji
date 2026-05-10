@@ -12,6 +12,11 @@ Route::middleware('auth')->group(function () {
     Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('settings/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    Route::get('settings/addresses', [App\Http\Controllers\Settings\AddressController::class, 'index'])->name('addresses.index');
+    Route::post('settings/addresses', [App\Http\Controllers\Settings\AddressController::class, 'store'])->name('addresses.store');
+    Route::delete('settings/addresses/{address}', [App\Http\Controllers\Settings\AddressController::class, 'destroy'])->name('addresses.destroy');
+    Route::patch('settings/addresses/{address}/primary', [App\Http\Controllers\Settings\AddressController::class, 'setPrimary'])->name('addresses.primary');
+
     Route::get('settings/password', [PasswordController::class, 'edit'])->name('password.edit');
 
     Route::put('settings/password', [PasswordController::class, 'update'])

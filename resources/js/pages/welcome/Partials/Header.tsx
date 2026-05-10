@@ -50,7 +50,7 @@ function HeaderActions({ user }: { user: User | null }) {
                         {user.role === 'admin' ? (
                             <DropdownMenuItem asChild><Link href={route('dashboard')}><LayoutDashboard className="mr-2 h-4 w-4" /><span>Dashboard</span></Link></DropdownMenuItem>
                         ) : (
-                            <DropdownMenuItem asChild><Link href="#"><UserIcon className="mr-2 h-4 w-4" /><span>Profil</span></Link></DropdownMenuItem>
+                            <DropdownMenuItem asChild><Link href={route('addresses.index')}><UserIcon className="mr-2 h-4 w-4" /><span>Alamat Saya</span></Link></DropdownMenuItem>
                         )}
                         <DropdownMenuItem asChild><Link href={route('orders.index')}><ShoppingBag className="mr-2 h-4 w-4" /><span>Pesanan Saya</span></Link></DropdownMenuItem>
                         {user.role !== 'admin' && (

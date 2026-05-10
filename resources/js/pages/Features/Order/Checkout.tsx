@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm, usePage, Link } from '@inertiajs/react';
 import { SharedData, CartItem } from '@/types';
 import { route } from 'ziggy-js';
 import Header from '@/pages/welcome/Partials/Header';
@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, ArrowRight } from "lucide-react";
+import { Loader2, ArrowRight, Check } from "lucide-react";
 import { format } from "date-fns";
 import { Toaster, toast } from 'sonner';
 
@@ -38,9 +38,24 @@ interface Village {
     name: string;
 }
 
+interface Address {
+    id: number;
+    label: string;
+    recipient_name: string;
+    phone_number: string;
+    province: string;
+    city: string;
+    district: string;
+    village: string;
+    address_detail: string;
+    postal_code: string;
+    is_primary: boolean;
+}
+
 interface Props {
     cartItems: CartItem[];
     total: number;
+    addresses: Address[];
 }
 
 const formatCurrency = (value: number | string) => {
@@ -51,7 +66,7 @@ const formatCurrency = (value: number | string) => {
     }).format(Number(value));
 };
 
-export default function Checkout({ cartItems, total }: Props) {
+export default function Checkout({ cartItems, total, addresses }: Props) {
     const { auth } = usePage<SharedData>().props;
 
     // API State
@@ -129,6 +144,28 @@ export default function Checkout({ cartItems, total }: Props) {
         }
     };
 
+    const [selectedAddressId, setSelectedAddressId] = useState(
+        addresses.find(a => a.is_primary)?.id || addresses[0]?.id || null
+    );
+
+    // Fungsi untuk mendapatkan data alamat yang aktif
+    const activeAddress = addresses.find(a => a.id === selectedAddressId);
+
+    // Gunakan useEffect untuk mensinkronkan data alamat ke form checkout
+    useEffect(() => {
+        if (activeAddress) {
+            setData({
+                ...data,
+                province: activeAddress.province,
+                city: activeAddress.city,
+                district: activeAddress.district,
+                village: activeAddress.village,
+                address_detail: activeAddress.address_detail,
+                postal_code: activeAddress.postal_code,
+            });
+        }
+    }, [selectedAddressId]);
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         post(route('checkout.store'), {
@@ -136,6 +173,7 @@ export default function Checkout({ cartItems, total }: Props) {
             onError: () => toast.error("Mohon lengkapi data pesanan."),
         });
     };
+
 
     return (
         <>
@@ -157,105 +195,41 @@ export default function Checkout({ cartItems, total }: Props) {
                             <div className="lg:col-span-7 space-y-8">
                                 <Card>
                                     <CardHeader>
-                                        <CardTitle>Alamat Pengiriman</CardTitle>
-                                        <CardDescription>Masukkan detail alamat lengkap untuk pengiriman.</CardDescription>
+                                        <CardTitle className="text-lg flex justify-between items-center">
+                                            Alamat Pengiriman
+                                            <Link href={route('addresses.index')} className="text-sm font-normal text-blue-600 hover:underline">
+                                                Kelola Alamat
+                                            </Link>
+                                        </CardTitle>
                                     </CardHeader>
                                     <CardContent className="space-y-4">
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <Label>Provinsi</Label>
-                                                <Select onValueChange={handleProvinceChange} value={data.province}>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Pilih Provinsi" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {provinces.map(p => (
-                                                            <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                {errors.province && <p className="text-xs text-red-500">{errors.province}</p>}
+                                        {addresses.length > 0 ? (
+                                            <div className="grid gap-3">
+                                                {addresses.map((addr) => (
+                                                    <div 
+                                                        key={addr.id}
+                                                        onClick={() => setSelectedAddressId(addr.id)}
+                                                        className={`p-4 border rounded-lg cursor-pointer transition-all ${selectedAddressId === addr.id ? 'border-black bg-slate-50' : 'hover:border-gray-400'}`}
+                                                    >
+                                                        <div className="flex justify-between items-start">
+                                                            <div>
+                                                                <p className="font-bold text-sm">{addr.recipient_name} <span className="text-gray-400 font-normal">({addr.label})</span></p>
+                                                                <p className="text-xs text-gray-500 mt-1">{addr.phone_number}</p>
+                                                                <p className="text-xs mt-2 line-clamp-2">{addr.address_detail}, {addr.city}</p>
+                                                            </div>
+                                                            {selectedAddressId === addr.id && <Check className="w-4 h-4" />}
+                                                        </div>
+                                                    </div>
+                                                ))}
                                             </div>
-                                            <div className="space-y-2">
-                                                <Label>Kota/Kabupaten</Label>
-                                                <Select onValueChange={handleCityChange} value={data.city} disabled={!data.province}>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Pilih Kota" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {regencies.map(r => (
-                                                            <SelectItem key={r.id} value={r.name}>{r.name}</SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                {errors.city && <p className="text-xs text-red-500">{errors.city}</p>}
+                                        ) : (
+                                            <div className="text-center py-6">
+                                                <p className="text-sm text-muted-foreground mb-4">Anda belum memiliki alamat tersimpan.</p>
+                                                <Button asChild variant="outline">
+                                                    <Link href={route('addresses.index')}>Tambah Alamat Baru</Link>
+                                                </Button>
                                             </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <Label>Kecamatan</Label>
-                                                <Select onValueChange={handleDistrictChange} value={data.district} disabled={!data.city}>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Pilih Kecamatan" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {districts.map(d => (
-                                                            <SelectItem key={d.id} value={d.name}>{d.name}</SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                {errors.district && <p className="text-xs text-red-500">{errors.district}</p>}
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label>Desa/Kelurahan</Label>
-                                                <Select onValueChange={(val) => setData('village', val)} value={data.village} disabled={!data.district}>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Pilih Desa" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {villages.map(v => (
-                                                            <SelectItem key={v.id} value={v.name}>{v.name}</SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                {errors.village && <p className="text-xs text-red-500">{errors.village}</p>}
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label htmlFor="address_detail">Detail Jalan / Nomor Rumah</Label>
-                                            <Textarea
-                                                id="address_detail"
-                                                placeholder="Contoh: Jl. Mawar No. 12, RT 01/RW 02"
-                                                value={data.address_detail}
-                                                onChange={e => setData('address_detail', e.target.value)}
-                                            />
-                                            {errors.address_detail && <p className="text-xs text-red-500">{errors.address_detail}</p>}
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <Label htmlFor="postal_code">Kode Pos</Label>
-                                                <Input
-                                                    id="postal_code"
-                                                    placeholder="Contoh: 12345"
-                                                    value={data.postal_code}
-                                                    onChange={e => setData('postal_code', e.target.value)}
-                                                />
-                                                {errors.postal_code && <p className="text-xs text-red-500">{errors.postal_code}</p>}
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label htmlFor="notes">Catatan Tambahan (Opsional)</Label>
-                                            <Textarea
-                                                id="notes"
-                                                placeholder="Contoh: Rumah cat biru pagar hitam, dekat masjid."
-                                                value={data.notes}
-                                                onChange={e => setData('notes', e.target.value)}
-                                            />
-                                        </div>
+                                        )}
                                     </CardContent>
                                 </Card>
                             </div>

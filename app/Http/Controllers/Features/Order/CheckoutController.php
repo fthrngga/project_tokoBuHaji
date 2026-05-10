@@ -29,6 +29,7 @@ class CheckoutController extends Controller
         return \Inertia\Inertia::render('Features/Order/Checkout', [
             'cartItems' => $cartItems,
             'total' => $total,
+            'addresses' => auth()->user()->addresses()->latest()->get(),
         ]);
     }
 
