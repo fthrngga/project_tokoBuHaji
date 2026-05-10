@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, SharedData, Product } from '@/types';
 import { Badge } from "@/components/ui/badge";
@@ -103,16 +103,33 @@ export default function Show({ order }: Props) {
         status: order.status,
     });
 
+    // 1. Polling untuk mendapatkan pesan realtime menggunakan Inertia Reload
+    useEffect(() => {
+        // Hentikan polling jika admin sedang memproses pengiriman pesan
+        if (msgProcessing) return;
+
+        const intervalId = setInterval(() => {
+            router.reload({
+                only: ['order'], // Cukup panggil 'only' saja
+            });
+        }, 3000); 
+
+        return () => clearInterval(intervalId); 
+    }, [msgProcessing]); // Masukkan msgProcessing ke dependency array
+
+    // 2. Auto-scroll ke bawah HANYA saat jumlah pesan bertambah
+    const messagesCount = order.messages.length;
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
-    }, [order.messages]);
+    }, [messagesCount]);
 
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
-        postMsg(route('orders.messages.store', order.id), { // Using the same route logic as user
+        postMsg(route('orders.messages.store', order.id), {
             preserveScroll: true,
+            preserveState: true,
             onSuccess: () => resetMsg('message'),
             onError: () => toast.error("Failed to send message"),
         });
@@ -130,7 +147,7 @@ export default function Show({ order }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Admin - Order #${order.id}`} />
 
-            <div className="flex flex-col space-y-4 p-4 h-[calc(100vh-4rem)]"> {/* Adjusted height to fit viewport minus header */}
+            <div className="flex flex-col space-y-4 p-4 h-[calc(100vh-4rem)]">
                 <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border">
                     <div>
                         <h1 className="text-2xl font-bold flex items-center gap-3">
@@ -158,8 +175,8 @@ export default function Show({ order }: Props) {
                                 </div>
                             )}
                             {order.messages.map((msg) => {
-                                const isAdmin = msg.user.id !== order.user_id; // Simple check: message is from admin logic
-                                const isMe = msg.user_id === auth.user.id; // Check if it's CURRENT logged in admin
+                                const isAdmin = msg.user.id !== order.user_id;
+                                const isMe = msg.user_id === auth.user.id;
 
                                 return (
                                     <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
@@ -185,6 +202,7 @@ export default function Show({ order }: Props) {
                                     placeholder="Reply as Admin..."
                                     className="flex-1"
                                     disabled={msgProcessing}
+                                    autoComplete="off"
                                 />
                                 <Button type="submit" size="icon" disabled={msgProcessing || !msgData.message.trim()}>
                                     <Send className="h-4 w-4" />
@@ -217,28 +235,8 @@ export default function Show({ order }: Props) {
                                         ) : (
                                             <form onSubmit={(e) => {
                                                 e.preventDefault();
-                                                const formData = new FormData();
-                                                // Assuming file input is handled via state or ref, but let's use a simple approach using router 
-                                                // or useForm. Let's assume we need a new useForm for this or extend existing?
-                                                // The existing `updateData` is for admin.
-                                                // We need a customer upload form. 
-                                                // Since this component serves both Admin and Customer view? Wait.
-                                                // This `Show.tsx` is located in `pages/Admin/Order/Show.tsx`.
-                                                // WAIT!!
-                                                // The USER REQUESTED "in customer...".
-                                                // I was modifying Admin/Order/Show.tsx previously for disabling status.
-                                                // But the Customer View is `pages/Features/Order/Show.tsx`.
-                                                // I need to check `pages/Features/Order/Show.tsx` which is the customer view!
-                                                // I made a mistake assuming this was the customer view in my thought process? 
-                                                // Let me check file paths again.
-                                                // `pages/Admin/Order/Show.tsx` -> Admin View.
-                                                // `pages/Features/Order/Show.tsx` -> Customer View.
-                                                // The user said: "di customer saat invoice sudah diisi customer...".
-                                                // So I must edit `pages/Features/Order/Show.tsx`.
-
-                                                // ABORTING THIS EDIT.
                                             }} className="space-y-4">
-                                                {/* Placeholder to stop edit */}
+                                                {/* Placeholder */}
                                             </form>
                                         )}
                                     </div>
@@ -258,7 +256,7 @@ export default function Show({ order }: Props) {
                                         <div className="space-y-2">
                                             <Label>Order Status</Label>
                                             <select
-                                                className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                                className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                                 value={updateData.status}
                                                 onChange={e => setUpdateData('status', e.target.value)}
                                             >

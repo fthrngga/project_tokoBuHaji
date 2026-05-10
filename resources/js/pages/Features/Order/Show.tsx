@@ -1,4 +1,4 @@
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
 import { SharedData, Product } from '@/types';
 import { route } from 'ziggy-js';
 import Header from '@/pages/welcome/Partials/Header';
@@ -115,16 +115,34 @@ export default function Show({ order }: Props) {
 
     const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
 
+    // 1. Polling untuk mendapatkan pesan realtime menggunakan Inertia Reload
+    useEffect(() => {
+        // Hentikan polling jika user sedang memproses pengiriman pesan
+        // (menghindari tabrakan request/Inertia visit cancelled)
+        if (processing) return;
+
+        const intervalId = setInterval(() => {
+            router.reload({
+                only: ['order'], // Cukup panggil 'only' saja
+            });
+        }, 3000); 
+
+        return () => clearInterval(intervalId); 
+    }, [processing]); // Masukkan processing ke dependency array
+
+    // 2. Auto-scroll ke bawah saat ada pesan baru masuk
+    const messagesCount = order.messages.length;
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
-    }, [order.messages]);
+    }, [messagesCount]);
 
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
         post(route('orders.messages.store', order.id), {
             preserveScroll: true,
+            preserveState: true,
             onSuccess: () => reset('message'),
         });
     }
@@ -201,6 +219,7 @@ export default function Show({ order }: Props) {
                                                 placeholder="Tulis pesan..."
                                                 className="flex-1"
                                                 disabled={processing}
+                                                autoComplete="off"
                                             />
                                             <Button type="submit" size="icon" disabled={processing || !data.message.trim()}>
                                                 <Send className="h-4 w-4" />
@@ -221,10 +240,10 @@ export default function Show({ order }: Props) {
                                             <div key={item.id} className="flex gap-3 justify-between">
                                                 <div className="flex gap-3 overflow-hidden">
                                                     <div className="h-12 w-12 flex-shrink-0 bg-gray-100 rounded-md">
-                                                        {/* Image Placeholder if needed, or real image */}
                                                         <img
                                                             src={item.product.images?.[0]?.image_path ? `/storage/${item.product.images[0].image_path}` : 'https://placehold.co/50'}
                                                             className="h-full w-full object-cover"
+                                                            alt={item.product.name}
                                                         />
                                                     </div>
                                                     <div>
@@ -280,7 +299,6 @@ export default function Show({ order }: Props) {
                                                         </div>
 
                                                         <form id="payment-form" onSubmit={handlePaymentSubmit} className="grid gap-4">
-                                                            {/* ... (Select Inputs remain same) ... */}
                                                             <div className="space-y-2">
                                                                 <Label>Metode Pembayaran</Label>
                                                                 <Select
