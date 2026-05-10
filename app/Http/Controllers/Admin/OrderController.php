@@ -28,32 +28,48 @@ class OrderController extends Controller
 
     public function update(Request $request, Order $order)
     {
+        $statusHierarchy = [
+            'negotiation' => 1,
+            'awaiting_payment' => 2,
+            'processing' => 3,
+            'completed' => 4,
+            'cancelled' => 5,
+        ];
+
+        $currentStatusLevel = $statusHierarchy[$order->status];
+        $newStatusLevel = $statusHierarchy[$request->status];
+
+        // 1. Cegah perubahan jika status sudah 'completed' atau 'cancelled'
+        if ($currentStatusLevel >= 4) {
+            return back()->withErrors(['status' => 'Pesanan yang sudah selesai atau dibatalkan tidak dapat diubah lagi.']);
+        }
+
+        // 2. Cegah kembali ke status sebelumnya
+        if ($newStatusLevel < $currentStatusLevel) {
+            return back()->withErrors(['status' => 'Tidak dapat mengembalikan status ke tahap sebelumnya.']);
+        }
+
+        // 3. Validasi input
         $request->validate([
-            'shipping_cost' => 'nullable|numeric|min:0',
-            'status' => 'required|string|in:pending,negotiation,awaiting_payment,processing,completed,cancelled',
+            'status' => 'required|string',
+            'shipping_cost' => 'nullable|numeric',
+            'cancel_reason' => 'required_if:status,cancelled|string|nullable',
         ]);
 
-        $data = $request->only('status');
+        // 4. Update data order
+        $order->update([
+            'status' => $request->status,
+            'shipping_cost' => $request->shipping_cost ?? $order->shipping_cost,
+        ]);
 
-        if ($request->has('shipping_cost')) {
-            $shippingCost = $request->shipping_cost;
-            $itemsTotal = $order->items->sum(fn($item) => $item->quantity * $item->price);
-
-            $data['shipping_cost'] = $shippingCost;
-            $data['total_amount'] = $itemsTotal + $shippingCost;
+        // 5. Jika dibatalkan, kirim pesan otomatis ke chat
+        if ($request->status === 'cancelled' && $request->cancel_reason) {
+            $order->messages()->create([
+                'user_id' => auth()->id(),
+                'message' => "🛑 PESANAN DIBATALKAN OLEH ADMIN. Alasan: " . $request->cancel_reason,
+            ]);
         }
 
-        // Decrement stock if status changes to completed
-        if ($request->status === 'completed' && $order->status !== 'completed') {
-            foreach ($order->items as $item) {
-                if ($item->product) {
-                    $item->product->decrement('stock', $item->quantity);
-                }
-            }
-        }
-
-        $order->update($data);
-
-        return back();
+        return back()->with('success', 'Status pesanan berhasil diperbarui.');
     }
 }

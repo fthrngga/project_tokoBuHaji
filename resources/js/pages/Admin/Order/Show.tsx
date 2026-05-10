@@ -109,6 +109,7 @@ export default function Show({ order }: Props) {
     const { data: updateData, setData: setUpdateData, put: putUpdate, processing: updateProcessing } = useForm({
         shipping_cost: order.shipping_cost || '',
         status: order.status,
+        cancel_reason: '',
     });
 
     // 1. Polling untuk mendapatkan pesan realtime menggunakan Inertia Reload
@@ -272,14 +273,30 @@ export default function Show({ order }: Props) {
                                                 className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                                 value={updateData.status}
                                                 onChange={e => setUpdateData('status', e.target.value)}
+                                                disabled={['completed', 'cancelled'].includes(order.status)} // Kunci jika sudah final
                                             >
-                                                <option value="negotiation" disabled={['processing', 'completed', 'cancelled'].includes(order.status)}>Negotiation</option>
-                                                <option value="awaiting_payment" disabled={['processing', 'completed', 'cancelled'].includes(order.status)}>Awaiting Payment (Send Invoice)</option>
-                                                <option value="processing">Processing</option>
+                                                {/* Opsi dinonaktifkan berdasarkan urutan statusHierarchy di backend */}
+                                                <option value="negotiation" disabled={order.status !== 'negotiation'}>Negotiation</option>
+                                                <option value="awaiting_payment" disabled={!['negotiation', 'awaiting_payment'].includes(order.status)}>Awaiting Payment</option>
+                                                <option value="processing" disabled={['completed', 'cancelled'].includes(order.status)}>Processing</option>
                                                 <option value="completed">Completed</option>
                                                 <option value="cancelled">Cancelled</option>
                                             </select>
                                         </div>
+
+                                        {/* Munculkan input alasan jika memilih Cancelled */}
+                                        {updateData.status === 'cancelled' && order.status !== 'cancelled' && (
+                                            <div className="space-y-2 mt-4 p-3 bg-red-50 border border-red-100 rounded-md">
+                                                <Label className="text-red-900">Alasan Pembatalan</Label>
+                                                <textarea
+                                                    className="w-full text-sm p-2 border rounded-md"
+                                                    placeholder="Contoh: Stok barang tiba-tiba habis atau lokasi tidak terjangkau..."
+                                                    value={updateData.cancel_reason}
+                                                    onChange={e => setUpdateData('cancel_reason', e.target.value)}
+                                                    required
+                                                />
+                                            </div>
+                                        )}
                                         <Button type="submit" className="w-full" disabled={updateProcessing}>
                                             {updateProcessing ? "Updating..." : "Update Order"}
                                         </Button>

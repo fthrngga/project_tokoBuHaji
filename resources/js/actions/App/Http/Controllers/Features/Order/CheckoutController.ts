@@ -134,4 +134,10 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     store.form = storeForm
 const CheckoutController = { index, store }
 
+export default CheckoutControllerd: 'post',
+        })
+    
+    store.form = storeForm
+const CheckoutController = { index, store }
+
 export default CheckoutController
