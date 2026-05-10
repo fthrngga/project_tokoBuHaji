@@ -39,7 +39,7 @@ interface Message {
 interface PaymentLog {
     id: number;
     payment_id: number;
-    type: 'down_payment' | 'installment';
+    type: 'down_payment' | 'installment' | 'full_payment';
     installment_number?: number;
     amount: number;
     proof_path: string;
@@ -100,6 +100,14 @@ export default function Show({ order }: Props) {
     const { auth } = usePage<SharedData>().props;
     const scrollRef = useRef<HTMLDivElement>(null);
 
+    const [isAtBottom, setIsAtBottom] = useState(true);
+
+    const handleScroll = () => {
+        if (!scrollRef.current) return;
+        const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+        setIsAtBottom(scrollHeight - scrollTop - clientHeight < 50);
+    };
+
     // Chat Form
     const { data, setData, post, processing, reset } = useForm({
         message: '',
@@ -130,16 +138,17 @@ export default function Show({ order }: Props) {
         return () => clearInterval(intervalId); 
     }, [processing]); // Masukkan processing ke dependency array
 
-    // 2. Auto-scroll ke bawah saat ada pesan baru masuk
+    // 2. Auto-scroll HANYA JIKA user sedang berada di paling bawah
     const messagesCount = order.messages.length;
     useEffect(() => {
-        if (scrollRef.current) {
+        if (scrollRef.current && isAtBottom) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
     }, [messagesCount]);
 
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
+        setIsAtBottom(true);
         post(route('orders.messages.store', order.id), {
             preserveScroll: true,
             preserveState: true,
@@ -192,7 +201,11 @@ export default function Show({ order }: Props) {
                                             Diskusi Pengiriman & Harga
                                         </CardTitle>
                                     </CardHeader>
-                                    <CardContent className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 dark:bg-slate-900/50" ref={scrollRef}>
+                                    <CardContent 
+                                        className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 dark:bg-slate-900/50" 
+                                        ref={scrollRef}
+                                        onScroll={handleScroll} 
+                                    >
                                         <div className="text-center text-xs text-gray-400 py-4">
                                             Pesanan dibuat. Silakan diskusikan ongkos kirim dan detail pengiriman dengan admin di sini.
                                         </div>

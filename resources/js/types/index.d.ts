@@ -110,3 +110,9 @@ export interface CartItem {
     quantity: number;
     product: Product;
 }
+
+declare global {
+    interface Window {
+        snap: any;
+    }
+}

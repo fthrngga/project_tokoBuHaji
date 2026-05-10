@@ -86,6 +86,14 @@ export default function Show({ order }: Props) {
     const { auth } = usePage<SharedData>().props;
     const scrollRef = useRef<HTMLDivElement>(null);
 
+    const [isAtBottom, setIsAtBottom] = useState(true);
+
+    const handleScroll = () => {
+        if (!scrollRef.current) return;
+        const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+        setIsAtBottom(scrollHeight - scrollTop - clientHeight < 50);
+    };
+
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Dashboard', href: '/dashboard' },
         { title: 'Orders', href: route('admin.orders.index') },
@@ -117,16 +125,17 @@ export default function Show({ order }: Props) {
         return () => clearInterval(intervalId); 
     }, [msgProcessing]); // Masukkan msgProcessing ke dependency array
 
-    // 2. Auto-scroll ke bawah HANYA saat jumlah pesan bertambah
+    // 2. Auto-scroll HANYA JIKA user sedang berada di paling bawah
     const messagesCount = order.messages.length;
     useEffect(() => {
-        if (scrollRef.current) {
+        if (scrollRef.current && isAtBottom) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
     }, [messagesCount]);
 
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
+        setIsAtBottom(true);
         postMsg(route('orders.messages.store', order.id), {
             preserveScroll: true,
             preserveState: true,
@@ -168,7 +177,11 @@ export default function Show({ order }: Props) {
                                 <TrendingUp className="h-4 w-4" /> Negotiation Chat
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 relative" ref={scrollRef}>
+                        <CardContent 
+                            className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 dark:bg-slate-900/50" 
+                            ref={scrollRef}
+                            onScroll={handleScroll} 
+                        >
                             {order.messages.length === 0 && (
                                 <div className="text-center text-sm text-gray-400 py-10">
                                     No messages yet. Start the conversation.
