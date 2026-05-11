@@ -13,3 +13,5 @@ Route::resource('products', ProductController::class)
 // Rute untuk menghapus gambar produk
 Route::delete('/products/images/{image}', [App\Features\Product\ProductController::class, 'destroyImage'])
     ->name('products.images.destroy');
+
+Route::post('/products/{product}/restock', [ProductController::class, 'requestRestock'])->name('products.restock');

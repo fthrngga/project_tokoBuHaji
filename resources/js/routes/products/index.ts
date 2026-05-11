@@ -611,6 +611,85 @@ destroy.delete = (args: { product: number | { id: number } } | [product: number 
         })
     
     destroy.form = destroyForm
+/**
+* @see \App\Features\Product\ProductController::restock
+ * @see app/Features/Product/ProductController.php:160
+ * @route '/products/{product}/restock'
+ */
+export const restock = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: restock.url(args, options),
+    method: 'post',
+})
+
+restock.definition = {
+    methods: ["post"],
+    url: '/products/{product}/restock',
+} satisfies RouteDefinition<["post"]>
+
+/**
+* @see \App\Features\Product\ProductController::restock
+ * @see app/Features/Product/ProductController.php:160
+ * @route '/products/{product}/restock'
+ */
+restock.url = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { product: args }
+    }
+
+            if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
+            args = { product: args.id }
+        }
+    
+    if (Array.isArray(args)) {
+        args = {
+                    product: args[0],
+                }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+                        product: typeof args.product === 'object'
+                ? args.product.id
+                : args.product,
+                }
+
+    return restock.definition.url
+            .replace('{product}', parsedArgs.product.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Features\Product\ProductController::restock
+ * @see app/Features/Product/ProductController.php:160
+ * @route '/products/{product}/restock'
+ */
+restock.post = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: restock.url(args, options),
+    method: 'post',
+})
+
+    /**
+* @see \App\Features\Product\ProductController::restock
+ * @see app/Features/Product/ProductController.php:160
+ * @route '/products/{product}/restock'
+ */
+    const restockForm = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        action: restock.url(args, options),
+        method: 'post',
+    })
+
+            /**
+* @see \App\Features\Product\ProductController::restock
+ * @see app/Features/Product/ProductController.php:160
+ * @route '/products/{product}/restock'
+ */
+        restockForm.post = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: restock.url(args, options),
+            method: 'post',
+        })
+    
+    restock.form = restockForm
 const products = {
     show,
 index,
@@ -620,6 +699,7 @@ edit,
 update,
 destroy,
 images,
+restock,
 }
 
 export default products

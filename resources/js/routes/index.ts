@@ -508,3 +508,81 @@ logout.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
         })
     
     logout.form = logoutForm
+/**
+* @see \App\Features\Finance\FinanceController::restockApproval
+ * @see app/Features/Finance/FinanceController.php:443
+ * @route '/restock-approval'
+ */
+export const restockApproval = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: restockApproval.url(options),
+    method: 'get',
+})
+
+restockApproval.definition = {
+    methods: ["get","head"],
+    url: '/restock-approval',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Features\Finance\FinanceController::restockApproval
+ * @see app/Features/Finance/FinanceController.php:443
+ * @route '/restock-approval'
+ */
+restockApproval.url = (options?: RouteQueryOptions) => {
+    return restockApproval.definition.url + queryParams(options)
+}
+
+/**
+* @see \App\Features\Finance\FinanceController::restockApproval
+ * @see app/Features/Finance/FinanceController.php:443
+ * @route '/restock-approval'
+ */
+restockApproval.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: restockApproval.url(options),
+    method: 'get',
+})
+/**
+* @see \App\Features\Finance\FinanceController::restockApproval
+ * @see app/Features/Finance/FinanceController.php:443
+ * @route '/restock-approval'
+ */
+restockApproval.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: restockApproval.url(options),
+    method: 'head',
+})
+
+    /**
+* @see \App\Features\Finance\FinanceController::restockApproval
+ * @see app/Features/Finance/FinanceController.php:443
+ * @route '/restock-approval'
+ */
+    const restockApprovalForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        action: restockApproval.url(options),
+        method: 'get',
+    })
+
+            /**
+* @see \App\Features\Finance\FinanceController::restockApproval
+ * @see app/Features/Finance/FinanceController.php:443
+ * @route '/restock-approval'
+ */
+        restockApprovalForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: restockApproval.url(options),
+            method: 'get',
+        })
+            /**
+* @see \App\Features\Finance\FinanceController::restockApproval
+ * @see app/Features/Finance/FinanceController.php:443
+ * @route '/restock-approval'
+ */
+        restockApprovalForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: restockApproval.url({
+                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                            _method: 'HEAD',
+                            ...(options?.query ?? options?.mergeQuery ?? {}),
+                        }
+                    }),
+            method: 'get',
+        })
+    
+    restockApproval.form = restockApprovalForm

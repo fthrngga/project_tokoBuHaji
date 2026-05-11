@@ -442,8 +442,30 @@ class FinanceController extends Controller
 
     public function restockApproval()
     {
-        // TODO: Integrasi dengan Modul Gudang setelah koordinasi dengan tim
-        // Saat ini me-render halaman dengan data kosong (frontend menggunakan dummy data)
-        return \Inertia\Inertia::render('Features/Finance/RestockApproval');
+        $requests = \App\Models\RestockRequest::with(['product.category', 'user'])
+            ->latest()
+            ->get();
+            
+        return Inertia::render('Features/Finance/RestockApproval', [
+            'restockRequests' => $requests
+        ]);
+    }
+
+    public function approveRestock(\Illuminate\Http\Request $request, \App\Models\RestockRequest $restockRequest)
+    {
+        if ($restockRequest->status !== 'pending') return back();
+
+        $restockRequest->update(['status' => 'approved']);
+        $restockRequest->product->increment('stock', $restockRequest->requested_quantity);
+        
+        return back()->with('success', 'Restock disetujui, stok produk otomatis bertambah!');
+    }
+
+    public function rejectRestock(\Illuminate\Http\Request $request, \App\Models\RestockRequest $restockRequest)
+    {
+        if ($restockRequest->status !== 'pending') return back();
+        
+        $restockRequest->update(['status' => 'rejected']);
+        return back()->with('success', 'Permintaan restock ditolak.');
     }
 }

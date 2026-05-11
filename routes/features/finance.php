@@ -19,3 +19,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin/finance')->
 
 Route::post('/api/midtrans/callback', [\App\Http\Controllers\Features\Finance\PaymentCallbackController::class, 'handleCallback'])
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+
+Route::get('/restock-approval', [FinanceController::class, 'restockApproval'])->name('restock-approval');
+Route::patch('/restock-approval/{restockRequest}/approve', [FinanceController::class, 'approveRestock'])->name('restock.approve');
+Route::patch('/restock-approval/{restockRequest}/reject', [FinanceController::class, 'rejectRestock'])->name('restock.reject');

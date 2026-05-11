@@ -1,188 +1,271 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
+import React, { useState } from 'react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
-import { PageProps, Pagination, BreadcrumbItem, Category } from '@/types';
+import { PageProps, Category, BreadcrumbItem } from '@/types';
 import { route } from 'ziggy-js';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, Pencil, PlusCircle, Search, ArrowUpDown, Trash2, CheckCircle, XCircle, Star } from 'lucide-react';
-import debounce from 'lodash.debounce';
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Search, PlusCircle, MoreHorizontal, Pencil, Trash2, AlertTriangle, Package } from 'lucide-react';
+import { toast } from 'sonner';
 
-// Sesuaikan interface Product untuk menyertakan relasi 'category'
 interface Product {
     id: number;
     name: string;
     sku: string;
     price: number;
     stock: number;
-    is_featured: boolean;
+    minimum_stock?: number;
     is_published: boolean;
-    category: Category; // Relasi dengan tabel Kategori
+    category?: Category;
+}
+
+interface Paginator<T> {
+    data: T[];
+    links: any[];
+    current_page: number;
+    last_page: number;
+    total: number;
+}
+
+interface ProductIndexProps extends PageProps {
+    products: Paginator<Product> | Product[]; 
+    filters?: any;
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Products',
+        title: 'Produk',
         href: route('products.index'),
     },
 ];
 
-// SOLUSI: Definisikan nilai default untuk paginator
-const defaultPaginator: Pagination<Product> = {
-    data: [],
-    from: 0,
-    to: 0,
-    total: 0,
-    prev_page_url: null,
-    next_page_url: null,
-    links: [],
-    current_page: 1,
-    last_page: 1,
-    per_page: 0,
-    path: '',
-};
+export default function Index({ products }: ProductIndexProps) {
+    const [isRestockOpen, setIsRestockOpen] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-export default function Index({ auth, items = defaultPaginator, filters }: PageProps<{ items: Pagination<Product>, filters: any }>) {
-    const [search, setSearch] = useState(filters.search || '');
-    const [sortBy, setSortBy] = useState(filters.sort_by || 'created_at');
-    const [sortDir, setSortDir] = useState(filters.sort_dir || 'desc');
+    const { data: restockData, setData: setRestockData, post: postRestock, processing: restockProcessing, reset } = useForm({
+        requested_quantity: '',
+        notes: ''
+    });
 
-    const debouncedSearch = useCallback(
-        debounce((value) => {
-            router.get(route('products.index'), { search: value, sort_by: sortBy, sort_dir: sortDir }, { preserveState: true, replace: true });
-        }, 300),
-        [sortBy, sortDir]
-    );
+    const getProductsData = () => {
+        if (!products) return [];
+        if (Array.isArray(products)) return products;
+        return products.data || [];
+    };
 
-    useEffect(() => {
-        debouncedSearch(search);
-        return () => debouncedSearch.cancel();
-    }, [search, debouncedSearch]);
+    const productsList = getProductsData();
 
-    const handleSort = (newSortBy: string) => {
-        const newSortDir = sortBy === newSortBy && sortDir === 'asc' ? 'desc' : 'asc';
-        setSortBy(newSortBy);
-        setSortDir(newSortDir);
-        router.get(route('products.index'), { search, sort_by: newSortBy, sort_dir: newSortDir }, { preserveState: true, replace: true });
+    const formatCurrency = (value: number) => {
+        return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);
+    };
+
+    const deleteProduct = (id: number) => {
+        if (confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
+            router.delete(route('products.destroy', id), {
+                onSuccess: () => toast.success('Produk berhasil dihapus!'),
+            });
+        }
+    };
+
+    const openRestockModal = (product: Product) => {
+        setSelectedProduct(product);
+        setRestockData({ requested_quantity: '', notes: '' });
+        setIsRestockOpen(true);
+    };
+
+    const submitRestock = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedProduct) return;
+        
+        postRestock(route('products.restock', selectedProduct.id), {
+            onSuccess: () => {
+                setIsRestockOpen(false);
+                reset();
+                toast.success('Permintaan restock berhasil dikirim!');
+            }
+        });
     };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Products" />
-            <div className="p-4 sm:p-6 lg:p-8">
+            
+            <div className="flex h-full flex-1 flex-col gap-4 p-4 sm:p-6">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <div className="relative">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                type="search"
+                                placeholder="Search products..."
+                                className="w-full appearance-none bg-background pl-8 shadow-none md:w-64"
+                            />
+                        </div>
+                    </div>
+                    <Button asChild className="gap-2 bg-black text-white hover:bg-gray-800">
+                        <Link href={route('products.create')}>
+                            <PlusCircle className="h-4 w-4" />
+                            <span className="hidden sm:inline">Add Product</span>
+                        </Link>
+                    </Button>
+                </div>
+
                 <Card>
                     <CardHeader>
                         <CardTitle>Products</CardTitle>
-                        <CardDescription>Kelola semua produk Anda di sini.</CardDescription>
+                        <CardDescription>
+                            Manage your product catalog and monitor inventory.
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="flex items-center justify-between gap-2 py-4">
-                            <div className="relative flex-1">
-                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    type="search"
-                                    placeholder="Cari produk..."
-                                    className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                />
-                            </div>
-                            <Button asChild>
-                                <Link href={route('products.create')}>
-                                    <PlusCircle className="mr-2 h-4 w-4" /> Tambah Produk
-                                </Link>
-                            </Button>
-                        </div>
-                        <div className="rounded-md border">
-                            <Table>
-                                <TableHeader>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>SKU</TableHead>
+                                    <TableHead>Nama Produk</TableHead>
+                                    <TableHead>Kategori</TableHead>
+                                    <TableHead>Harga</TableHead>
+                                    <TableHead className="text-center">Stok</TableHead>
+                                    <TableHead className="text-center">Status</TableHead>
+                                    <TableHead className="text-right">Aksi</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {productsList.length === 0 ? (
                                     <TableRow>
-                                        <TableHead>Nama Produk</TableHead>
-                                        <TableHead className="text-center">SKU</TableHead>
-                                        <TableHead className="text-center">Kategori</TableHead>
-                                        <TableHead className="text-center">
-                                            <Button variant="ghost" onClick={() => handleSort('price')} className="justify-center w-full">
-                                                Harga
-                                                <ArrowUpDown className="ml-2 h-4 w-4" />
-                                            </Button>
-                                        </TableHead>
-                                        <TableHead className="text-center">
-                                            <Button variant="ghost" onClick={() => handleSort('stock')} className="justify-center w-full">
-                                                Stok
-                                                <ArrowUpDown className="ml-2 h-4 w-4" />
-                                            </Button>
-                                        </TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead className="text-center">Actions</TableHead>
+                                        <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                                            <div className="flex flex-col items-center justify-center">
+                                                <Package className="h-8 w-8 mb-2 opacity-20" />
+                                                Data produk tidak ditemukan.
+                                            </div>
+                                        </TableCell>
                                     </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {items.data.map((item: Product) => (
-                                        <TableRow key={item.id}>
-                                            <TableCell className="font-medium">{item.name}</TableCell>
-                                            <TableCell className="text-center">
-                                                <Badge variant="outline">{item.sku}</Badge>
-                                            </TableCell>
-                                            <TableCell className="text-center">{item.category.name}</TableCell>
-                                            <TableCell className="text-center">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.price)}</TableCell>
-                                            <TableCell className="text-center">{item.stock}</TableCell>
-                                            <TableCell>
-                                                <div className="flex gap-2">
-                                                    {item.is_published ? (
-                                                        <Badge variant="success"><CheckCircle className="mr-1 h-3 w-3" /> Published</Badge>
-                                                    ) : (
-                                                        <Badge variant="destructive"><XCircle className="mr-1 h-3 w-3" /> Draft</Badge>
+                                ) : (
+                                    productsList.map((product) => {
+                                        const minStock = product.minimum_stock ?? 5;
+                                        const isLowStock = product.stock <= minStock;
+
+                                        return (
+                                            <TableRow key={product.id} className={isLowStock ? 'bg-amber-50/50 dark:bg-amber-900/10' : ''}>
+                                                <TableCell className="font-medium text-muted-foreground">{product.sku}</TableCell>
+                                                <TableCell className="font-medium">{product.name}</TableCell>
+                                                <TableCell>{product.category?.name || '-'}</TableCell>
+                                                <TableCell>{formatCurrency(product.price)}</TableCell>
+                                                
+                                                <TableCell className="text-center">
+                                                    <span className={isLowStock ? 'text-amber-600 font-bold' : ''}>
+                                                        {product.stock}
+                                                    </span>
+                                                    {isLowStock && (
+                                                        <Badge variant="outline" className="ml-2 border-amber-300 text-amber-700 bg-amber-100 text-[10px]">
+                                                            LOW
+                                                        </Badge>
                                                     )}
-                                                    {item.is_featured && <Badge variant="secondary"><Star className="mr-1 h-3 w-3" /> Unggulan</Badge>}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className="text-center">
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button aria-haspopup="true" size="icon" variant="ghost">
-                                                            <MoreHorizontal className="h-4 w-4" />
-                                                            <span className="sr-only">Toggle menu</span>
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                        <DropdownMenuItem asChild>
-                                                            <Link href={route('products.edit', item.id)}>
-                                                                <Pencil className="mr-2 h-4 w-4" />
-                                                                <span>Edit</span>
-                                                            </Link>
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem className="text-red-600" asChild>
-                                                            <Link href={route('products.destroy', item.id)} method="delete" as="button">
-                                                                <Trash2 className="mr-2 h-4 w-4" />
-                                                                <span>Delete</span>
-                                                            </Link>
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </div>
-                        <div className="flex items-center justify-between space-x-2 py-4">
-                            <div className="text-sm text-muted-foreground">
-                                Menampilkan {items.from}-{items.to} dari {items.total} data
-                            </div>
-                            <div className="space-x-2">
-                                <Button variant="outline" size="sm" asChild disabled={!items.prev_page_url}><Link href={items.prev_page_url ?? '#'}>Sebelumnya</Link></Button>
-                                <Button variant="outline" size="sm" asChild disabled={!items.next_page_url}><Link href={items.next_page_url ?? '#'}>Berikutnya</Link></Button>
-                            </div>
-                        </div>
+                                                </TableCell>
+                                                
+                                                <TableCell className="text-center">
+                                                    <Badge variant={product.is_published ? 'default' : 'secondary'}>
+                                                        {product.is_published ? 'Publik' : 'Draft'}
+                                                    </Badge>
+                                                </TableCell>
+
+                                                <TableCell className="text-right">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        {isLowStock && (
+                                                            <Button 
+                                                                variant="ghost" 
+                                                                size="icon" 
+                                                                className="text-amber-600 hover:text-amber-700 hover:bg-amber-100" 
+                                                                onClick={() => openRestockModal(product)} 
+                                                                title="Ajukan Restock"
+                                                            >
+                                                                <AlertTriangle className="w-4 h-4" />
+                                                            </Button>
+                                                        )}
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                                                    <span className="sr-only">Open menu</span>
+                                                                    <MoreHorizontal className="h-4 w-4" />
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent align="end">
+                                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                                <DropdownMenuItem asChild>
+                                                                    <Link href={route('products.edit', product.id)} className="flex items-center cursor-pointer">
+                                                                        <Pencil className="mr-2 h-4 w-4" /> Edit
+                                                                    </Link>
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => deleteProduct(product.id)} className="text-red-600 focus:text-red-600 cursor-pointer">
+                                                                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                                                </DropdownMenuItem>
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })
+                                )}
+                            </TableBody>
+                        </Table>
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Modal Restock */}
+            <Dialog open={isRestockOpen} onOpenChange={setIsRestockOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <AlertTriangle className="w-5 h-5 text-amber-500" />
+                            Permintaan Restock
+                        </DialogTitle>
+                        <DialogDescription>
+                            Ajukan permintaan penambahan stok ke bagian Finance untuk produk <strong>{selectedProduct?.name}</strong>.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={submitRestock} className="space-y-4 pt-2">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label>Sisa Stok</Label>
+                                <Input value={selectedProduct?.stock || 0} disabled className="bg-muted text-red-600 font-bold" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Jumlah Tambahan <span className="text-red-500">*</span></Label>
+                                <Input 
+                                    type="number" 
+                                    min="1" 
+                                    value={restockData.requested_quantity} 
+                                    onChange={e => setRestockData('requested_quantity', e.target.value)} 
+                                    required 
+                                    autoFocus
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Catatan (Opsional)</Label>
+                            <Textarea 
+                                value={restockData.notes} 
+                                onChange={e => setRestockData('notes', e.target.value)} 
+                                rows={2}
+                            />
+                        </div>
+                        <DialogFooter>
+                            <Button type="button" variant="outline" onClick={() => setIsRestockOpen(false)}>Batal</Button>
+                            <Button type="submit" disabled={restockProcessing}>Kirim Request</Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </AppLayout>
     );
 }
-

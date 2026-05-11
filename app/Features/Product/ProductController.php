@@ -33,7 +33,7 @@ class ProductController extends Controller
         $query->orderBy($sortBy, $sortDir);
 
         return Inertia::render('Features/Product/Index', [
-            'items' => $query->paginate(10)->withQueryString(),
+            'products' => $query->paginate(10)->withQueryString(),
             'filters' => $request->only(['search', 'sort_by', 'sort_dir']),
         ]);
     }
@@ -156,5 +156,24 @@ class ProductController extends Controller
             'product' => $product,
         ]);
     }
+
+    public function requestRestock(\Illuminate\Http\Request $request, Product $product)
+    {
+        $request->validate([
+            'requested_quantity' => 'required|integer|min:1',
+            'notes' => 'nullable|string'
+        ]);
+
+        \App\Models\RestockRequest::create([
+            'product_id' => $product->id,
+            'user_id' => auth()->id(),
+            'requested_quantity' => $request->requested_quantity,
+            'notes' => $request->notes,
+            'status' => 'pending'
+        ]);
+
+        return back()->with('success', 'Permintaan restock berhasil dikirim ke Finance.');
+    }
+
 }
 
