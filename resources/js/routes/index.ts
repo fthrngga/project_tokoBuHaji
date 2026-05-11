@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../wayfinder'
 /**
 * @see \App\Http\Controllers\WelcomeController::__invoke
- * @see app/Http/Controllers/WelcomeController.php:16
+ * @see app/Http/Controllers/WelcomeController.php:18
  * @route '/'
  */
 export const home = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ home.definition = {
 
 /**
 * @see \App\Http\Controllers\WelcomeController::__invoke
- * @see app/Http/Controllers/WelcomeController.php:16
+ * @see app/Http/Controllers/WelcomeController.php:18
  * @route '/'
  */
 home.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ home.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\WelcomeController::__invoke
- * @see app/Http/Controllers/WelcomeController.php:16
+ * @see app/Http/Controllers/WelcomeController.php:18
  * @route '/'
  */
 home.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -34,7 +34,7 @@ home.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 /**
 * @see \App\Http\Controllers\WelcomeController::__invoke
- * @see app/Http/Controllers/WelcomeController.php:16
+ * @see app/Http/Controllers/WelcomeController.php:18
  * @route '/'
  */
 home.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -44,7 +44,7 @@ home.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
     /**
 * @see \App\Http\Controllers\WelcomeController::__invoke
- * @see app/Http/Controllers/WelcomeController.php:16
+ * @see app/Http/Controllers/WelcomeController.php:18
  * @route '/'
  */
     const homeForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -54,7 +54,7 @@ home.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
             /**
 * @see \App\Http\Controllers\WelcomeController::__invoke
- * @see app/Http/Controllers/WelcomeController.php:16
+ * @see app/Http/Controllers/WelcomeController.php:18
  * @route '/'
  */
         homeForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -63,7 +63,7 @@ home.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
         })
             /**
 * @see \App\Http\Controllers\WelcomeController::__invoke
- * @see app/Http/Controllers/WelcomeController.php:16
+ * @see app/Http/Controllers/WelcomeController.php:18
  * @route '/'
  */
         homeForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -78,7 +78,8 @@ home.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     
     home.form = homeForm
 /**
- * @see routes/web.php:11
+* @see \App\Http\Controllers\WelcomeController::dashboard
+ * @see app/Http/Controllers/WelcomeController.php:66
  * @route '/dashboard'
  */
 export const dashboard = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -92,7 +93,8 @@ dashboard.definition = {
 } satisfies RouteDefinition<["get","head"]>
 
 /**
- * @see routes/web.php:11
+* @see \App\Http\Controllers\WelcomeController::dashboard
+ * @see app/Http/Controllers/WelcomeController.php:66
  * @route '/dashboard'
  */
 dashboard.url = (options?: RouteQueryOptions) => {
@@ -100,7 +102,8 @@ dashboard.url = (options?: RouteQueryOptions) => {
 }
 
 /**
- * @see routes/web.php:11
+* @see \App\Http\Controllers\WelcomeController::dashboard
+ * @see app/Http/Controllers/WelcomeController.php:66
  * @route '/dashboard'
  */
 dashboard.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -108,7 +111,8 @@ dashboard.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     method: 'get',
 })
 /**
- * @see routes/web.php:11
+* @see \App\Http\Controllers\WelcomeController::dashboard
+ * @see app/Http/Controllers/WelcomeController.php:66
  * @route '/dashboard'
  */
 dashboard.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -117,7 +121,8 @@ dashboard.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 })
 
     /**
- * @see routes/web.php:11
+* @see \App\Http\Controllers\WelcomeController::dashboard
+ * @see app/Http/Controllers/WelcomeController.php:66
  * @route '/dashboard'
  */
     const dashboardForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -126,7 +131,8 @@ dashboard.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     })
 
             /**
- * @see routes/web.php:11
+* @see \App\Http\Controllers\WelcomeController::dashboard
+ * @see app/Http/Controllers/WelcomeController.php:66
  * @route '/dashboard'
  */
         dashboardForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -134,7 +140,8 @@ dashboard.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
             method: 'get',
         })
             /**
- * @see routes/web.php:11
+* @see \App\Http\Controllers\WelcomeController::dashboard
+ * @see app/Http/Controllers/WelcomeController.php:66
  * @route '/dashboard'
  */
         dashboardForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -149,7 +156,7 @@ dashboard.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     
     dashboard.form = dashboardForm
 /**
- * @see routes/web.php:22
+ * @see routes/web.php:20
  * @route '/profil-saya'
  */
 export const profile = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -163,7 +170,7 @@ profile.definition = {
 } satisfies RouteDefinition<["get","head"]>
 
 /**
- * @see routes/web.php:22
+ * @see routes/web.php:20
  * @route '/profil-saya'
  */
 profile.url = (options?: RouteQueryOptions) => {
@@ -171,7 +178,7 @@ profile.url = (options?: RouteQueryOptions) => {
 }
 
 /**
- * @see routes/web.php:22
+ * @see routes/web.php:20
  * @route '/profil-saya'
  */
 profile.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -179,7 +186,7 @@ profile.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     method: 'get',
 })
 /**
- * @see routes/web.php:22
+ * @see routes/web.php:20
  * @route '/profil-saya'
  */
 profile.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -188,7 +195,7 @@ profile.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 })
 
     /**
- * @see routes/web.php:22
+ * @see routes/web.php:20
  * @route '/profil-saya'
  */
     const profileForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -197,7 +204,7 @@ profile.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     })
 
             /**
- * @see routes/web.php:22
+ * @see routes/web.php:20
  * @route '/profil-saya'
  */
         profileForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -205,7 +212,7 @@ profile.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
             method: 'get',
         })
             /**
- * @see routes/web.php:22
+ * @see routes/web.php:20
  * @route '/profil-saya'
  */
         profileForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({

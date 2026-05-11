@@ -224,7 +224,6 @@ export default function Index({ addresses }: Props) {
                         </div>
                     </div>
                 </main>
-
                 <Footer />
             </div>
         </>

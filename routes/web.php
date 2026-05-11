@@ -8,9 +8,7 @@ use Inertia\Inertia;
 Route::get('/', WelcomeController::class)->name('home');
 
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    Route::get('dashboard', [WelcomeController::class, 'dashboard'])->name('dashboard');
 
     Route::resource('admin/orders', \App\Http\Controllers\Admin\OrderController::class)->names('admin.orders');
     
