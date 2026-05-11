@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Search, Plus, Minus, Trash2, ShoppingCart, User as UserIcon, Package } from "lucide-react";
+import { toast } from 'sonner';
+import { route } from 'ziggy-js';
 
 interface Product {
     id: number;
@@ -59,7 +61,7 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
             const existing = prev.find(item => item.id === product.id);
             if (existing) {
                 if (existing.quantity >= product.stock) {
-                    alert(`Hanya ada ${product.stock} stok untuk ${product.name}`);
+                    toast.error(`Stok tidak cukup! Hanya tersisa ${product.stock} unit untuk ${product.name}`);
                     return prev;
                 }
                 return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);
@@ -74,7 +76,7 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
                 const newQuantity = item.quantity + delta;
                 if (newQuantity <= 0) return item;
                 if (newQuantity > item.stock) {
-                    alert("Tidak dapat menambah melebihi stok tersedia.");
+                    toast.error("Tidak dapat menambah melebihi stok yang tersedia.");
                     return item;
                 }
                 return { ...item, quantity: newQuantity };
@@ -99,7 +101,7 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
         e.preventDefault();
         
         if (cart.length === 0) {
-            alert("Silakan tambahkan produk ke keranjang terlebih dahulu.");
+            toast.warning("Keranjang belanja masih kosong!");
             return;
         }
 
@@ -116,10 +118,11 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
             onSuccess: () => {
                 setCart([]);
                 reset();
-                alert("Transaksi Berhasil dicatat ke dalam sistem.");
+                toast.success("Transaksi POS berhasil diproses dan dicatat!");
             },
             onError: (err) => {
-                alert("Gagal: " + (Object.values(err)[0] as string));
+                const errorMessage = Object.values(err)[0] as string;
+                toast.error("Transaksi Gagal: " + errorMessage);
             }
         });
     };
@@ -129,7 +132,7 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
             <Head title="Kasir (POS)" />
             <div className="flex h-[calc(100vh-theme(spacing.16)-theme(spacing.8))] flex-col lg:flex-row gap-6 p-4 md:p-6 overflow-hidden">
                 
-                {/* Left Side: Product List */}
+                {/* Kiri: Daftar Produk */}
                 <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-slate-900 rounded-xl border shadow-sm overflow-hidden">
                     <div className="p-4 border-b">
                         <div className="relative">
@@ -187,7 +190,7 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
                     </div>
                 </div>
 
-                {/* Right Side: Cart & Checkout */}
+                {/* Kanan: Keranjang & Pembayaran */}
                 <div className="w-full lg:w-[400px] xl:w-[450px] flex flex-col min-h-0 bg-white dark:bg-slate-900 rounded-xl border shadow-sm">
                     <div className="p-4 border-b flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 rounded-t-xl">
                         <div className="flex items-center gap-2">
