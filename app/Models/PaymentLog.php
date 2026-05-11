@@ -13,6 +13,7 @@ class PaymentLog extends Model
         'installment_number',
         'amount',
         'proof_path',
+        'snap_token',
         'status',
         'paid_at',
         'admin_notes',
