@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Send, ArrowLeft, Clock, CheckCircle, Truck, RefreshCcw, CreditCard } from "lucide-react";
+import { Send, ArrowLeft, Clock, CheckCircle2, Truck, RotateCcw, CreditCard, ShoppingBag, MapPin, Package, Upload, AlertTriangle, Loader2, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { useEffect, useRef, useState } from "react";
@@ -18,11 +18,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import axios from 'axios';
 
+interface ProductReturn {
+    id: number;
+    status: 'pending' | 'processing' | 'completed' | 'rejected';
+    reason: string;
+}
+
 interface OrderItem {
     id: number;
     product: Product;
     quantity: number;
     price: number;
+    variant?: any;
+    returns?: ProductReturn[];
 }
 
 interface Message {
@@ -85,15 +93,22 @@ const formatCurrency = (value: number | string) => {
 };
 
 const getStatusBadge = (status: string) => {
-    switch (status) {
-        case 'negotiation': return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Negosiasi</Badge>;
-        case 'pending': return <Badge variant="secondary" className="bg-gray-100 text-gray-800">Menunggu</Badge>;
-        case 'awaiting_payment': return <Badge variant="secondary" className="bg-blue-100 text-blue-800">Menunggu Pembayaran</Badge>;
-        case 'processing': return <Badge variant="secondary" className="bg-orange-100 text-orange-800">Diproses</Badge>;
-        case 'completed': return <Badge variant="default" className="bg-green-600 hover:bg-green-700">Selesai</Badge>;
-        case 'cancelled': return <Badge variant="destructive">Dibatalkan</Badge>;
-        default: return <Badge variant="outline">{status}</Badge>;
-    }
+    const configs: Record<string, { label: string; cls: string; dot: string }> = {
+        negotiation: { label: 'Negosiasi Harga', cls: 'bg-violet-50 text-violet-700 border-violet-200', dot: 'bg-violet-500' },
+        pending:     { label: 'Menunggu Konfirmasi', cls: 'bg-slate-100 text-slate-700 border-slate-200', dot: 'bg-slate-400' },
+        awaiting_payment: { label: 'Menunggu Pembayaran', cls: 'bg-blue-50 text-blue-700 border-blue-200', dot: 'bg-blue-500' },
+        processing:  { label: 'Sedang Diproses', cls: 'bg-amber-50 text-amber-700 border-amber-200', dot: 'bg-amber-500' },
+        completed:   { label: 'Selesai', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200', dot: 'bg-emerald-500' },
+        cancelled:   { label: 'Dibatalkan', cls: 'bg-red-50 text-red-700 border-red-200', dot: 'bg-red-500' },
+    };
+    const cfg = configs[status];
+    if (!cfg) return <Badge variant="outline">{status}</Badge>;
+    return (
+        <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${cfg.cls}`}>
+            <span className={`h-1.5 w-1.5 rounded-full ${cfg.dot}`} />
+            {cfg.label}
+        </span>
+    );
 }
 
 export default function Show({ order }: Props) {
@@ -122,6 +137,15 @@ export default function Show({ order }: Props) {
     });
 
     const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
+
+    // Return Form
+    const [isReturnOpen, setIsReturnOpen] = useState(false);
+    const [selectedItemForReturn, setSelectedItemForReturn] = useState<OrderItem | null>(null);
+    const { data: returnData, setData: setReturnData, post: postReturn, processing: processingReturn, errors: returnErrors, reset: resetReturn } = useForm({
+        order_item_id: '',
+        reason: '',
+        proof_image: null as File | null,
+    });
 
     // 1. Polling untuk mendapatkan pesan realtime menggunakan Inertia Reload
     useEffect(() => {
@@ -160,6 +184,16 @@ export default function Show({ order }: Props) {
         e.preventDefault();
         postPayment(route('orders.payment.store', order.id), {
             onSuccess: () => setIsInvoiceOpen(false),
+        });
+    };
+
+    const handleReturnSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        postReturn(route('orders.returns.store', order.id), {
+            onSuccess: () => {
+                setIsReturnOpen(false);
+                resetReturn();
+            },
         });
     };
 
@@ -244,46 +278,103 @@ export default function Show({ order }: Props) {
 
                             {/* Kanan: Ringkasan Produk & Info */}
                             <div className="lg:col-span-4 space-y-6 mt-8 lg:mt-0">
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle className="text-lg">Rincian Barang</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        {order.items.map((item) => (
-                                            <div key={item.id} className="flex gap-3 justify-between">
-                                                <div className="flex gap-3 overflow-hidden">
-                                                    <div className="h-12 w-12 flex-shrink-0 bg-gray-100 rounded-md">
+                                <Card className="overflow-hidden border shadow-sm">
+                                    <div className="flex items-center gap-2.5 border-b bg-muted/30 px-5 py-4">
+                                        <ShoppingBag className="h-4 w-4 text-primary" />
+                                        <h2 className="font-semibold text-sm">Rincian Barang</h2>
+                                        <span className="ml-auto text-xs text-muted-foreground">{order.items.length} item</span>
+                                    </div>
+                                    <CardContent className="p-0">
+                                        <div className="divide-y divide-border">
+                                        {order.items.map((item) => {
+                                            const hasActiveReturn = item.returns?.some(r => ['pending', 'processing'].includes(r.status));
+                                            const latestReturn = item.returns?.[0];
+                                            const canReturn = ['processing', 'completed'].includes(order.status) && !hasActiveReturn;
+
+                                            const returnStatusConfig: Record<string, { label: string; cls: string }> = {
+                                                pending:    { label: 'Return: Menunggu Konfirmasi', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
+                                                processing: { label: 'Return: Sedang Diproses', cls: 'bg-blue-50 text-blue-700 border-blue-200' },
+                                                completed:  { label: 'Return: Selesai', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+                                                rejected:   { label: 'Return: Ditolak', cls: 'bg-red-50 text-red-700 border-red-200' },
+                                            };
+
+                                            return (
+                                                <div key={item.id} className="flex gap-4 p-5">
+                                                    {/* Thumbnail lebih besar */}
+                                                    <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border bg-muted">
                                                         <img
-                                                            src={item.product.images?.[0]?.image_path ? `/storage/${item.product.images[0].image_path}` : 'https://placehold.co/50'}
-                                                            className="h-full w-full object-cover"
+                                                            src={item.product.images?.[0]?.image_path ? `/storage/${item.product.images[0].image_path}` : 'https://placehold.co/80'}
+                                                            className="h-full w-full object-cover transition-transform hover:scale-105"
                                                             alt={item.product.name}
                                                         />
                                                     </div>
-                                                    <div>
-                                                        <p className="text-sm font-medium line-clamp-1">{item.product.name}</p>
-                                                        <p className="text-xs text-gray-500">{item.quantity} x {formatCurrency(item.price)}</p>
+
+                                                    {/* Info */}
+                                                    <div className="flex flex-1 flex-col gap-2">
+                                                        <div className="flex items-start justify-between gap-2">
+                                                            <p className="font-semibold leading-tight">{item.product.name}</p>
+                                                            <p className="flex-shrink-0 font-bold text-primary">{formatCurrency(item.quantity * item.price)}</p>
+                                                        </div>
+
+                                                        {/* Variant chips */}
+                                                        {item.variant && (
+                                                            <div className="flex flex-wrap gap-1.5">
+                                                                {Object.entries(item.variant.options).map(([k, v]) => (
+                                                                    <span key={k} className="inline-flex items-center gap-1 rounded-md border bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
+                                                                        <span className="text-muted-foreground">{k}:</span> {v as string}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        )}
+
+                                                        <p className="text-xs text-muted-foreground">
+                                                            {item.quantity} × {formatCurrency(item.price)}
+                                                        </p>
+
+                                                        {/* Return Status Badge */}
+                                                        {latestReturn && returnStatusConfig[latestReturn.status] && (
+                                                            <span className={`inline-flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium ${returnStatusConfig[latestReturn.status].cls}`}>
+                                                                <RotateCcw className="h-3 w-3" />
+                                                                {returnStatusConfig[latestReturn.status].label}
+                                                            </span>
+                                                        )}
+
+                                                        {/* Tombol Return */}
+                                                        {canReturn && (
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                className="mt-1 w-fit gap-1.5 border-dashed text-xs text-muted-foreground hover:border-primary/40 hover:text-primary"
+                                                                onClick={() => {
+                                                                    setSelectedItemForReturn(item);
+                                                                    setReturnData('order_item_id', item.id.toString());
+                                                                    setIsReturnOpen(true);
+                                                                }}
+                                                            >
+                                                                <RotateCcw className="h-3 w-3" />
+                                                                Ajukan Return
+                                                            </Button>
+                                                        )}
                                                     </div>
                                                 </div>
-                                                <div className="text-sm font-medium">
-                                                    {formatCurrency(item.quantity * item.price)}
-                                                </div>
-                                            </div>
-                                        ))}
-                                        <Separator />
-                                        <div className="flex justify-between items-center font-bold">
-                                            <span>Total Barang</span>
-                                            <span>{formatCurrency(order.total_amount)}</span>
+                                            );
+                                        })}
+                                        </div>
+                                        <div className="flex items-center justify-between border-t bg-muted/30 px-5 py-4">
+                                            <span className="text-sm font-semibold">Total Barang</span>
+                                            <span className="text-base font-bold text-primary">{formatCurrency(order.total_amount)}</span>
                                         </div>
                                     </CardContent>
                                 </Card>
 
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle className="text-lg">Alamat Pengiriman</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="text-sm">
-                                        <p className="font-medium text-gray-900 dark:text-white">{auth.user?.name}</p>
-                                        <p className="text-gray-500 mt-1">
+                                <Card className="overflow-hidden border shadow-sm">
+                                    <div className="flex items-center gap-2.5 border-b bg-muted/30 px-5 py-4">
+                                        <MapPin className="h-4 w-4 text-primary" />
+                                        <h2 className="font-semibold text-sm">Alamat Pengiriman</h2>
+                                    </div>
+                                    <CardContent className="px-5 py-4 text-sm">
+                                        <p className="font-semibold">{auth.user?.name}</p>
+                                        <p className="mt-1.5 leading-relaxed text-muted-foreground">
                                             {order.address_detail}<br />
                                             {order.city}, {order.province}<br />
                                             {order.postal_code ? `Kode Pos: ${order.postal_code}` : ''}
@@ -658,6 +749,129 @@ export default function Show({ order }: Props) {
                 </main>
                 <Footer />
             </div>
+
+            {/* Modal Return — premium redesign */}
+            <Dialog open={isReturnOpen} onOpenChange={setIsReturnOpen}>
+                <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-md">
+                    {/* Fixed Header */}
+                    <DialogHeader className="flex-shrink-0 border-b px-6 py-5">
+                        <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+                                <RotateCcw className="h-5 w-5" />
+                            </div>
+                            <div>
+                                <DialogTitle className="text-base font-semibold">Ajukan Pengembalian</DialogTitle>
+                                <p className="text-sm text-muted-foreground">Isi formulir di bawah dengan jujur dan jelas</p>
+                            </div>
+                        </div>
+                    </DialogHeader>
+
+                    {/* Scrollable Body */}
+                    <div className="flex-1 overflow-y-auto">
+                        <form id="return-form" onSubmit={handleReturnSubmit} className="space-y-5 px-6 py-5">
+                            {/* Info Produk */}
+                            {selectedItemForReturn && (
+                                <div className="flex items-center gap-3 rounded-xl border bg-muted/40 p-3">
+                                    <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg border bg-white">
+                                        <img
+                                            src={selectedItemForReturn.product.images?.[0]?.image_path
+                                                ? `/storage/${selectedItemForReturn.product.images[0].image_path}`
+                                                : 'https://placehold.co/56'}
+                                            alt={selectedItemForReturn.product.name}
+                                            className="h-full w-full object-cover"
+                                        />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="truncate font-semibold text-sm">{selectedItemForReturn.product.name}</p>
+                                        {selectedItemForReturn.variant && (
+                                            <div className="mt-1 flex flex-wrap gap-1">
+                                                {Object.entries(selectedItemForReturn.variant.options).map(([k, v]) => (
+                                                    <span key={k} className="rounded border bg-white px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                                                        {k}: {v as string}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                        <p className="mt-1 text-xs text-muted-foreground">
+                                            {selectedItemForReturn.quantity} × {formatCurrency(selectedItemForReturn.price)}
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Kebijakan Return */}
+                            <div className="rounded-xl border-l-4 border-l-amber-400 bg-amber-50 px-4 py-3">
+                                <div className="flex gap-2">
+                                    <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-500" />
+                                    <p className="text-xs leading-relaxed text-amber-800">
+                                        Return hanya berlaku untuk barang <strong>rusak bukan akibat kesalahan penggunaan</strong>.
+                                        Sertakan kartu garansi dan kemasan asli saat pengembalian.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Alasan */}
+                            <div className="space-y-2">
+                                <Label htmlFor="reason" className="font-semibold">Alasan Pengembalian <span className="text-destructive">*</span></Label>
+                                <textarea
+                                    id="reason"
+                                    rows={3}
+                                    value={returnData.reason}
+                                    onChange={(e) => setReturnData('reason', e.target.value)}
+                                    placeholder="Jelaskan secara detail kerusakan atau masalah yang dialami pada produk..."
+                                    required
+                                    className="w-full resize-none rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground"
+                                />
+                                {returnErrors.reason && <p className="text-destructive text-xs">{returnErrors.reason}</p>}
+                            </div>
+
+                            {/* Upload Foto */}
+                            <div className="space-y-2">
+                                <Label className="font-semibold">Foto Bukti Kerusakan <span className="text-destructive">*</span></Label>
+                                <label
+                                    htmlFor="proof_image"
+                                    className="group flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed border-border bg-muted/30 px-6 py-8 text-center transition hover:border-primary/40 hover:bg-primary/5"
+                                >
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-background shadow-sm transition group-hover:shadow-md">
+                                        <Upload className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                                    </div>
+                                    {returnData.proof_image ? (
+                                        <div className="space-y-1">
+                                            <p className="text-sm font-semibold text-emerald-600">✓ Foto dipilih</p>
+                                            <p className="text-xs text-muted-foreground">{returnData.proof_image.name}</p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-1">
+                                            <p className="text-sm font-medium">Klik untuk unggah foto</p>
+                                            <p className="text-xs text-muted-foreground">PNG, JPG, JPEG hingga 2MB</p>
+                                        </div>
+                                    )}
+                                    <input
+                                        id="proof_image"
+                                        type="file"
+                                        accept="image/*"
+                                        className="sr-only"
+                                        onChange={(e) => setReturnData('proof_image', e.target.files?.[0] || null)}
+                                        required
+                                    />
+                                </label>
+                                {returnErrors.proof_image && <p className="text-destructive text-xs">{returnErrors.proof_image}</p>}
+                            </div>
+                        </form>
+                    </div>
+
+                    {/* Fixed Footer */}
+                    <DialogFooter className="flex-shrink-0 border-t bg-muted/30 px-6 py-4">
+                        <Button type="button" variant="outline" onClick={() => { setIsReturnOpen(false); resetReturn(); }}>
+                            Batal
+                        </Button>
+                        <Button type="submit" form="return-form" disabled={processingReturn} className="gap-2">
+                            {processingReturn && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                            Kirim Pengajuan
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     );
 }

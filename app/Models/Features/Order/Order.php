@@ -61,7 +61,6 @@ class Order extends Model
                         }
                     }
                 }
-
                 // 2. PENGEMBALIAN STOK (RESTORE)
                 // Jika pesanan dibatalkan, TAPI stoknya sebelumnya sudah telanjur dikurangi
                 if (in_array($originalStatus, ['processing', 'completed']) && $newStatus === 'cancelled') {
@@ -75,5 +74,10 @@ class Order extends Model
                 
             }
         });
+    }
+
+    public function returns()
+    {
+        return $this->hasMany(ProductReturn::class);
     }
 }

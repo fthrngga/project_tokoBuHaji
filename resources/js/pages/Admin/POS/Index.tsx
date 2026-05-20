@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Search, Plus, Minus, Trash2, ShoppingCart, User as UserIcon, Package } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from 'sonner';
 import { route } from 'ziggy-js';
 
@@ -20,6 +21,7 @@ interface Product {
     stock: number;
     images?: { image_path: string }[];
     category?: { name: string };
+    variants?: { id: number; sku: string; stock: number; options: Record<string, string> }[];
 }
 
 interface Customer {
@@ -30,6 +32,9 @@ interface Customer {
 }
 
 interface CartItem extends Product {
+    cart_id: string;
+    product_variant_id: number | null;
+    variant_options?: Record<string, string>;
     quantity: number;
 }
 
@@ -41,10 +46,13 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
         customer_id: '',
         customer_name: '',
         customer_phone: '',
-        items: [] as { id: number, quantity: number }[],
+        items: [] as { id: number, product_variant_id: number | null, quantity: number }[],
         payment_method: 'tunai',
         amount_paid: '',
     });
+
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    const [selectedVariantId, setSelectedVariantId] = useState<string>('');
 
     const filteredProducts = useMemo(() => {
         if (!searchQuery) return products;
@@ -56,26 +64,57 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
         );
     }, [products, searchQuery]);
 
-    const addToCart = (product: Product) => {
+    const handleProductClick = (product: Product) => {
+        if (product.variants && product.variants.length > 0) {
+            setSelectedProduct(product);
+            setSelectedVariantId('');
+        } else {
+            addToCart(product, null);
+        }
+    };
+
+    const confirmVariantSelection = () => {
+        if (!selectedProduct || !selectedVariantId) return;
+        const variant = selectedProduct.variants?.find(v => v.id.toString() === selectedVariantId);
+        if (variant) {
+            addToCart(selectedProduct, variant);
+        }
+        setSelectedProduct(null);
+    };
+
+    const addToCart = (product: Product, variant: { id: number, stock: number, options: Record<string, string> } | null) => {
         setCart(prev => {
-            const existing = prev.find(item => item.id === product.id);
+            const cartId = variant ? `${product.id}-${variant.id}` : `${product.id}`;
+            const existing = prev.find(item => item.cart_id === cartId);
+            const stockToCheck = variant ? variant.stock : product.stock;
+            
             if (existing) {
-                if (existing.quantity >= product.stock) {
-                    toast.error(`Stok tidak cukup! Hanya tersisa ${product.stock} unit untuk ${product.name}`);
+                if (existing.quantity >= stockToCheck && stockToCheck > 0) {
+                    toast.error(`Stok tidak cukup! Hanya tersisa ${stockToCheck} unit.`);
                     return prev;
                 }
-                return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);
+                return prev.map(item => item.cart_id === cartId ? { ...item, quantity: item.quantity + 1 } : item);
             }
-            return [...prev, { ...product, quantity: 1 }];
+            return [...prev, { 
+                ...product, 
+                cart_id: cartId, 
+                product_variant_id: variant ? variant.id : null,
+                variant_options: variant ? variant.options : undefined,
+                quantity: 1 
+            }];
         });
     };
 
-    const updateQuantity = (id: number, delta: number) => {
+    const updateQuantity = (cartId: string, delta: number) => {
         setCart(prev => prev.map(item => {
-            if (item.id === id) {
+            if (item.cart_id === cartId) {
                 const newQuantity = item.quantity + delta;
                 if (newQuantity <= 0) return item;
-                if (newQuantity > item.stock) {
+                const maxStock = item.product_variant_id ? 
+                    (item.variants?.find(v => v.id === item.product_variant_id)?.stock || 0) : 
+                    item.stock;
+
+                if (newQuantity > maxStock && maxStock > 0) {
                     toast.error("Tidak dapat menambah melebihi stok yang tersedia.");
                     return item;
                 }
@@ -85,8 +124,8 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
         }));
     };
 
-    const removeFromCart = (id: number) => {
-        setCart(prev => prev.filter(item => item.id !== id));
+    const removeFromCart = (cartId: string) => {
+        setCart(prev => prev.filter(item => item.cart_id !== cartId));
     };
 
     const totalAmount = useMemo(() => {
@@ -105,7 +144,7 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
             return;
         }
 
-        const items = cart.map(item => ({ id: item.id, quantity: item.quantity }));
+        const items = cart.map(item => ({ id: item.id, product_variant_id: item.product_variant_id, quantity: item.quantity }));
         
         const payloadData = {
             ...data,
@@ -157,7 +196,7 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
                                 {filteredProducts.map(product => (
                                     <div 
                                         key={product.id} 
-                                        onClick={() => addToCart(product)}
+                                        onClick={() => handleProductClick(product)}
                                         className="group cursor-pointer rounded-xl border bg-card hover:border-blue-500 hover:shadow-md transition-all overflow-hidden flex flex-col h-full"
                                     >
                                         <div className="aspect-square bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
@@ -209,7 +248,7 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
                         ) : (
                             <div className="space-y-4">
                                 {cart.map(item => (
-                                    <div key={item.id} className="flex gap-3 items-center group">
+                                    <div key={item.cart_id} className="flex gap-3 items-center group">
                                         <div className="w-12 h-12 rounded-md bg-slate-100 dark:bg-slate-800 overflow-hidden shrink-0 flex items-center justify-center">
                                             {item.images && item.images.length > 0 ? (
                                                 <img src={`/storage/${item.images[0].image_path}`} className="w-full h-full object-cover" />
@@ -219,18 +258,27 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <h4 className="font-medium text-sm truncate">{item.name}</h4>
+                                            {item.variant_options && (
+                                                <div className="flex flex-wrap gap-1 mt-0.5">
+                                                    {Object.entries(item.variant_options).map(([k, v]) => (
+                                                        <span key={k} className="inline-flex items-center text-[9px] font-medium text-blue-800 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 px-1 rounded">
+                                                            {k}: {v as string}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
                                             <p className="text-xs text-slate-500">{formatCurrency(item.price)}</p>
                                         </div>
                                         <div className="flex items-center gap-2 shrink-0">
-                                            <Button variant="outline" size="icon" className="h-7 w-7 rounded-full" onClick={() => updateQuantity(item.id, -1)}>
+                                            <Button variant="outline" size="icon" className="h-7 w-7 rounded-full" onClick={() => updateQuantity(item.cart_id, -1)}>
                                                 <Minus className="h-3 w-3" />
                                             </Button>
                                             <span className="w-4 text-center font-medium text-sm">{item.quantity}</span>
-                                            <Button variant="outline" size="icon" className="h-7 w-7 rounded-full" onClick={() => updateQuantity(item.id, 1)}>
+                                            <Button variant="outline" size="icon" className="h-7 w-7 rounded-full" onClick={() => updateQuantity(item.cart_id, 1)}>
                                                 <Plus className="h-3 w-3" />
                                             </Button>
                                         </div>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" onClick={() => removeFromCart(item.id)}>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" onClick={() => removeFromCart(item.cart_id)}>
                                             <Trash2 className="h-4 w-4" />
                                         </Button>
                                     </div>
@@ -322,6 +370,40 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
                     </div>
                 </div>
             </div>
+            
+            <Dialog open={!!selectedProduct} onOpenChange={(open) => !open && setSelectedProduct(null)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Pilih Varian Produk</DialogTitle>
+                        <DialogDescription>
+                            {selectedProduct?.name} memiliki beberapa variasi.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4 space-y-4">
+                        <Label>Pilihan Varian</Label>
+                        <Select value={selectedVariantId} onValueChange={setSelectedVariantId}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Pilih Varian" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {selectedProduct?.variants?.map(variant => {
+                                    const optionStr = Object.entries(variant.options).map(([k, v]) => `${k}: ${v}`).join(', ');
+                                    const stockStr = variant.stock > 0 ? `Stok: ${variant.stock}` : 'Pre-order';
+                                    return (
+                                        <SelectItem key={variant.id} value={variant.id.toString()}>
+                                            {optionStr} ({stockStr})
+                                        </SelectItem>
+                                    );
+                                })}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setSelectedProduct(null)}>Batal</Button>
+                        <Button onClick={confirmVariantSelection} disabled={!selectedVariantId}>Tambahkan ke Keranjang</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </AppLayout>
     );
 }

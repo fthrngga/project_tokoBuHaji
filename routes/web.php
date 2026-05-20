@@ -14,6 +14,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     
     Route::get('admin/pos', [\App\Http\Controllers\Admin\POSController::class, 'index'])->name('admin.pos.index');
     Route::post('admin/pos', [\App\Http\Controllers\Admin\POSController::class, 'store'])->name('admin.pos.store');
+
+    Route::resource('admin/returns', \App\Http\Controllers\Admin\ProductReturnController::class)
+        ->only(['index', 'update'])
+        ->names('admin.returns');
 });
 
 Route::middleware(['auth', 'verified', 'role:customer'])->group(function () {

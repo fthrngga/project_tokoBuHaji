@@ -15,7 +15,7 @@ class CheckoutController extends Controller
             ->first()
             ->items()
             ->whereIn('id', $selectedIds)
-            ->with(['product.images'])
+            ->with(['product.images', 'variant'])
             ->get();
 
         if ($cartItems->isEmpty()) {
@@ -50,7 +50,7 @@ class CheckoutController extends Controller
 
         // Fetch fresh items to ensure price consistency
         $cartItems = \App\Features\Cart\CartItem::whereIn('id', $ids)
-            ->with('product')
+            ->with(['product', 'variant'])
             ->get(); // Should add check for user ownership here ideally
 
         $totalAmount = $cartItems->sum(fn($item) => $item->quantity * $item->product->price);
@@ -74,9 +74,19 @@ class CheckoutController extends Controller
                 \App\Models\Features\Order\OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item->product_id,
+                    'product_variant_id' => $item->product_variant_id,
                     'quantity' => $item->quantity,
                     'price' => $item->product->price,
                 ]);
+
+                // Decrement stock (Pessimistic Locking ideally, but for now just decrement)
+                if ($item->product_variant_id && $item->variant) {
+                    $item->variant->decrement('stock', $item->quantity);
+                    // Also decrement main product stock which is total of all variants
+                    $item->product->decrement('stock', $item->quantity);
+                } else {
+                    $item->product->decrement('stock', $item->quantity);
+                }
             }
 
             // Delete cart items

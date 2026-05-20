@@ -175,8 +175,21 @@ export default function Index({ cartItems, total }: Props) {
                                                                 {item.product.name}
                                                             </Link>
                                                         </h3>
+                                                        {item.variant && (
+                                                            <div className="mt-1 flex flex-wrap gap-1">
+                                                                {Object.entries(item.variant.options).map(([k, v]) => (
+                                                                    <span key={k} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                                                        {k}: {v}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        )}
                                                         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                                            Stok tersedia: {item.product.stock}
+                                                            {item.variant ? (
+                                                                item.variant.stock > 0 ? `Stok tersedia: ${item.variant.stock}` : <span className="text-amber-600 font-medium">Pre-order / Menunggu Stok</span>
+                                                            ) : (
+                                                                item.product.stock > 0 ? `Stok tersedia: ${item.product.stock}` : <span className="text-red-500 font-medium">Stok Habis</span>
+                                                            )}
                                                         </p>
                                                         <button
                                                             onClick={() => confirmDelete(item.id)}
@@ -209,7 +222,7 @@ export default function Index({ cartItems, total }: Props) {
                                                         size="icon"
                                                         className="h-8 w-8 rounded-full"
                                                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                                        disabled={item.quantity >= item.product.stock}
+                                                        disabled={item.variant ? (item.variant.stock > 0 && item.quantity >= item.variant.stock) : (item.quantity >= item.product.stock)}
                                                     >
                                                         <Plus className="h-3 w-3" />
                                                     </Button>

@@ -28,7 +28,8 @@ class Product extends Model
         'weight',
         'specifications',
         'is_featured',
-        'is_published'
+        'is_published',
+        'custom_options',
     ];
     // SYNC_FILLABLE_END
 
@@ -38,6 +39,7 @@ class Product extends Model
         'price' => 'decimal:2',
         'is_featured' => 'boolean',
         'is_published' => 'boolean',
+        'custom_options' => 'array',
     ];
     // SYNC_CASTS_END
 
@@ -49,5 +51,10 @@ class Product extends Model
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class);
+    }
+
+    public function variants(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class);
     }
 }

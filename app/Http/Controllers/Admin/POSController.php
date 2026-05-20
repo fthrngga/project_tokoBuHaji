@@ -17,7 +17,7 @@ class POSController extends Controller
 {
     public function index()
     {
-        $products = Product::with(['images', 'category'])
+        $products = Product::with(['images', 'category', 'variants'])
             ->where('is_published', true)
             ->where('stock', '>', 0)
             ->get();
@@ -48,6 +48,7 @@ class POSController extends Controller
             'customer_phone' => 'nullable|string|max:255',
             'items' => 'required|array|min:1',
             'items.*.id' => 'required|exists:products,id',
+            'items.*.product_variant_id' => 'nullable|exists:product_variants,id',
             'items.*.quantity' => 'required|integer|min:1',
             'payment_method' => 'required|string', 
             'amount_paid' => 'required|numeric|min:0',
@@ -94,11 +95,26 @@ class POSController extends Controller
                 // membeli barang yang sama persis di detik yang sama.
                 $product = Product::lockForUpdate()->findOrFail($item['id']);
                 
-                if ($product->stock < $item['quantity']) {
-                    // Wajib melempar Exception agar DB::transaction ter-rollback!
-                    throw ValidationException::withMessages([
-                        'error' => "Stok tidak mencukupi untuk '{$product->name}'. Sisa stok: {$product->stock}"
-                    ]);
+                $variant = null;
+                if (!empty($item['product_variant_id'])) {
+                    $variant = $product->variants()->lockForUpdate()->find($item['product_variant_id']);
+                    if (!$variant) {
+                        throw ValidationException::withMessages([
+                            'error' => "Varian tidak ditemukan untuk produk '{$product->name}'"
+                        ]);
+                    }
+                    if ($variant->stock < $item['quantity']) {
+                        throw ValidationException::withMessages([
+                            'error' => "Stok varian tidak mencukupi untuk '{$product->name}'. Sisa stok varian: {$variant->stock}"
+                        ]);
+                    }
+                    $variant->decrement('stock', $item['quantity']);
+                } else {
+                    if ($product->stock < $item['quantity']) {
+                        throw ValidationException::withMessages([
+                            'error' => "Stok tidak mencukupi untuk '{$product->name}'. Sisa stok: {$product->stock}"
+                        ]);
+                    }
                 }
 
                 $product->decrement('stock', $item['quantity']);
@@ -108,6 +124,7 @@ class POSController extends Controller
 
                 $orderItemsData[] = [
                     'product_id' => $product->id,
+                    'product_variant_id' => $item['product_variant_id'] ?? null,
                     'quantity' => $item['quantity'],
                     'price' => $product->price,
                     'subtotal' => $subtotal,

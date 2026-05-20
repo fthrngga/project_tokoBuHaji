@@ -5,7 +5,7 @@ namespace App\Features\Product;
 use App\Http\Controllers\Controller;
 use App\Features\Product\Category;
 use App\Features\Product\ProductImage;
-use App\Features\Product\Product; // <-- DISESUAIKAN: Path ke model Product
+use App\Features\Product\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -58,9 +58,22 @@ class ProductController extends Controller
             'specifications' => 'required|json',
             'is_featured' => 'required|boolean',
             'is_published' => 'required|boolean',
-            'images' => 'nullable|array', // Validasi untuk gambar baru
-            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048', // Aturan untuk setiap file gambar
+            'images' => 'nullable|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+            'custom_options' => 'nullable|array',
+            'custom_options.*.name' => 'required_with:custom_options|string|max:255',
+            'custom_options.*.options' => 'required_with:custom_options|array|min:1',
+            'variants' => 'nullable|array',
+            'variants.*.id' => 'nullable|exists:product_variants,id',
+            'variants.*.sku' => 'nullable|string|max:255',
+            'variants.*.stock' => 'required_with:variants|integer|min:0',
+            'variants.*.options' => 'required_with:variants|array',
         ]);
+
+        // Hitung total stok dari varian jika ada
+        if (!empty($validated['variants'])) {
+            $validated['stock'] = collect($validated['variants'])->sum('stock');
+        }
 
         // Dekode specifications sebelum membuat model
         if (isset($validated['specifications']) && is_string($validated['specifications'])) {
@@ -77,6 +90,13 @@ class ProductController extends Controller
             }
         }
 
+        // Simpan varian jika ada
+        if (!empty($validated['variants'])) {
+            foreach ($validated['variants'] as $variantData) {
+                $product->variants()->create($variantData);
+            }
+        }
+
         // Redirect ke halaman index setelah produk berhasil dibuat
         return redirect()->route('products.index')->with('message', 'Produk baru berhasil ditambahkan.');
     }
@@ -84,7 +104,7 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         return Inertia::render('Features/Product/FormPage', [
-            'item' => $product->load('images'),
+            'item' => $product->load(['images', 'variants']),
             'categories' => Category::all(),
         ]);
     }
@@ -104,7 +124,20 @@ class ProductController extends Controller
             'is_published' => 'required|boolean',
             'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+            'custom_options' => 'nullable|array',
+            'custom_options.*.name' => 'required_with:custom_options|string|max:255',
+            'custom_options.*.options' => 'required_with:custom_options|array|min:1',
+            'variants' => 'nullable|array',
+            'variants.*.id' => 'nullable|exists:product_variants,id',
+            'variants.*.sku' => 'nullable|string|max:255',
+            'variants.*.stock' => 'required_with:variants|integer|min:0',
+            'variants.*.options' => 'required_with:variants|array',
         ]);
+
+        // Hitung total stok dari varian jika ada
+        if (!empty($validated['variants'])) {
+            $validated['stock'] = collect($validated['variants'])->sum('stock');
+        }
 
         // Dekode specifications jika itu adalah string JSON (karena casts 'array' di model)
         if (isset($validated['specifications']) && is_string($validated['specifications'])) {
@@ -118,6 +151,26 @@ class ProductController extends Controller
                 $path = $file->store('products', 'public');
                 $product->images()->create(['image_path' => $path]);
             }
+        }
+
+        // Sinkronisasi varian
+        if (isset($validated['variants'])) {
+            $existingVariantIds = [];
+            foreach ($validated['variants'] as $variantData) {
+                if (!empty($variantData['id'])) {
+                    $variant = $product->variants()->find($variantData['id']);
+                    if ($variant) {
+                        $variant->update($variantData);
+                        $existingVariantIds[] = $variant->id;
+                    }
+                } else {
+                    $newVariant = $product->variants()->create($variantData);
+                    $existingVariantIds[] = $newVariant->id;
+                }
+            }
+            $product->variants()->whereNotIn('id', $existingVariantIds)->delete();
+        } else {
+            $product->variants()->delete();
         }
 
         return redirect()->route('products.index')->with('message', 'Produk berhasil diperbarui.');
@@ -149,7 +202,7 @@ class ProductController extends Controller
         $product = Product::query()
             ->where('slug', $slug)
             ->where('is_published', true)
-            ->with(['images', 'category'])
+            ->with(['images', 'category', 'variants'])
             ->firstOrFail();
 
         return Inertia::render('Features/Product/Show', [

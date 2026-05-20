@@ -2,7 +2,7 @@ import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFo
 import images from './images'
 /**
 * @see \App\Features\Product\ProductController::show
- * @see app/Features/Product/ProductController.php:147
+ * @see app/Features/Product/ProductController.php:200
  * @route '/produk/{slug}'
  */
 export const show = (args: { slug: string | number } | [slug: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -17,7 +17,7 @@ show.definition = {
 
 /**
 * @see \App\Features\Product\ProductController::show
- * @see app/Features/Product/ProductController.php:147
+ * @see app/Features/Product/ProductController.php:200
  * @route '/produk/{slug}'
  */
 show.url = (args: { slug: string | number } | [slug: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -45,7 +45,7 @@ show.url = (args: { slug: string | number } | [slug: string | number ] | string 
 
 /**
 * @see \App\Features\Product\ProductController::show
- * @see app/Features/Product/ProductController.php:147
+ * @see app/Features/Product/ProductController.php:200
  * @route '/produk/{slug}'
  */
 show.get = (args: { slug: string | number } | [slug: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -54,7 +54,7 @@ show.get = (args: { slug: string | number } | [slug: string | number ] | string 
 })
 /**
 * @see \App\Features\Product\ProductController::show
- * @see app/Features/Product/ProductController.php:147
+ * @see app/Features/Product/ProductController.php:200
  * @route '/produk/{slug}'
  */
 show.head = (args: { slug: string | number } | [slug: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -64,7 +64,7 @@ show.head = (args: { slug: string | number } | [slug: string | number ] | string
 
     /**
 * @see \App\Features\Product\ProductController::show
- * @see app/Features/Product/ProductController.php:147
+ * @see app/Features/Product/ProductController.php:200
  * @route '/produk/{slug}'
  */
     const showForm = (args: { slug: string | number } | [slug: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -74,7 +74,7 @@ show.head = (args: { slug: string | number } | [slug: string | number ] | string
 
             /**
 * @see \App\Features\Product\ProductController::show
- * @see app/Features/Product/ProductController.php:147
+ * @see app/Features/Product/ProductController.php:200
  * @route '/produk/{slug}'
  */
         showForm.get = (args: { slug: string | number } | [slug: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -83,7 +83,7 @@ show.head = (args: { slug: string | number } | [slug: string | number ] | string
         })
             /**
 * @see \App\Features\Product\ProductController::show
- * @see app/Features/Product/ProductController.php:147
+ * @see app/Features/Product/ProductController.php:200
  * @route '/produk/{slug}'
  */
         showForm.head = (args: { slug: string | number } | [slug: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -310,7 +310,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     store.form = storeForm
 /**
 * @see \App\Features\Product\ProductController::edit
- * @see app/Features/Product/ProductController.php:84
+ * @see app/Features/Product/ProductController.php:104
  * @route '/products/{product}/edit'
  */
 export const edit = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -325,7 +325,7 @@ edit.definition = {
 
 /**
 * @see \App\Features\Product\ProductController::edit
- * @see app/Features/Product/ProductController.php:84
+ * @see app/Features/Product/ProductController.php:104
  * @route '/products/{product}/edit'
  */
 edit.url = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -358,7 +358,7 @@ edit.url = (args: { product: number | { id: number } } | [product: number | { id
 
 /**
 * @see \App\Features\Product\ProductController::edit
- * @see app/Features/Product/ProductController.php:84
+ * @see app/Features/Product/ProductController.php:104
  * @route '/products/{product}/edit'
  */
 edit.get = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -367,7 +367,7 @@ edit.get = (args: { product: number | { id: number } } | [product: number | { id
 })
 /**
 * @see \App\Features\Product\ProductController::edit
- * @see app/Features/Product/ProductController.php:84
+ * @see app/Features/Product/ProductController.php:104
  * @route '/products/{product}/edit'
  */
 edit.head = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -377,7 +377,7 @@ edit.head = (args: { product: number | { id: number } } | [product: number | { i
 
     /**
 * @see \App\Features\Product\ProductController::edit
- * @see app/Features/Product/ProductController.php:84
+ * @see app/Features/Product/ProductController.php:104
  * @route '/products/{product}/edit'
  */
     const editForm = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -387,7 +387,7 @@ edit.head = (args: { product: number | { id: number } } | [product: number | { i
 
             /**
 * @see \App\Features\Product\ProductController::edit
- * @see app/Features/Product/ProductController.php:84
+ * @see app/Features/Product/ProductController.php:104
  * @route '/products/{product}/edit'
  */
         editForm.get = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -396,7 +396,7 @@ edit.head = (args: { product: number | { id: number } } | [product: number | { i
         })
             /**
 * @see \App\Features\Product\ProductController::edit
- * @see app/Features/Product/ProductController.php:84
+ * @see app/Features/Product/ProductController.php:104
  * @route '/products/{product}/edit'
  */
         editForm.head = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -412,7 +412,7 @@ edit.head = (args: { product: number | { id: number } } | [product: number | { i
     edit.form = editForm
 /**
 * @see \App\Features\Product\ProductController::update
- * @see app/Features/Product/ProductController.php:92
+ * @see app/Features/Product/ProductController.php:112
  * @route '/products/{product}'
  */
 export const update = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -427,7 +427,7 @@ update.definition = {
 
 /**
 * @see \App\Features\Product\ProductController::update
- * @see app/Features/Product/ProductController.php:92
+ * @see app/Features/Product/ProductController.php:112
  * @route '/products/{product}'
  */
 update.url = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -460,7 +460,7 @@ update.url = (args: { product: number | { id: number } } | [product: number | { 
 
 /**
 * @see \App\Features\Product\ProductController::update
- * @see app/Features/Product/ProductController.php:92
+ * @see app/Features/Product/ProductController.php:112
  * @route '/products/{product}'
  */
 update.put = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -469,7 +469,7 @@ update.put = (args: { product: number | { id: number } } | [product: number | { 
 })
 /**
 * @see \App\Features\Product\ProductController::update
- * @see app/Features/Product/ProductController.php:92
+ * @see app/Features/Product/ProductController.php:112
  * @route '/products/{product}'
  */
 update.patch = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -479,7 +479,7 @@ update.patch = (args: { product: number | { id: number } } | [product: number | 
 
     /**
 * @see \App\Features\Product\ProductController::update
- * @see app/Features/Product/ProductController.php:92
+ * @see app/Features/Product/ProductController.php:112
  * @route '/products/{product}'
  */
     const updateForm = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -494,7 +494,7 @@ update.patch = (args: { product: number | { id: number } } | [product: number | 
 
             /**
 * @see \App\Features\Product\ProductController::update
- * @see app/Features/Product/ProductController.php:92
+ * @see app/Features/Product/ProductController.php:112
  * @route '/products/{product}'
  */
         updateForm.put = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -508,7 +508,7 @@ update.patch = (args: { product: number | { id: number } } | [product: number | 
         })
             /**
 * @see \App\Features\Product\ProductController::update
- * @see app/Features/Product/ProductController.php:92
+ * @see app/Features/Product/ProductController.php:112
  * @route '/products/{product}'
  */
         updateForm.patch = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -524,7 +524,7 @@ update.patch = (args: { product: number | { id: number } } | [product: number | 
     update.form = updateForm
 /**
 * @see \App\Features\Product\ProductController::destroy
- * @see app/Features/Product/ProductController.php:126
+ * @see app/Features/Product/ProductController.php:179
  * @route '/products/{product}'
  */
 export const destroy = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -539,7 +539,7 @@ destroy.definition = {
 
 /**
 * @see \App\Features\Product\ProductController::destroy
- * @see app/Features/Product/ProductController.php:126
+ * @see app/Features/Product/ProductController.php:179
  * @route '/products/{product}'
  */
 destroy.url = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -572,7 +572,7 @@ destroy.url = (args: { product: number | { id: number } } | [product: number | {
 
 /**
 * @see \App\Features\Product\ProductController::destroy
- * @see app/Features/Product/ProductController.php:126
+ * @see app/Features/Product/ProductController.php:179
  * @route '/products/{product}'
  */
 destroy.delete = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -582,7 +582,7 @@ destroy.delete = (args: { product: number | { id: number } } | [product: number 
 
     /**
 * @see \App\Features\Product\ProductController::destroy
- * @see app/Features/Product/ProductController.php:126
+ * @see app/Features/Product/ProductController.php:179
  * @route '/products/{product}'
  */
     const destroyForm = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -597,7 +597,7 @@ destroy.delete = (args: { product: number | { id: number } } | [product: number 
 
             /**
 * @see \App\Features\Product\ProductController::destroy
- * @see app/Features/Product/ProductController.php:126
+ * @see app/Features/Product/ProductController.php:179
  * @route '/products/{product}'
  */
         destroyForm.delete = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -613,7 +613,7 @@ destroy.delete = (args: { product: number | { id: number } } | [product: number 
     destroy.form = destroyForm
 /**
 * @see \App\Features\Product\ProductController::restock
- * @see app/Features/Product/ProductController.php:160
+ * @see app/Features/Product/ProductController.php:213
  * @route '/products/{product}/restock'
  */
 export const restock = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -628,7 +628,7 @@ restock.definition = {
 
 /**
 * @see \App\Features\Product\ProductController::restock
- * @see app/Features/Product/ProductController.php:160
+ * @see app/Features/Product/ProductController.php:213
  * @route '/products/{product}/restock'
  */
 restock.url = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -661,7 +661,7 @@ restock.url = (args: { product: number | { id: number } } | [product: number | {
 
 /**
 * @see \App\Features\Product\ProductController::restock
- * @see app/Features/Product/ProductController.php:160
+ * @see app/Features/Product/ProductController.php:213
  * @route '/products/{product}/restock'
  */
 restock.post = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -671,7 +671,7 @@ restock.post = (args: { product: number | { id: number } } | [product: number | 
 
     /**
 * @see \App\Features\Product\ProductController::restock
- * @see app/Features/Product/ProductController.php:160
+ * @see app/Features/Product/ProductController.php:213
  * @route '/products/{product}/restock'
  */
     const restockForm = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -681,7 +681,7 @@ restock.post = (args: { product: number | { id: number } } | [product: number | 
 
             /**
 * @see \App\Features\Product\ProductController::restock
- * @see app/Features/Product/ProductController.php:160
+ * @see app/Features/Product/ProductController.php:213
  * @route '/products/{product}/restock'
  */
         restockForm.post = (args: { product: number | { id: number } } | [product: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

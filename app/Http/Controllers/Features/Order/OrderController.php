@@ -29,7 +29,7 @@ class OrderController extends Controller
     public function show(string $id)
     {
         $order = \App\Models\Features\Order\Order::where('user_id', auth()->id())
-            ->with(['items.product.images', 'messages.user', 'payment.paymentLogs'])
+            ->with(['items.product.images', 'items.variant', 'items.returns', 'messages.user', 'payment.paymentLogs'])
             ->findOrFail($id);
 
         return \Inertia\Inertia::render('Features/Order/Show', [

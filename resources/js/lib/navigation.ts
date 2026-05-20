@@ -28,6 +28,10 @@ export const mainNavItems: NavItem[] = [
                 href: route('admin.orders.index', undefined, false),
             },
             {
+                title: 'Return Produk',
+                href: route('admin.returns.index', undefined, false),
+            },
+            {
                 title: 'Customers',
                 href: route('customers.index', undefined, false),
             },

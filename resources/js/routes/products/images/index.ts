@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../wayfinder'
 /**
 * @see \App\Features\Product\ProductController::destroy
- * @see app/Features/Product/ProductController.php:136
+ * @see app/Features/Product/ProductController.php:189
  * @route '/products/images/{image}'
  */
 export const destroy = (args: { image: number | { id: number } } | [image: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -16,7 +16,7 @@ destroy.definition = {
 
 /**
 * @see \App\Features\Product\ProductController::destroy
- * @see app/Features/Product/ProductController.php:136
+ * @see app/Features/Product/ProductController.php:189
  * @route '/products/images/{image}'
  */
 destroy.url = (args: { image: number | { id: number } } | [image: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -49,7 +49,7 @@ destroy.url = (args: { image: number | { id: number } } | [image: number | { id:
 
 /**
 * @see \App\Features\Product\ProductController::destroy
- * @see app/Features/Product/ProductController.php:136
+ * @see app/Features/Product/ProductController.php:189
  * @route '/products/images/{image}'
  */
 destroy.delete = (args: { image: number | { id: number } } | [image: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -59,7 +59,7 @@ destroy.delete = (args: { image: number | { id: number } } | [image: number | { 
 
     /**
 * @see \App\Features\Product\ProductController::destroy
- * @see app/Features/Product/ProductController.php:136
+ * @see app/Features/Product/ProductController.php:189
  * @route '/products/images/{image}'
  */
     const destroyForm = (args: { image: number | { id: number } } | [image: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -74,7 +74,7 @@ destroy.delete = (args: { image: number | { id: number } } | [image: number | { 
 
             /**
 * @see \App\Features\Product\ProductController::destroy
- * @see app/Features/Product/ProductController.php:136
+ * @see app/Features/Product/ProductController.php:189
  * @route '/products/images/{image}'
  */
         destroyForm.delete = (args: { image: number | { id: number } } | [image: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

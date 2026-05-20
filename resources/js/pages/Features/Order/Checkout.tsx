@@ -252,6 +252,15 @@ export default function Checkout({ cartItems, total, addresses }: Props) {
                                                     </div>
                                                     <div className="flex-1">
                                                         <p className="text-sm font-medium text-gray-900 dark:text-white line-clamp-2">{item.product.name}</p>
+                                                        {item.variant && (
+                                                            <div className="mt-0.5 flex flex-wrap gap-1">
+                                                                {Object.entries(item.variant.options).map(([k, v]) => (
+                                                                    <span key={k} className="inline-flex items-center text-[10px] font-medium text-gray-500 dark:text-gray-400">
+                                                                        {k}: {v}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        )}
                                                         <div className="flex justify-between items-center mt-1">
                                                             <p className="text-xs text-gray-500">{item.quantity} x {formatCurrency(item.product.price)}</p>
                                                             <p className="text-sm font-medium">{formatCurrency(item.quantity * item.product.price)}</p>

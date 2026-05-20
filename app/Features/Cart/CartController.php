@@ -15,7 +15,7 @@ class CartController extends Controller
      */
     public function index()
     {
-        $cart = Cart::with(['items.product.images', 'items.product.category'])
+        $cart = Cart::with(['items.product.images', 'items.product.category', 'items.variant'])
             ->where('user_id', Auth::id())
             ->first();
 
@@ -40,6 +40,7 @@ class CartController extends Controller
     {
         $request->validate([
             'product_id' => 'required|exists:products,id',
+            'product_variant_id' => 'nullable|exists:product_variants,id',
             'quantity' => 'required|integer|min:1',
         ]);
 
@@ -49,26 +50,38 @@ class CartController extends Controller
         $cart = Cart::firstOrCreate(['user_id' => $user->id]);
 
         $product = Product::findOrFail($request->product_id);
-
-        // Cek stok produk
-        if ($product->stock < $request->quantity) {
-            return redirect()->back()->withErrors(['quantity' => 'Stok produk tidak mencukupi']);
+        
+        // Cek stok (Varian atau Produk Utama)
+        $variant = null;
+        if ($request->product_variant_id) {
+            $variant = $product->variants()->find($request->product_variant_id);
+            if (!$variant) {
+                return redirect()->back()->withErrors(['product_variant_id' => 'Varian produk tidak valid']);
+            }
+            // Pre-order diizinkan, jadi jika stok varian < quantity dan == 0, itu pre-order. 
+            // Jika stok > 0 tapi < quantity, mungkin tidak valid, namun kita biarkan stok menjadi negatif saat pre-order.
+            // Namun, untuk sederhana, mari kita biarkan masuk keranjang berapapun quantity-nya.
+        } else {
+            if ($product->stock < $request->quantity && $product->stock !== 0) { // Jika 0 dianggap pre-order
+                return redirect()->back()->withErrors(['quantity' => 'Stok produk tidak mencukupi']);
+            }
         }
 
         // Cek apakah item sudah ada di keranjang
-        $cartItem = $cart->items()->where('product_id', $product->id)->first();
+        $cartItem = $cart->items()
+            ->where('product_id', $product->id)
+            ->where('product_variant_id', $request->product_variant_id)
+            ->first();
 
         if ($cartItem) {
             // Jika ada, tambahkan quantity
             $newQuantity = $cartItem->quantity + $request->quantity;
-            if ($newQuantity > $product->stock) {
-                return redirect()->back()->withErrors(['quantity' => 'Total stok produk tidak mencukupi']);
-            }
             $cartItem->update(['quantity' => $newQuantity]);
         } else {
             // Jika belum ada, buat item baru
             $cart->items()->create([
                 'product_id' => $product->id,
+                'product_variant_id' => $request->product_variant_id,
                 'quantity' => $request->quantity,
             ]);
         }

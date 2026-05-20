@@ -1,6 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../wayfinder'
 import messages from './messages'
 import payment from './payment'
+import returns from './returns'
 /**
 * @see \App\Http\Controllers\Features\Order\OrderController::index
  * @see app/Http/Controllers/Features/Order/OrderController.php:18
@@ -181,6 +182,7 @@ const orders = {
 show,
 messages,
 payment,
+returns,
 }
 
 export default orders

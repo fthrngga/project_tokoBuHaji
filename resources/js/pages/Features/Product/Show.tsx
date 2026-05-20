@@ -18,6 +18,15 @@ interface Props {
 export default function Show({ product }: Props) {
   const { auth } = usePage<SharedData>().props;
   const [quantity, setQuantity] = useState(1);
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+  
+  const selectedVariant = product.variants?.find(v => {
+    return Object.entries(selectedOptions).every(([k, val]) => v.options[k] === val) &&
+           Object.keys(v.options).length === (product.custom_options?.length || 0);
+  });
+
+  const currentStock = selectedVariant ? selectedVariant.stock : product.stock;
+
   const [selectedImage, setSelectedImage] = useState(
     product.images && product.images.length > 0
       ? "/storage/" + product.images[0].image_path
@@ -39,7 +48,7 @@ export default function Show({ product }: Props) {
   };
 
   const handleIncrease = () => {
-    if (quantity < product.stock) {
+    if (quantity < currentStock) {
       setQuantity(quantity + 1);
     }
   };
@@ -51,8 +60,14 @@ export default function Show({ product }: Props) {
       return;
     }
 
+    if (product.custom_options && product.custom_options.length > 0 && !selectedVariant) {
+      toast.error("Silakan pilih varian yang tersedia terlebih dahulu.");
+      return;
+    }
+
     router.post(route('cart.store'), {
       product_id: product.id,
+      product_variant_id: selectedVariant?.id,
       quantity: quantity
     }, {
       preserveScroll: true,
@@ -135,6 +150,53 @@ export default function Show({ product }: Props) {
                   </p>
                 </div>
 
+                {/* Variant Selectors */}
+                {product.custom_options && product.custom_options.length > 0 && (
+                  <div className="mt-6 space-y-4">
+                    {product.custom_options.map((optionGroup) => (
+                      <div key={optionGroup.name} className="space-y-2">
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">
+                          {optionGroup.name}
+                        </span>
+                        <div className="flex flex-wrap gap-2">
+                          {optionGroup.options.map((optValue) => {
+                            const isSelected = selectedOptions[optionGroup.name] === optValue;
+                            return (
+                              <button
+                                key={optValue}
+                                onClick={() => setSelectedOptions(prev => ({ ...prev, [optionGroup.name]: optValue }))}
+                                className={`px-4 py-2 text-sm rounded-md border transition-colors ${
+                                  isSelected 
+                                    ? "border-blue-600 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:border-blue-500 dark:text-blue-300" 
+                                    : "border-gray-200 hover:border-gray-300 text-gray-700 dark:border-gray-700 dark:text-gray-300"
+                                }`}
+                              >
+                                {optValue}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                    
+                    <div className="pt-2">
+                        {Object.keys(selectedOptions).length === product.custom_options.length ? (
+                            selectedVariant ? (
+                                selectedVariant.stock > 0 ? (
+                                    <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">Tersedia: {selectedVariant.stock} unit</Badge>
+                                ) : (
+                                    <Badge variant="outline" className="text-amber-600 border-amber-200 bg-amber-50">Pre-order (Menunggu Stok)</Badge>
+                                )
+                            ) : (
+                                <span className="text-sm text-red-500 font-medium">Kombinasi varian ini tidak tersedia.</span>
+                            )
+                        ) : (
+                            <span className="text-sm text-gray-500">Pilih semua opsi untuk melihat ketersediaan.</span>
+                        )}
+                    </div>
+                  </div>
+                )}
+
                 {/* Add to Cart Section */}
                 <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800">
                   <div className="flex flex-col sm:flex-row gap-4">
@@ -154,7 +216,7 @@ export default function Show({ product }: Props) {
                         size="icon"
                         className="h-10 w-10 rounded-full hover:bg-transparent"
                         onClick={handleIncrease}
-                        disabled={quantity >= product.stock}
+                        disabled={quantity >= currentStock}
                       >
                         <Plus className="h-4 w-4" />
                       </Button>
@@ -163,10 +225,16 @@ export default function Show({ product }: Props) {
                     <Button
                       onClick={addToCart}
                       className="flex-1 h-12 rounded-full text-lg font-medium"
-                      disabled={product.stock <= 0}
+                      disabled={
+                        (product.custom_options && product.custom_options.length > 0 && !selectedVariant) || 
+                        (!product.custom_options?.length && product.stock <= 0)
+                      }
                     >
                       <ShoppingCart className="mr-2 h-5 w-5" />
-                      {product.stock > 0 ? "Tambahkan ke Keranjang" : "Stok Habis"}
+                      {product.custom_options && product.custom_options.length > 0
+                          ? (!selectedVariant ? "Pilih Varian" : (selectedVariant.stock > 0 ? "Tambahkan ke Keranjang" : "Pre-order Sekarang"))
+                          : (product.stock > 0 ? "Tambahkan ke Keranjang" : "Stok Habis")
+                      }
                     </Button>
                   </div>
                 </div>
@@ -206,7 +274,7 @@ export default function Show({ product }: Props) {
                   <div className="border-b border-gray-100 dark:border-gray-800 pb-4">
                     <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Stok Tersedia</dt>
                     <dd className="mt-1 text-base font-semibold text-gray-900 dark:text-white">
-                      {product.stock > 0 ? `${product.stock} unit` : 'Habis'}
+                      {product.stock > 0 ? `${product.stock} unit` : 'Pre-order'}
                     </dd>
                   </div>
 

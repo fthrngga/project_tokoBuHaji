@@ -13,6 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { cn } from '@/lib/utils';
 import { PlusCircle, X, UploadCloud, Trash2 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import { Toaster, toast } from 'sonner';
 
 interface Product {
     id: number;
@@ -28,6 +29,8 @@ interface Product {
     is_featured: boolean;
     is_published: boolean;
     images: ProductImage[];
+    custom_options?: { name: string; options: string[] }[];
+    variants?: { id?: number; sku: string | null; stock: number; options: Record<string, string> }[];
 }
 
 export default function FormPage({ auth, item, categories = [] }: PageProps<{ item?: Product; categories: Category[] }>) {
@@ -36,7 +39,7 @@ export default function FormPage({ auth, item, categories = [] }: PageProps<{ it
         { title: item ? 'Edit' : 'Create', href: item ? route('products.edit', item.id) : route('products.create') },
     ];
 
-    const { data, setData, post, processing, errors, progress } = useForm({
+    const { data, setData, post, processing, errors, progress, transform } = useForm({
         name: item?.name ?? '',
         slug: item?.slug ?? '',
         sku: item?.sku ?? '',
@@ -49,7 +52,21 @@ export default function FormPage({ auth, item, categories = [] }: PageProps<{ it
         is_featured: item?.is_featured ?? false,
         is_published: item?.is_published ?? true,
         images: [] as File[],
+        custom_options: (item?.custom_options ?? []).map((opt: any) => ({
+            name: opt.name,
+            options_string: (opt.options || []).join(', ')
+        })),
+        variants: item?.variants ?? [],
     });
+
+    transform((data) => ({
+        ...data,
+        _method: item ? 'PUT' : 'POST',
+        custom_options: data.custom_options.map((opt: any) => ({
+            name: opt.name,
+            options: (opt.options_string || '').split(',').map((s: string) => s.trim()).filter((s: string) => s !== '')
+        }))
+    }));
 
     const [specItems, setSpecItems] = useState<{ key: string; value: string }[]>([]);
     const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -110,7 +127,17 @@ export default function FormPage({ auth, item, categories = [] }: PageProps<{ it
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         const url = item ? route('products.update', item.id) : route('products.store');
-        router.post(url, { ...data, _method: item ? 'PUT' : 'POST' }, { forceFormData: true });
+        
+        post(url, {
+            forceFormData: true,
+            onSuccess: () => {
+                toast.success(`Produk berhasil di${item ? 'update' : 'tambahkan'}!`);
+            },
+            onError: (errs) => {
+                console.error("Validation errors:", errs);
+                toast.error("Gagal menyimpan produk. Periksa kembali form Anda.");
+            }
+        });
     }
 
     // **FUNGSI BARU** untuk menjalankan aksi hapus setelah konfirmasi
@@ -126,6 +153,7 @@ export default function FormPage({ auth, item, categories = [] }: PageProps<{ it
         <>
             <AppLayout breadcrumbs={breadcrumbs}>
                 <Head title={(item ? 'Edit' : 'Create') + ' Product'} />
+                <Toaster richColors closeButton position="top-center" />
                 <div className="p-4 sm:p-6 lg:p-8">
                     <form onSubmit={handleSubmit}>
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -147,8 +175,133 @@ export default function FormPage({ auth, item, categories = [] }: PageProps<{ it
                                         <div className="space-y-2"><Label>Spesifikasi</Label><div className="space-y-3 rounded-md border bg-slate-50/50 p-4">{specItems.map((spec, index) => (<div key={index} className="flex items-center gap-2"><Input placeholder="Key (e.g., Dimensi)" value={spec.key} onChange={(e) => handleSpecChange(index, 'key', e.target.value)} className="flex-1 bg-white" /><Input placeholder="Value (e.g., 120cm x 60cm)" value={spec.value} onChange={(e) => handleSpecChange(index, 'value', e.target.value)} className="flex-1 bg-white" /><Button type="button" variant="ghost" size="icon" onClick={() => removeSpecItem(index)} className="text-slate-500 hover:bg-red-100 hover:text-red-600"><X className="h-4 w-4" /></Button></div>))}<Button type="button" variant="outline" size="sm" onClick={addSpecItem} className="mt-2 border-dashed"><PlusCircle className="mr-2 h-4 w-4" /> Tambah Spesifikasi</Button></div></div>
                                     </CardContent>
                                 </Card>
-                            </div>
 
+                                {/* Varian Produk Card */}
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Varian Produk (Opsional)</CardTitle>
+                                        <CardDescription>Atur tipe varian produk seperti Warna, Ukuran, dan Kelengkapan lainnya.</CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="space-y-6">
+                                        <div className="space-y-4">
+                                            <h3 className="font-medium text-sm">Opsi Varian (Misal: Warna, Ukuran)</h3>
+                                            {data.custom_options.map((opt, i) => (
+                                                <div key={i} className="flex gap-2 items-start">
+                                                    <Input placeholder="Nama Opsi (Cth: Warna)" value={opt.name} onChange={e => {
+                                                        const newOpts = [...data.custom_options];
+                                                        newOpts[i].name = e.target.value;
+                                                        setData('custom_options', newOpts);
+                                                    }} className="w-1/3" />
+                                                    <Input placeholder="Pilihan (pisahkan dengan koma, Cth: Merah, Biru)" value={opt.options_string || ''} onChange={e => {
+                                                        const newOpts = [...data.custom_options];
+                                                        newOpts[i].options_string = e.target.value;
+                                                        setData('custom_options', newOpts);
+                                                    }} className="flex-1" />
+                                                    <Button type="button" variant="ghost" className="text-red-600" onClick={() => {
+                                                        setData('custom_options', data.custom_options.filter((_, idx) => idx !== i));
+                                                    }}><X className="h-4 w-4" /></Button>
+                                                </div>
+                                            ))}
+                                            <Button type="button" variant="outline" size="sm" onClick={() => {
+                                                setData('custom_options', [...data.custom_options, { name: '', options_string: '' }]);
+                                            }} className="border-dashed"><PlusCircle className="mr-2 h-4 w-4"/> Tambah Opsi Varian</Button>
+                                        </div>
+
+                                        <div className="space-y-4 pt-4 border-t">
+                                            <div className="flex justify-between items-center">
+                                                <h3 className="font-medium text-sm">Daftar Varian & Stok</h3>
+                                                <Button type="button" variant="secondary" size="sm" onClick={() => {
+                                                    if (data.custom_options.length === 0) return;
+                                                    
+                                                    const generateCombinations = (optionsList: typeof data.custom_options): Record<string, string>[] => {
+                                                        if (optionsList.length === 0) return [];
+                                                        const result: Record<string, string>[] = [];
+                                                        const recurse = (current: Record<string, string>, depth: number) => {
+                                                            if (depth === optionsList.length) {
+                                                                result.push({ ...current });
+                                                                return;
+                                                            }
+                                                            const option = optionsList[depth];
+                                                            if (option.options.length === 0) {
+                                                                recurse(current, depth + 1);
+                                                                return;
+                                                            }
+                                                            for (const val of option.options) {
+                                                                current[option.name] = val;
+                                                                recurse(current, depth + 1);
+                                                                delete current[option.name];
+                                                            }
+                                                        };
+                                                        recurse({}, 0);
+                                                        return result;
+                                                    };
+                                                    
+                                                    const parsedOptions = data.custom_options.map((opt: any) => ({
+                                                        name: opt.name,
+                                                        options: (opt.options_string || '').split(',').map((s: string) => s.trim()).filter((s: string) => s !== '')
+                                                    })).filter(o => o.name && o.options.length > 0);
+                                                    
+                                                    const combinations = generateCombinations(parsedOptions);
+                                                    if (combinations.length === 0) return;
+
+                                                    const newVariants = combinations.map(comb => {
+                                                        const existing = data.variants.find(v => JSON.stringify(v.options) === JSON.stringify(comb));
+                                                        if (existing) return existing;
+                                                        return { sku: '', stock: 0, options: comb };
+                                                    });
+                                                    
+                                                    setData('variants', newVariants);
+                                                }}>Buat Kombinasi Otomatis</Button>
+                                            </div>
+                                            
+                                            {data.variants.length > 0 ? (
+                                                <div className="border rounded-md divide-y overflow-hidden">
+                                                    <div className="grid grid-cols-12 gap-2 p-3 bg-slate-50 font-medium text-sm text-slate-500">
+                                                        <div className="col-span-6">Kombinasi Opsi</div>
+                                                        <div className="col-span-3">SKU</div>
+                                                        <div className="col-span-2">Stok</div>
+                                                        <div className="col-span-1"></div>
+                                                    </div>
+                                                    {data.variants.map((variant, i) => (
+                                                        <div key={i} className="grid grid-cols-12 gap-2 p-3 items-center">
+                                                            <div className="col-span-6 flex flex-wrap gap-1">
+                                                                {Object.entries(variant.options).map(([k, v]) => (
+                                                                    <span key={k} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                                                        {k}: {v}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                            <div className="col-span-3">
+                                                                <Input value={variant.sku || ''} onChange={e => {
+                                                                    const newV = [...data.variants];
+                                                                    newV[i].sku = e.target.value;
+                                                                    setData('variants', newV);
+                                                                }} placeholder="SKU" />
+                                                            </div>
+                                                            <div className="col-span-2">
+                                                                <Input type="number" value={variant.stock} onChange={e => {
+                                                                    const newV = [...data.variants];
+                                                                    newV[i].stock = parseInt(e.target.value) || 0;
+                                                                    setData('variants', newV);
+                                                                }} min={0} />
+                                                            </div>
+                                                            <div className="col-span-1 text-right">
+                                                                <Button type="button" variant="ghost" size="icon" className="text-red-600" onClick={() => {
+                                                                    setData('variants', data.variants.filter((_, idx) => idx !== i));
+                                                                }}><Trash2 className="h-4 w-4"/></Button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className="text-center py-6 text-sm text-slate-500 border rounded-md bg-slate-50">
+                                                    Belum ada varian. Tambahkan opsi di atas lalu klik "Buat Kombinasi Otomatis".
+                                                </div>
+                                            )}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </div>
                             <div className="space-y-6">
                                 <Card>
                                     <CardHeader><CardTitle>Gambar Produk</CardTitle><CardDescription>Unggah gambar utama dan pendukung.</CardDescription></CardHeader>

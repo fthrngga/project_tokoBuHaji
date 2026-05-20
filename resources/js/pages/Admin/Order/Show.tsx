@@ -322,6 +322,15 @@ export default function Show({ order }: Props) {
                                             </div>
                                             <div>
                                                 <p className="font-medium line-clamp-1 max-w-[120px]">{item.product.name}</p>
+                                                {item.variant && (
+                                                    <div className="mt-0.5 flex flex-wrap gap-1">
+                                                        {Object.entries(item.variant.options).map(([k, v]) => (
+                                                            <span key={k} className="inline-flex items-center text-[9px] font-medium text-gray-500 bg-gray-100 px-1 rounded">
+                                                                {k}: {v}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
                                                 <p className="text-xs text-muted-foreground">{item.quantity} x {formatCurrency(item.price)}</p>
                                             </div>
                                         </div>
