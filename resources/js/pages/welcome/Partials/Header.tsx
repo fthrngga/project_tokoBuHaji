@@ -1,212 +1,389 @@
 import { type User, type SharedData } from '@/types';
 import { Link, usePage, router } from '@inertiajs/react';
-import { Button, buttonVariants } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '@/components/ui/navigation-menu';
-import { ShoppingCart, User as UserIcon, LayoutDashboard, Search, LogOut, X, ShoppingBag, CreditCard } from 'lucide-react';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ShoppingCart, Search, LogOut, ShoppingBag, LayoutDashboard, User as UserIcon, CreditCard, X } from 'lucide-react';
 import { route } from 'ziggy-js';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import React from 'react';
-import { cn } from '@/lib/utils';
 
-// --- Sub-Komponen ---
-
-function BrandLogo() {
-    return (
-        <Link href="/" className="flex items-center gap-2">
-            <img src="/image/logo.png" alt="Haji Elektronik Logo" className="h-12 w-auto" />
-        </Link>
-    );
-}
-
-function HeaderActions({ user }: { user: User | null }) {
-    const { cartCount } = usePage<SharedData>().props;
-
-    if (user) {
-        return (
-            <div className="flex items-center gap-2">
-                <Link href={route('cart.index')}>
-                    <Button variant="ghost" size="icon" className="h-10 w-10 relative">
-                        <ShoppingCart className="h-6 w-6" />
-                        <span className="sr-only">Keranjang</span>
-                        {cartCount > 0 && (
-                            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white">
-                                {cartCount}
-                            </span>
-                        )}
-                    </Button>
-                </Link>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-10 w-10">
-                            <UserIcon className="h-6 w-6" />
-                            <span className="sr-only">Menu Pengguna</span>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Hi, {user.name}</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        {user.role === 'admin' ? (
-                            <DropdownMenuItem asChild><Link href={route('dashboard')}><LayoutDashboard className="mr-2 h-4 w-4" /><span>Dashboard</span></Link></DropdownMenuItem>
-                        ) : (
-                            <DropdownMenuItem asChild><Link href={route('addresses.index')}><UserIcon className="mr-2 h-4 w-4" /><span>Alamat Saya</span></Link></DropdownMenuItem>
-                        )}
-                        <DropdownMenuItem asChild><Link href={route('orders.index')}><ShoppingBag className="mr-2 h-4 w-4" /><span>Pesanan Saya</span></Link></DropdownMenuItem>
-                        {user.role !== 'admin' && (
-                            <DropdownMenuItem asChild><Link href={route('customer.installments.index')}><CreditCard className="mr-2 h-4 w-4" /><span>Cek Angsuran</span></Link></DropdownMenuItem>
-                        )}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild><Link href={route('logout')} method="post" as="button" className="w-full text-left"><LogOut className="mr-2 h-4 w-4" /><span>Log Out</span></Link></DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
-        );
-    }
-    return (
-        <div className="hidden items-center gap-2 md:flex">
-            <Link
-                href={route('login')}
-                className={cn(buttonVariants({ variant: 'outline' }), "rounded-full px-6 border-gray-300 dark:border-gray-700")}
-            >
-                Log In
-            </Link>
-            <Link
-                href={route('register')}
-                className={cn(buttonVariants({ variant: 'default' }), "bg-gray-900 text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 rounded-full px-6")}
-            >
-                Register
-            </Link>
-        </div>
-    );
-}
-
-// Komponen helper untuk item di dalam dropdown navigasi
-const ListItem = React.forwardRef<
-    React.ElementRef<"a">,
-    React.ComponentPropsWithoutRef<"a">
->(({ className, title, children, ...props }, ref) => {
-    return (
-        <li>
-            <NavigationMenuLink asChild>
-                <a
-                    ref={ref}
-                    className={cn(
-                        "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-                        className
-                    )}
-                    {...props}
-                >
-                    <div className="text-sm font-medium leading-none">{title}</div>
-                    <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                        {children}
-                    </p>
-                </a>
-            </NavigationMenuLink>
-        </li>
-    )
-})
-ListItem.displayName = "ListItem"
-
-
-// --- Komponen Utama Header ---
+const NAV_LINKS = [
+    { label: "Elektronik", href: "/kategori/elektronik" },
+    { label: "Mebel", href: "/kategori/mebel" },
+    { label: "Semua Produk", href: "/kategori" },
+];
 
 export default function Header({ user }: { user: User | null }) {
-    const [isTopBarVisible, setIsTopBarVisible] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
+    const { cartCount } = usePage<SharedData>().props;
+    const [scrolled, setScrolled] = useState(false);
+    const [searchOpen, setSearchOpen] = useState(false);
+    const [q, setQ] = useState('');
+    const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        const isDismissed = sessionStorage.getItem('topBarDismissed') === 'true';
-        if (!user && !isDismissed) {
-            setIsTopBarVisible(true);
-        }
-    }, [user]);
+        const fn = () => setScrolled(window.scrollY > 20);
+        window.addEventListener('scroll', fn, { passive: true });
+        return () => window.removeEventListener('scroll', fn);
+    }, []);
 
-    const handleDismissTopBar = () => {
-        setIsTopBarVisible(false);
-        sessionStorage.setItem('topBarDismissed', 'true');
-    };
+    useEffect(() => {
+        if (searchOpen) setTimeout(() => inputRef.current?.focus(), 50);
+    }, [searchOpen]);
+
+    useEffect(() => {
+        const fn = (e: KeyboardEvent) => {
+            if (e.key === "Escape") setSearchOpen(false);
+            if ((e.metaKey || e.ctrlKey) && e.key === "k") { e.preventDefault(); setSearchOpen(true); }
+        };
+        document.addEventListener("keydown", fn);
+        return () => document.removeEventListener("keydown", fn);
+    }, []);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        if (searchQuery.trim()) {
-            router.get(route('search.index'), { q: searchQuery });
-        }
+        if (q.trim()) { router.get(route('search.index'), { q }); setSearchOpen(false); }
     };
 
     return (
         <>
-            {isTopBarVisible && (
-                <div className="fixed top-0 left-0 right-0 z-[60] bg-black text-white text-center text-sm py-2 px-4">
-                    <span>Untuk melakukan pembelian, silahkan login dahulu</span>
-                    <button onClick={handleDismissTopBar} className="absolute top-1/2 right-4 -translate-y-1/2 text-white hover:opacity-75">
-                        <X className="h-5 w-5" />
-                    </button>
+            {/* ─── Search Overlay ─── */}
+            {searchOpen && (
+                <div
+                    style={{
+                        position: "fixed",
+                        inset: 0,
+                        zIndex: 200,
+                        background: "rgba(8,15,26,0.95)",
+                        backdropFilter: "blur(20px)",
+                        display: "flex",
+                        alignItems: "flex-start",
+                        justifyContent: "center",
+                        paddingTop: "20vh",
+                    }}
+                    onClick={e => { if (e.target === e.currentTarget) setSearchOpen(false); }}
+                >
+                    <div style={{ width: "100%", maxWidth: "640px", padding: "0 24px" }}>
+                        {/* Close */}
+                        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "32px" }}>
+                            <button
+                                onClick={() => setSearchOpen(false)}
+                                style={{ color: "rgba(189,213,234,0.4)", background: "none", border: "none", cursor: "pointer", padding: "4px" }}
+                                onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "#BDD5EA")}
+                                onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "rgba(189,213,234,0.4)")}
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <form onSubmit={handleSearch}>
+                            <div style={{ position: "relative", borderBottom: "1px solid rgba(87,115,153,0.3)" }}>
+                                <input
+                                    ref={inputRef}
+                                    type="text"
+                                    placeholder="Cari produk..."
+                                    value={q}
+                                    onChange={e => setQ(e.target.value)}
+                                    style={{
+                                        width: "100%",
+                                        background: "transparent",
+                                        border: "none",
+                                        outline: "none",
+                                        fontSize: "clamp(24px, 4vw, 40px)",
+                                        fontWeight: 700,
+                                        color: "white",
+                                        letterSpacing: "-0.03em",
+                                        padding: "0 0 20px",
+                                        caretColor: "#FE5F55",
+                                    }}
+                                />
+                            </div>
+                            <p style={{ marginTop: "16px", fontSize: "12px", color: "rgba(87,115,153,0.5)", textAlign: "center" }}>
+                                Tekan Enter untuk mencari · Esc untuk menutup
+                            </p>
+                        </form>
+                    </div>
                 </div>
             )}
 
-            <header className={cn(
-                "fixed left-0 right-0 z-50 w-full px-4 sm:px-6 lg:px-8 pointer-events-none transition-all duration-300",
-                isTopBarVisible ? "top-12 sm:top-14" : "top-6"
-            )}>
-                <div className="mx-auto max-w-7xl">
-                    <div className="pointer-events-auto flex h-20 items-center justify-between gap-8 rounded-full border border-slate-200/60 bg-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl dark:border-slate-800/60 dark:bg-slate-950/80 px-6 lg:px-8">
-
-                        <div className="flex items-center gap-8">
-                        <BrandLogo />
-                        {/* NAVIGASI UTAMA DIPERBARUI */}
-                        <nav className="hidden items-center gap-4 text-sm font-medium text-gray-700 dark:text-gray-300 md:flex">
-                            <NavigationMenu>
-                                <NavigationMenuList>
-                                    <NavigationMenuItem>
-                                        <NavigationMenuTrigger className="bg-transparent">Produk</NavigationMenuTrigger>
-                                        <NavigationMenuContent>
-                                            <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
-                                                <ListItem href="/kategori/elektronik" title="Elektronik">
-                                                    Peralatan canggih untuk mempermudah kehidupan sehari-hari Anda.
-                                                </ListItem>
-                                                <ListItem href="/kategori/mebel" title="Mebel">
-                                                    Koleksi furnitur modern dan minimalis untuk setiap sudut rumah Anda.
-                                                </ListItem>
-                                            </ul>
-                                        </NavigationMenuContent>
-                                    </NavigationMenuItem>
-                                </NavigationMenuList>
-                            </NavigationMenu>
-                            <Link href="#" className="hover:text-black dark:hover:text-white">Promo</Link>
-                            <Link href="#" className="hover:text-black dark:hover:text-white">Tentang Kami</Link>
-                            <Link href="#" className="hover:text-black dark:hover:text-white">Kontak</Link>
-                        </nav>
-                    </div>
-
-                    <div className="flex-1 flex justify-center">
-                        <div className="w-full max-w-lg">
-                            <form onSubmit={handleSearch} className="relative">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                                <Input
-                                    type="search"
-                                    placeholder="Cari produk elektronik atau mebel..."
-                                    className="pl-12 pr-4 h-12 w-full rounded-full bg-gray-100 dark:bg-gray-800 border-transparent focus:border-gray-300 focus:bg-white focus:ring-0"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                            </form>
+            {/* ─── Navbar ─── */}
+            <header
+                style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 100,
+                    transition: "background 0.4s, border-color 0.4s, backdrop-filter 0.4s",
+                    background: scrolled ? "rgba(8,15,26,0.95)" : "transparent",
+                    backdropFilter: scrolled ? "blur(20px)" : "none",
+                    borderBottom: `1px solid ${scrolled ? "rgba(87,115,153,0.12)" : "transparent"}`,
+                }}
+            >
+                <div
+                    style={{
+                        maxWidth: "1440px",
+                        margin: "0 auto",
+                        padding: "0 48px",
+                        height: "68px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: "32px",
+                    }}
+                >
+                    {/* Logo */}
+                    <Link
+                        href="/"
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                            flexShrink: 0,
+                            textDecoration: "none",
+                        }}
+                    >
+                        <div
+                            style={{
+                                width: "30px",
+                                height: "30px",
+                                borderRadius: "7px",
+                                background: "linear-gradient(135deg, #577399, #3d5a80)",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: "10px",
+                                fontWeight: 900,
+                                color: "white",
+                            }}
+                        >
+                            HE
                         </div>
-                    </div>
+                        <span
+                            style={{
+                                fontSize: "15px",
+                                fontWeight: 800,
+                                color: "white",
+                                letterSpacing: "-0.025em",
+                            }}
+                        >
+                            Haji Elektronik
+                        </span>
+                    </Link>
 
-                    <div className="flex items-center">
-                        <HeaderActions user={user} />
-                    </div>
+                    {/* Center nav */}
+                    <nav style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                        {NAV_LINKS.map(({ label, href }) => (
+                            <Link
+                                key={label}
+                                href={href}
+                                style={{
+                                    padding: "7px 14px",
+                                    borderRadius: "100px",
+                                    fontSize: "13px",
+                                    fontWeight: 500,
+                                    color: "rgba(189,213,234,0.55)",
+                                    transition: "color 0.2s, background 0.2s",
+                                    textDecoration: "none",
+                                }}
+                                onMouseEnter={e => {
+                                    const el = e.currentTarget as HTMLElement;
+                                    el.style.color = "white";
+                                    el.style.background = "rgba(87,115,153,0.12)";
+                                }}
+                                onMouseLeave={e => {
+                                    const el = e.currentTarget as HTMLElement;
+                                    el.style.color = "rgba(189,213,234,0.55)";
+                                    el.style.background = "transparent";
+                                }}
+                            >
+                                {label}
+                            </Link>
+                        ))}
+                    </nav>
+
+                    {/* Right actions */}
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+                        {/* Search button */}
+                        <button
+                            onClick={() => setSearchOpen(true)}
+                            style={{
+                                width: "36px",
+                                height: "36px",
+                                borderRadius: "50%",
+                                background: "transparent",
+                                border: "none",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                color: "rgba(189,213,234,0.5)",
+                                transition: "color 0.2s, background 0.2s",
+                            }}
+                            onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.color = "white"; el.style.background = "rgba(87,115,153,0.12)"; }}
+                            onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.color = "rgba(189,213,234,0.5)"; el.style.background = "transparent"; }}
+                        >
+                            <Search size={16} />
+                        </button>
+
+                        {user ? (
+                            <>
+                                {/* Cart */}
+                                <Link
+                                    href={route('cart.index')}
+                                    style={{
+                                        position: "relative",
+                                        width: "36px",
+                                        height: "36px",
+                                        borderRadius: "50%",
+                                        background: "transparent",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        color: "rgba(189,213,234,0.5)",
+                                        transition: "color 0.2s, background 0.2s",
+                                    }}
+                                    onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.color = "white"; el.style.background = "rgba(87,115,153,0.12)"; }}
+                                    onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.color = "rgba(189,213,234,0.5)"; el.style.background = "transparent"; }}
+                                >
+                                    <ShoppingCart size={16} />
+                                    {cartCount > 0 && (
+                                        <span
+                                            style={{
+                                                position: "absolute",
+                                                top: "2px",
+                                                right: "2px",
+                                                width: "16px",
+                                                height: "16px",
+                                                borderRadius: "50%",
+                                                background: "#FE5F55",
+                                                color: "white",
+                                                fontSize: "9px",
+                                                fontWeight: 800,
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                            }}
+                                        >
+                                            {cartCount}
+                                        </span>
+                                    )}
+                                </Link>
+
+                                {/* Avatar dropdown */}
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <button
+                                            style={{
+                                                width: "32px",
+                                                height: "32px",
+                                                borderRadius: "50%",
+                                                background: "linear-gradient(135deg, #577399, #3d5a80)",
+                                                border: "none",
+                                                cursor: "pointer",
+                                                color: "white",
+                                                fontSize: "12px",
+                                                fontWeight: 800,
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                transition: "opacity 0.2s",
+                                            }}
+                                            onMouseEnter={e => ((e.currentTarget as HTMLElement).style.opacity = "0.8")}
+                                            onMouseLeave={e => ((e.currentTarget as HTMLElement).style.opacity = "1")}
+                                        >
+                                            {user.name.charAt(0).toUpperCase()}
+                                        </button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent
+                                        align="end"
+                                        className="w-52"
+                                        style={{ background: "#0d1f33", border: "1px solid rgba(87,115,153,0.2)", color: "#BDD5EA" }}
+                                    >
+                                        <div style={{ padding: "10px 12px 8px", borderBottom: "1px solid rgba(87,115,153,0.15)" }}>
+                                            <p style={{ fontSize: "13px", fontWeight: 600, color: "white", margin: 0 }}>{user.name}</p>
+                                            <p style={{ fontSize: "11px", color: "#577399", margin: "2px 0 0" }}>{user.email as string}</p>
+                                        </div>
+                                        {(user.role as string) === 'admin' ? (
+                                            <DropdownMenuItem asChild>
+                                                <Link href={route('dashboard')} className="flex items-center gap-2" style={{ color: "#BDD5EA", fontSize: "13px" }}>
+                                                    <LayoutDashboard size={14} /> Dashboard
+                                                </Link>
+                                            </DropdownMenuItem>
+                                        ) : (
+                                            <>
+                                                <DropdownMenuItem asChild>
+                                                    <Link href={route('addresses.index')} className="flex items-center gap-2" style={{ color: "#BDD5EA", fontSize: "13px" }}>
+                                                        <UserIcon size={14} /> Profil & Alamat
+                                                    </Link>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem asChild>
+                                                    <Link href={route('orders.index')} className="flex items-center gap-2" style={{ color: "#BDD5EA", fontSize: "13px" }}>
+                                                        <ShoppingBag size={14} /> Pesanan Saya
+                                                    </Link>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem asChild>
+                                                    <Link href={route('customer.installments.index')} className="flex items-center gap-2" style={{ color: "#BDD5EA", fontSize: "13px" }}>
+                                                        <CreditCard size={14} /> Angsuran
+                                                    </Link>
+                                                </DropdownMenuItem>
+                                            </>
+                                        )}
+                                        <DropdownMenuSeparator style={{ background: "rgba(87,115,153,0.15)" }} />
+                                        <DropdownMenuItem asChild>
+                                            <Link href={route('logout')} method="post" as="button" className="w-full flex items-center gap-2" style={{ color: "#FE5F55", fontSize: "13px" }}>
+                                                <LogOut size={14} /> Log Out
+                                            </Link>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </>
+                        ) : (
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                <Link
+                                    href={route('login')}
+                                    style={{
+                                        padding: "7px 16px",
+                                        borderRadius: "100px",
+                                        fontSize: "13px",
+                                        fontWeight: 500,
+                                        color: "rgba(189,213,234,0.6)",
+                                        transition: "color 0.2s",
+                                        textDecoration: "none",
+                                    }}
+                                    onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "white")}
+                                    onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "rgba(189,213,234,0.6)")}
+                                >
+                                    Masuk
+                                </Link>
+                                <Link
+                                    href={route('register')}
+                                    style={{
+                                        padding: "8px 18px",
+                                        borderRadius: "100px",
+                                        fontSize: "13px",
+                                        fontWeight: 600,
+                                        color: "white",
+                                        background: "#FE5F55",
+                                        textDecoration: "none",
+                                        transition: "transform 0.2s, background 0.2s",
+                                    }}
+                                    onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = "#e84a40"; el.style.transform = "translateY(-1px)"; }}
+                                    onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = "#FE5F55"; el.style.transform = "translateY(0)"; }}
+                                >
+                                    Daftar
+                                </Link>
+                            </div>
+                        )}
                     </div>
                 </div>
             </header>
-            
-            {/* Global Spacer to offset the floating navbar on all pages */}
-            <div className={cn(
-                "w-full shrink-0 transition-all duration-300",
-                isTopBarVisible ? "h-36 lg:h-40" : "h-28 lg:h-32"
-            )}></div>
+
+            {/* Spacer */}
+            <div style={{ height: "68px" }} />
         </>
     );
 }
-

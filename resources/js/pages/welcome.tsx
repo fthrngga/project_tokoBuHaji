@@ -8,31 +8,29 @@ import HorizontalProductScroll from './welcome/Partials/HorizontalProductScroll'
 import EditorialCraftsmanship from './welcome/Partials/EditorialCraftsmanship';
 
 export default function Welcome() {
-    const { auth, featuredProducts, recommendedProducts } = usePage<{ auth: SharedData['auth'], featuredProducts: Product[], recommendedProducts: Product[] }>().props;
+    const { auth, featuredProducts, recommendedProducts } = usePage<{
+        auth: SharedData['auth'];
+        featuredProducts: Product[];
+        recommendedProducts: Product[];
+    }>().props;
 
     return (
         <>
-            <Head title="Haji Elektronik - Perabotan & Elektronik Premium" />
-            <div className="flex min-h-screen w-full flex-col bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans antialiased selection:bg-slate-200 selection:text-slate-900">
+            <Head title="Haji Elektronik — Elektronik & Mebel" />
+            <div style={{ background: "#080f1a", color: "#F7F7FF", fontFamily: "Inter, system-ui, sans-serif" }}>
                 <Header user={auth.user} />
 
-                <main className="flex-1">
+                <main>
                     <HeroSection />
-                    
                     <CategoryBento />
-
-                    <HorizontalProductScroll 
-                        products={featuredProducts} 
-                        title="Terbaru di Koleksi Kami" 
-                        subtitle="Eksplorasi inovasi terbaru untuk menyempurnakan rumah Anda." 
+                    <HorizontalProductScroll
+                        products={featuredProducts}
+                        title="Produk Terbaru"
                     />
-
                     <EditorialCraftsmanship />
-
-                    <HorizontalProductScroll 
-                        products={recommendedProducts} 
-                        title={auth.user ? "Kurasi Khusus Anda" : "Mungkin Anda Suka"} 
-                        subtitle="Rekomendasi yang dipersonalisasi dari koleksi terbaik kami." 
+                    <HorizontalProductScroll
+                        products={recommendedProducts}
+                        title={auth.user ? "Untuk Anda" : "Produk Pilihan"}
                     />
                 </main>
 
@@ -41,4 +39,3 @@ export default function Welcome() {
         </>
     );
 }
-

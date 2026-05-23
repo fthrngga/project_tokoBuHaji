@@ -180,127 +180,153 @@ export default function Checkout({ cartItems, total, addresses }: Props) {
             <Head title="Checkout Pesanan - Haji Elektronik" />
             <Toaster richColors closeButton position="top-center" />
 
-            <div className="flex min-h-screen w-full flex-col bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-200">
+        <div className="flex min-h-screen w-full flex-col" style={{ background: '#0d1e2e', color: '#F7F7FF' }}>
                 <Header user={auth.user} />
 
-                <main className="flex-1 py-12">
+                <main className="flex-1 py-10">
                     <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="mb-8">
-                            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Checkout Pesanan</h1>
-                            <p className="mt-2 text-gray-500 dark:text-gray-400">Lengkapi alamat pengiriman dan konfirmasi pesanan Anda.</p>
+                            <p className="text-xs font-bold uppercase tracking-[0.25em] text-orange-500 mb-2">— Pembelian</p>
+                            <h1 className="text-3xl font-extrabold text-white">Checkout Pesanan</h1>
+                            <p className="mt-2 text-slate-400">Konfirmasi alamat pengiriman dan rincian pesanan Anda.</p>
                         </div>
 
                         <form onSubmit={handleSubmit} className="lg:grid lg:grid-cols-12 lg:gap-12 items-start">
                             {/* Kolom Kiri: Form Alamat */}
                             <div className="lg:col-span-7 space-y-8">
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle className="text-lg flex justify-between items-center">
-                                            Alamat Pengiriman
-                                            <Link href={route('addresses.index')} className="text-sm font-normal text-blue-600 hover:underline">
-                                                Kelola Alamat
-                                            </Link>
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
+                            <div className="overflow-hidden rounded-2xl" style={{ border: '1px solid rgba(87,115,153,0.2)', background: '#1a2d42' }}>
+                                <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid rgba(87,115,153,0.15)' }}>
+                                    <h2 className="font-semibold text-white">Alamat Pengiriman</h2>
+                                    <Link href={route('addresses.index')} className="text-sm font-medium transition-colors" style={{ color: '#BDD5EA' }}
+                                        onMouseEnter={e => (e.currentTarget.style.color = '#FE5F55')}
+                                        onMouseLeave={e => (e.currentTarget.style.color = '#BDD5EA')}
+                                    >
+                                        Kelola Alamat
+                                    </Link>
+                                </div>
+                                <div className="p-5 space-y-3">
                                         {addresses.length > 0 ? (
                                             <div className="grid gap-3">
                                                 {addresses.map((addr) => (
-                                                    <div 
+                                                    <div
                                                         key={addr.id}
                                                         onClick={() => setSelectedAddressId(addr.id)}
-                                                        className={`p-4 border rounded-lg cursor-pointer transition-all ${selectedAddressId === addr.id ? 'border-black bg-slate-50' : 'hover:border-gray-400'}`}
+                                                        className={`p-4 rounded-xl border-2 cursor-pointer transition-all`}
+                                                        style={selectedAddressId === addr.id
+                                                            ? { borderColor: '#577399', background: 'rgba(87,115,153,0.15)' }
+                                                            : { borderColor: 'rgba(87,115,153,0.12)', background: 'rgba(87,115,153,0.05)' }
+                                                        }
                                                     >
-                                                        <div className="flex justify-between items-start">
-                                                            <div>
-                                                                <p className="font-bold text-sm">{addr.recipient_name} <span className="text-gray-400 font-normal">({addr.label})</span></p>
-                                                                <p className="text-xs text-gray-500 mt-1">{addr.phone_number}</p>
-                                                                <p className="text-xs mt-2 line-clamp-2">{addr.address_detail}, {addr.city}</p>
+                                                        <div className="flex justify-between items-start gap-3">
+                                                            <div className="flex-1">
+                                                                <div className="flex items-center gap-2">
+                                                                    <p className="font-bold text-sm text-white">{addr.recipient_name}</p>
+                                                                    <span className="rounded-full border border-white/20 px-2 py-0.5 text-[10px] text-slate-400">{addr.label}</span>
+                                                                    {addr.is_primary && <span className="rounded-full bg-orange-500/20 border border-orange-500/30 px-2 py-0.5 text-[10px] font-semibold text-orange-400">Utama</span>}
+                                                                </div>
+                                                                <p className="text-xs text-slate-500 mt-1">{addr.phone_number}</p>
+                                                                <p className="text-sm text-slate-400 mt-2 leading-relaxed line-clamp-2">{addr.address_detail}, {addr.city}, {addr.province}</p>
                                                             </div>
-                                                            {selectedAddressId === addr.id && <Check className="w-4 h-4" />}
+                                                            {selectedAddressId === addr.id && (
+                                                                    <div className="flex-shrink-0 flex h-6 w-6 items-center justify-center rounded-full" style={{ background: '#577399' }}>
+                                                                        <Check className="w-3.5 h-3.5 text-white" />
+                                                                    </div>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 ))}
                                             </div>
                                         ) : (
-                                            <div className="text-center py-6">
-                                                <p className="text-sm text-muted-foreground mb-4">Anda belum memiliki alamat tersimpan.</p>
-                                                <Button asChild variant="outline">
-                                                    <Link href={route('addresses.index')}>Tambah Alamat Baru</Link>
-                                                </Button>
+                                            <div className="text-center py-8">
+                                                <p className="text-sm text-slate-400 mb-4">Anda belum memiliki alamat tersimpan.</p>
+                                                <Link
+                                                    href={route('addresses.index')}
+                                                    className="inline-flex items-center gap-2 rounded-xl border border-orange-500/40 bg-orange-500/10 px-5 py-2.5 text-sm font-medium text-orange-400 hover:bg-orange-500/20 transition-all"
+                                                >
+                                                    Tambah Alamat Baru
+                                                </Link>
                                             </div>
                                         )}
-                                    </CardContent>
-                                </Card>
+                                </div>
+                            </div>
                             </div>
 
                             {/* Kolom Kanan: Ringkasan Order */}
                             <div className="lg:col-span-5 mt-8 lg:mt-0 space-y-6">
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>Rincian Pesanan</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="space-y-4">
+                                <div className="overflow-hidden rounded-2xl" style={{ border: '1px solid rgba(87,115,153,0.2)', background: '#1a2d42' }}>
+                                    <div className="border-b border-white/10 px-6 py-4">
+                                        <h2 className="font-semibold text-white">Rincian Pesanan</h2>
+                                        <p className="text-xs text-slate-500 mt-0.5">{cartItems.length} item</p>
+                                    </div>
+                                    <div className="p-5">
+                                        <div className="space-y-4 divide-y divide-white/5">
                                             {cartItems.map((item) => (
-                                                <div key={item.id} className="flex gap-4 items-start pb-4 border-b border-gray-100 dark:border-gray-800 last:border-0 last:pb-0">
-                                                    <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border border-gray-200 bg-white">
+                                                <div key={item.id} className="flex gap-3 items-start pt-4 first:pt-0">
+                                                    <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl border border-white/10 bg-slate-800">
                                                         <img
-                                                            src={item.product.images.length > 0 ? `/storage/${item.product.images[0].image_path}` : 'https://placehold.co/100x100'}
-                                                            className="h-full w-full object-contain"
+                                                            src={item.product.images.length > 0 ? `/storage/${item.product.images[0].image_path}` : 'https://placehold.co/100x100/1e293b/94a3b8'}
+                                                            className="h-full w-full object-contain p-1"
                                                         />
                                                     </div>
-                                                    <div className="flex-1">
-                                                        <p className="text-sm font-medium text-gray-900 dark:text-white line-clamp-2">{item.product.name}</p>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-semibold text-white line-clamp-2">{item.product.name}</p>
                                                         {item.variant && (
-                                                            <div className="mt-0.5 flex flex-wrap gap-1">
+                                                            <div className="mt-1 flex flex-wrap gap-1">
                                                                 {Object.entries(item.variant.options).map(([k, v]) => (
-                                                                    <span key={k} className="inline-flex items-center text-[10px] font-medium text-gray-500 dark:text-gray-400">
+                                                                    <span key={k} className="rounded border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] text-slate-400">
                                                                         {k}: {v}
                                                                     </span>
                                                                 ))}
                                                             </div>
                                                         )}
-                                                        <div className="flex justify-between items-center mt-1">
-                                                            <p className="text-xs text-gray-500">{item.quantity} x {formatCurrency(item.product.price)}</p>
-                                                            <p className="text-sm font-medium">{formatCurrency(item.quantity * item.product.price)}</p>
+                                                        <div className="flex justify-between items-center mt-2">
+                                                            <p className="text-xs text-slate-500">{item.quantity} × {formatCurrency(item.product.price)}</p>
+                                                            <p className="text-sm font-bold text-white">{formatCurrency(item.quantity * item.product.price)}</p>
                                                         </div>
                                                     </div>
                                                 </div>
                                             ))}
                                         </div>
 
-                                        <Separator className="my-6" />
-
-                                        <div className="space-y-2">
+                                        <div className="mt-6 border-t border-white/10 pt-4 space-y-2.5">
                                             <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 dark:text-gray-400">Total Harga Barang</span>
-                                                <span className="font-medium">{formatCurrency(total)}</span>
+                                                <span className="text-slate-400">Total Harga Barang</span>
+                                                <span className="font-medium text-white">{formatCurrency(total)}</span>
                                             </div>
                                             <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 dark:text-gray-400">Ongkos Kirim</span>
-                                                <span className="italic text-blue-600">Akan didiskusikan via chat</span>
+                                                <span className="text-slate-400">Ongkos Kirim</span>
+                                                <span className="text-orange-400 italic text-xs">Negosiasi via chat</span>
                                             </div>
-                                            <div className="flex justify-between text-lg font-bold pt-4">
-                                                <span>Total Sementara</span>
-                                                <span>{formatCurrency(total)}</span>
+                                            <div className="flex justify-between text-lg font-extrabold pt-3 border-t border-white/10">
+                                                <span className="text-white">Total Sementara</span>
+                                                <span className="text-orange-400">{formatCurrency(total)}</span>
                                             </div>
                                         </div>
-                                    </CardContent>
-                                    <CardFooter>
-                                        <Button className="w-full h-12 text-base bg-black hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200" disabled={processing || loadingLocation}>
-                                            {processing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
-                                            {processing ? "Memproses Pesanan..." : "Konfirmasi & Lanjut Chat"}
-                                        </Button>
-                                    </CardFooter>
-                                </Card>
 
-                                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-900">
-                                    <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">Informasi Penting</h4>
-                                    <ul className="list-disc list-inside text-xs text-blue-700 dark:text-blue-400 space-y-1">
-                                        <li>Ongkos kirim akan ditentukan setelah Anda mengkonfirmasi alamat.</li>
-                                        <li>Admin akan menghubungi Anda melalui fitur pesan untuk kesepakatan akhir.</li>
-                                        <li>Pembayaran dilakukan setelah ada kesepakatan total biaya.</li>
+                                        {/* Submit Button */}
+                                        <button
+                                            type="submit"
+                                            disabled={processing || loadingLocation || !selectedAddressId}
+                                            className="group relative mt-5 w-full overflow-hidden rounded-xl py-3.5 font-semibold text-white shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                            style={{ background: 'linear-gradient(135deg, #FE5F55, #e84a40)', boxShadow: '0 8px 24px rgba(254,95,85,0.3)' }}
+                                        >
+                                            <span className="absolute inset-0 -translate-x-full transition-transform duration-500 group-hover:translate-x-0" style={{ background: 'linear-gradient(135deg, #e84a40, #FE5F55)' }} />
+                                            <span className="relative flex items-center justify-center gap-2">
+                                                {processing
+                                                    ? <><Loader2 className="h-4 w-4 animate-spin" /> Memproses Pesanan...</>
+                                                    : <><ArrowRight className="h-4 w-4" /> Konfirmasi &amp; Lanjut Chat</>}
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Info box */}
+                                <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
+                                    <h4 className="text-sm font-semibold text-amber-400 mb-2">ℹ️ Informasi Penting</h4>
+                                    <ul className="space-y-1.5 text-xs text-amber-300/80">
+                                        <li className="flex items-start gap-2"><span className="text-amber-500 mt-0.5">•</span> Ongkos kirim ditentukan setelah Anda mengkonfirmasi alamat.</li>
+                                        <li className="flex items-start gap-2"><span className="text-amber-500 mt-0.5">•</span> Admin akan menghubungi Anda melalui fitur pesan untuk kesepakatan akhir.</li>
+                                        <li className="flex items-start gap-2"><span className="text-amber-500 mt-0.5">•</span> Pembayaran dilakukan setelah ada kesepakatan total biaya.</li>
                                     </ul>
                                 </div>
                             </div>
