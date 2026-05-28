@@ -66,6 +66,7 @@ class ProductController extends Controller
             'variants' => 'nullable|array',
             'variants.*.id' => 'nullable|exists:product_variants,id',
             'variants.*.sku' => 'nullable|string|max:255',
+            'variants.*.price' => 'nullable|numeric|min:0',
             'variants.*.stock' => 'required_with:variants|integer|min:0',
             'variants.*.options' => 'required_with:variants|array',
         ]);
@@ -130,6 +131,7 @@ class ProductController extends Controller
             'variants' => 'nullable|array',
             'variants.*.id' => 'nullable|exists:product_variants,id',
             'variants.*.sku' => 'nullable|string|max:255',
+            'variants.*.price' => 'nullable|numeric|min:0',
             'variants.*.stock' => 'required_with:variants|integer|min:0',
             'variants.*.options' => 'required_with:variants|array',
         ]);

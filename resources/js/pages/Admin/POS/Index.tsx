@@ -172,15 +172,15 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
             <div className="flex h-[calc(100vh-theme(spacing.16)-theme(spacing.8))] flex-col lg:flex-row gap-6 p-4 md:p-6 overflow-hidden">
                 
                 {/* Kiri: Daftar Produk */}
-                <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-slate-900 rounded-xl border shadow-sm overflow-hidden">
-                    <div className="p-4 border-b">
+                <div className="flex-1 flex flex-col min-h-0 bg-card text-card-foreground rounded-xl border border-border shadow-sm overflow-hidden">
+                    <div className="p-4 border-b border-border">
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                             <Input 
                                 placeholder="Cari nama produk, SKU, atau kategori..." 
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-9 bg-slate-50 dark:bg-slate-800 border-none focus-visible:ring-1"
+                                className="pl-9 bg-secondary border-none focus-visible:ring-1"
                             />
                         </div>
                     </div>
@@ -197,21 +197,21 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
                                     <div 
                                         key={product.id} 
                                         onClick={() => handleProductClick(product)}
-                                        className="group cursor-pointer rounded-xl border bg-card hover:border-blue-500 hover:shadow-md transition-all overflow-hidden flex flex-col h-full"
+                                        className="group cursor-pointer rounded-xl border border-border bg-card hover:border-primary hover:shadow-md transition-all overflow-hidden flex flex-col h-full"
                                     >
-                                        <div className="aspect-square bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
+                                        <div className="aspect-square bg-secondary relative overflow-hidden">
                                             {product.images && product.images.length > 0 ? (
                                                 <img 
                                                     src={`/storage/${product.images[0].image_path}`} 
                                                     alt={product.name} 
-                                                    className="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal transition-transform group-hover:scale-105"
+                                                    className="w-full h-full object-cover bg-white transition-transform group-hover:scale-105"
                                                 />
                                             ) : (
                                                 <div className="flex items-center justify-center h-full">
                                                     <Package className="h-8 w-8 text-slate-300" />
                                                 </div>
                                             )}
-                                            <div className="absolute top-2 right-2 bg-white/90 dark:bg-black/90 px-2 py-0.5 rounded text-[10px] font-bold shadow-sm">
+                                            <div className="absolute top-2 right-2 bg-black/70 px-2 py-0.5 rounded text-[10px] font-bold shadow-sm text-white">
                                                 Stok: {product.stock}
                                             </div>
                                         </div>
@@ -230,10 +230,10 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
                 </div>
 
                 {/* Kanan: Keranjang & Pembayaran */}
-                <div className="w-full lg:w-[400px] xl:w-[450px] flex flex-col min-h-0 bg-white dark:bg-slate-900 rounded-xl border shadow-sm">
-                    <div className="p-4 border-b flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 rounded-t-xl">
+                <div className="w-full lg:w-[400px] xl:w-[450px] flex flex-col min-h-0 bg-card text-card-foreground rounded-xl border border-border shadow-sm">
+                    <div className="p-4 border-b border-border flex items-center justify-between bg-secondary/50 rounded-t-xl">
                         <div className="flex items-center gap-2">
-                            <ShoppingCart className="h-5 w-5 text-blue-600" />
+                            <ShoppingCart className="h-5 w-5 text-primary" />
                             <h2 className="font-semibold text-lg">Keranjang</h2>
                         </div>
                         <Badge variant="secondary">{cart.reduce((acc, item) => acc + item.quantity, 0)} Item</Badge>
@@ -249,7 +249,7 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
                             <div className="space-y-4">
                                 {cart.map(item => (
                                     <div key={item.cart_id} className="flex gap-3 items-center group">
-                                        <div className="w-12 h-12 rounded-md bg-slate-100 dark:bg-slate-800 overflow-hidden shrink-0 flex items-center justify-center">
+                                        <div className="w-12 h-12 rounded-md bg-secondary overflow-hidden shrink-0 flex items-center justify-center">
                                             {item.images && item.images.length > 0 ? (
                                                 <img src={`/storage/${item.images[0].image_path}`} className="w-full h-full object-cover" />
                                             ) : (
@@ -287,18 +287,18 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
                         )}
                     </div>
 
-                    <div className="p-4 border-t bg-slate-50 dark:bg-slate-800/50 rounded-b-xl">
+                    <div className="p-4 border-t border-border bg-secondary/30 rounded-b-xl">
                         <form onSubmit={handleCheckout} className="space-y-4">
                             <div className="flex items-center justify-between mb-4">
-                                <span className="font-semibold text-slate-600 dark:text-slate-300">Total Pembayaran</span>
-                                <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{formatCurrency(totalAmount)}</span>
+                                <span className="font-semibold text-muted-foreground">Total Pembayaran</span>
+                                <span className="text-2xl font-bold text-primary">{formatCurrency(totalAmount)}</span>
                             </div>
 
                             <div className="space-y-3">
                                 <div className="space-y-1.5">
-                                    <Label className="text-xs text-slate-500">Pelanggan</Label>
+                                    <Label className="text-xs text-muted-foreground">Pelanggan</Label>
                                     <Select value={data.customer_id} onValueChange={(val) => setData('customer_id', val === 'walk_in' ? '' : val)}>
-                                        <SelectTrigger className="bg-white dark:bg-slate-900">
+                                        <SelectTrigger className="bg-card">
                                             <SelectValue placeholder="Walk-in Customer (Baru)" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -317,7 +317,7 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
                                                 placeholder="Nama Pelanggan" 
                                                 value={data.customer_name} 
                                                 onChange={e => setData('customer_name', e.target.value)}
-                                                className="bg-white dark:bg-slate-900 text-sm"
+                                                className="bg-card text-sm"
                                                 required={!data.customer_id}
                                             />
                                         </div>
@@ -326,7 +326,7 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
                                                 placeholder="No. WhatsApp" 
                                                 value={data.customer_phone} 
                                                 onChange={e => setData('customer_phone', e.target.value)}
-                                                className="bg-white dark:bg-slate-900 text-sm"
+                                                className="bg-card text-sm"
                                             />
                                         </div>
                                     </div>
@@ -334,9 +334,9 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
 
                                 <div className="grid grid-cols-2 gap-2">
                                     <div className="space-y-1.5">
-                                        <Label className="text-xs text-slate-500">Metode Bayar</Label>
+                                        <Label className="text-xs text-muted-foreground">Metode Bayar</Label>
                                         <Select value={data.payment_method} onValueChange={val => setData('payment_method', val)}>
-                                            <SelectTrigger className="bg-white dark:bg-slate-900">
+                                            <SelectTrigger className="bg-card">
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -347,13 +347,13 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
                                         </Select>
                                     </div>
                                     <div className="space-y-1.5">
-                                        <Label className="text-xs text-slate-500">Uang Diterima (Opsional)</Label>
+                                        <Label className="text-xs text-muted-foreground">Uang Diterima (Opsional)</Label>
                                         <Input 
                                             type="number"
                                             placeholder={totalAmount.toString()}
                                             value={data.amount_paid}
                                             onChange={e => setData('amount_paid', e.target.value)}
-                                            className="bg-white dark:bg-slate-900 text-sm font-medium"
+                                            className="bg-card text-sm font-medium"
                                         />
                                     </div>
                                 </div>

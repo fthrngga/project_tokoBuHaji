@@ -154,7 +154,7 @@ export default function Index({ products }: ProductIndexProps) {
                                         const isLowStock = product.stock <= minStock;
 
                                         return (
-                                            <TableRow key={product.id} className={isLowStock ? 'bg-amber-50/50 dark:bg-amber-900/10' : ''}>
+                                            <TableRow key={product.id} className={isLowStock ? 'bg-secondary' : ''}>
                                                 <TableCell className="font-medium text-muted-foreground">{product.sku}</TableCell>
                                                 <TableCell className="font-medium">{product.name}</TableCell>
                                                 <TableCell>{product.category?.name || '-'}</TableCell>
@@ -165,7 +165,7 @@ export default function Index({ products }: ProductIndexProps) {
                                                         {product.stock}
                                                     </span>
                                                     {isLowStock && (
-                                                        <Badge variant="outline" className="ml-2 border-amber-300 text-amber-700 bg-amber-100 text-[10px]">
+                                                        <Badge variant="outline" className="ml-2 border-amber-500/30 text-amber-500 bg-amber-500/10 text-[10px]">
                                                             LOW
                                                         </Badge>
                                                     )}
@@ -183,7 +183,7 @@ export default function Index({ products }: ProductIndexProps) {
                                                             <Button 
                                                                 variant="ghost" 
                                                                 size="icon" 
-                                                                className="text-amber-600 hover:text-amber-700 hover:bg-amber-100" 
+                                                                className="text-amber-500 hover:text-amber-400 hover:bg-amber-500/20" 
                                                                 onClick={() => openRestockModal(product)} 
                                                                 title="Ajukan Restock"
                                                             >

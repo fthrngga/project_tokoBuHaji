@@ -82,9 +82,9 @@ export default function ArrearsMonitoring({ credits }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Daftar Tunggakan & Penagihan" />
             <div className="flex flex-col gap-4 p-4">
-                <div className="flex flex-col gap-2 rounded-xl border bg-card p-6 text-card-foreground shadow border-red-200">
-                    <h1 className="text-2xl font-bold tracking-tight text-red-800">Daftar Tunggakan & Penagihan</h1>
-                    <p className="text-muted-foreground text-red-600">
+                <div className="flex flex-col gap-2 rounded-xl border border-border bg-card p-6 text-card-foreground shadow">
+                    <h1 className="text-2xl font-bold tracking-tight text-foreground">Daftar Tunggakan & Penagihan</h1>
+                    <p className="text-muted-foreground">
                         Kelola pelanggan yang mengalami kendala pembayaran angsuran.
                     </p>
                 </div>
@@ -93,8 +93,8 @@ export default function ArrearsMonitoring({ credits }: Props) {
                 <div className="flex space-x-2 border-b overflow-x-auto pb-2">
                     <button
                         className={`px-4 py-2 text-sm font-medium border rounded-md transition-colors whitespace-nowrap ${filterTab === 'semua'
-                            ? 'bg-red-600 text-white border-red-600'
-                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-secondary text-secondary-foreground border-border hover:bg-secondary/80'
                             }`}
                         onClick={() => setFilterTab('semua')}
                     >
@@ -102,8 +102,8 @@ export default function ArrearsMonitoring({ credits }: Props) {
                     </button>
                     <button
                         className={`px-4 py-2 text-sm font-medium border rounded-md transition-colors whitespace-nowrap ${filterTab === 'lewat_1'
-                            ? 'bg-red-600 text-white border-red-600'
-                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-secondary text-secondary-foreground border-border hover:bg-secondary/80'
                             }`}
                         onClick={() => setFilterTab('lewat_1')}
                     >
@@ -111,8 +111,8 @@ export default function ArrearsMonitoring({ credits }: Props) {
                     </button>
                     <button
                         className={`px-4 py-2 text-sm font-medium border rounded-md transition-colors whitespace-nowrap ${filterTab === 'lewat_3'
-                            ? 'bg-red-600 text-white border-red-600'
-                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-secondary text-secondary-foreground border-border hover:bg-secondary/80'
                             }`}
                         onClick={() => setFilterTab('lewat_3')}
                     >
@@ -120,15 +120,15 @@ export default function ArrearsMonitoring({ credits }: Props) {
                     </button>
                 </div>
 
-                <div className="rounded-xl border bg-card shadow overflow-hidden border-red-200">
+                <div className="rounded-xl border border-border bg-card shadow overflow-hidden">
                     <Table>
-                        <TableHeader className="bg-red-50">
+                        <TableHeader className="bg-secondary/30">
                             <TableRow>
-                                <TableHead className="font-bold text-red-900">Pelanggan</TableHead>
-                                <TableHead className="font-bold text-red-900">No. HP</TableHead>
-                                <TableHead className="font-bold text-red-900">Masa Menunggak</TableHead>
-                                <TableHead className="font-bold text-red-900">Nominal Tunggakan</TableHead>
-                                <TableHead className="text-right font-bold text-red-900">Aksi</TableHead>
+                                <TableHead className="font-bold text-muted-foreground">Pelanggan</TableHead>
+                                <TableHead className="font-bold text-muted-foreground">No. HP</TableHead>
+                                <TableHead className="font-bold text-muted-foreground">Masa Menunggak</TableHead>
+                                <TableHead className="font-bold text-muted-foreground">Nominal Tunggakan</TableHead>
+                                <TableHead className="text-right font-bold text-muted-foreground">Aksi</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -154,7 +154,7 @@ export default function ArrearsMonitoring({ credits }: Props) {
                                             {credit.tunggakan_months} Bulan
                                         </Badge>
                                     </TableCell>
-                                    <TableCell className="font-bold text-red-600">
+                                    <TableCell className="font-bold text-primary">
                                         {formatCurrency(credit.tunggakan_amount || 0)}
                                     </TableCell>
                                     <TableCell className="text-right">
@@ -185,7 +185,7 @@ export default function ArrearsMonitoring({ credits }: Props) {
 
                 {/* Detail Modal */}
                 <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-                    <DialogContent className="sm:max-w-[700px] bg-red-50/50">
+                    <DialogContent className="sm:max-w-[700px] bg-card">
                         <DialogHeader>
                             <DialogTitle>Detail Tunggakan Pelanggan</DialogTitle>
                             <DialogDescription>
@@ -222,23 +222,23 @@ export default function ArrearsMonitoring({ credits }: Props) {
                                     {/* Kolom Kanan: Rincian Kredit */}
                                     <div className="space-y-4">
                                         <h3 className="font-semibold border-b pb-2">Rincian Kredit</h3>
-                                        <div className="space-y-2 text-sm bg-red-100 p-3 rounded-lg border border-red-200">
+                                        <div className="space-y-2 text-sm bg-secondary/30 p-3 rounded-lg border border-border">
                                             <div>
                                                 <span className="text-muted-foreground block text-xs">Tagihan Per Bulan</span>
                                                 <span className="font-medium">{formatCurrency(selectedCredit.installment_amount)}</span>
                                             </div>
                                             <div>
                                                 <span className="text-muted-foreground block text-xs">Progress Pembayaran</span>
-                                                <span className="font-bold text-red-700">
+                                                <span className="font-bold text-foreground">
                                                     {selectedCredit.installments_paid || 0} / {selectedCredit.duration_months} Bulan
                                                 </span>
                                             </div>
-                                            <div className="pt-2 mt-2 border-t border-red-300">
+                                            <div className="pt-2 mt-2 border-t border-border">
                                                 <span className="text-muted-foreground block text-xs">Tunggakan Kritis</span>
-                                                <span className="font-bold text-xl text-red-600 block">
+                                                <span className="font-bold text-xl text-primary block">
                                                     {formatCurrency(selectedCredit.tunggakan_amount || 0)}
                                                 </span>
-                                                <span className="text-red-500 font-medium text-xs">
+                                                <span className="text-primary font-medium text-xs">
                                                     Menunggak selama {selectedCredit.tunggakan_months} Bulan
                                                 </span>
                                             </div>

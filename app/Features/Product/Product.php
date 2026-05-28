@@ -43,6 +43,8 @@ class Product extends Model
     ];
     // SYNC_CASTS_END
 
+    protected $appends = ['selling_price'];
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
@@ -56,5 +58,14 @@ class Product extends Model
     public function variants(): HasMany
     {
         return $this->hasMany(ProductVariant::class);
+    }
+
+    public function getSellingPriceAttribute()
+    {
+        $costPrice = $this->price ?? 0;
+        $markup = $costPrice * 0.10;
+        $sellingPrice = $costPrice + $markup;
+        // Smart rounding up to nearest 1000
+        return ceil($sellingPrice / 1000) * 1000;
     }
 }

@@ -75,7 +75,8 @@ export default function Show({ product }: Props) {
     ? (!selectedVariant ? "Pilih Varian Dulu" : (selectedVariant.stock > 0 ? "Tambahkan ke Keranjang" : "Pre-order Sekarang"))
     : (product.stock > 0 ? "Tambahkan ke Keranjang" : "Stok Habis");
 
-  const installmentEstimate = Math.ceil(product.price * 1.5 / 10);
+  const activePrice = selectedVariant && selectedVariant.selling_price ? selectedVariant.selling_price : product.selling_price;
+  const installmentEstimate = Math.ceil(activePrice * 1.5 / 10);
 
   return (
     <>
@@ -172,7 +173,7 @@ export default function Show({ product }: Props) {
                 {/* Price */}
                 <div className="mt-6 p-5 rounded-2xl" style={{ background: 'rgba(87,115,153,0.12)', border: '1px solid rgba(87,115,153,0.25)' }}>
                   <p className="text-4xl font-black text-white">
-                    {formatCurrency(product.price)}
+                    {formatCurrency(activePrice)}
                   </p>
                   <div className="mt-2 flex items-center gap-3">
                     <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold" style={{ border: '1px solid rgba(74,222,128,0.3)', background: 'rgba(74,222,128,0.1)', color: '#4ade80' }}>

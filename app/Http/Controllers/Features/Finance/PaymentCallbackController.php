@@ -96,11 +96,6 @@ class PaymentCallbackController extends Controller
 
     private function recordFinancialTransaction($log)
     {
-        // Prevent duplicate transaction entry
-        if (\App\Models\FinancialTransaction::where('related_type', PaymentLog::class)->where('related_id', $log->id)->exists()) {
-            return;
-        }
-
         $category = 'other';
         $description = '';
         if ($log->type === 'down_payment') {
@@ -112,6 +107,14 @@ class PaymentCallbackController extends Controller
         } elseif ($log->type === 'installment') {
             $category = 'installment';
             $description = "Pembayaran Angsuran ke-{$log->installment_number} otomatis via Midtrans";
+        }
+
+        // Prevent duplicate transaction entry. Added category check to avoid collision with stale data.
+        if (\App\Models\FinancialTransaction::where('related_type', PaymentLog::class)
+            ->where('related_id', $log->id)
+            ->where('category', $category)
+            ->exists()) {
+            return;
         }
 
         \App\Models\FinancialTransaction::create([

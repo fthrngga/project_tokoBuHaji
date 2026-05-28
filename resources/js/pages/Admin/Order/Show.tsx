@@ -179,7 +179,7 @@ export default function Show({ order }: Props) {
                             </CardTitle>
                         </CardHeader>
                         <CardContent 
-                            className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 dark:bg-slate-900/50" 
+                            className="flex-1 overflow-y-auto p-4 space-y-4 bg-secondary/20 dark:bg-slate-900/50" 
                             ref={scrollRef}
                             onScroll={handleScroll} 
                         >
@@ -228,9 +228,9 @@ export default function Show({ order }: Props) {
                     {/* RIGHT COLUMN: Details & Actions */}
                     <div className="space-y-6 overflow-y-auto h-full pr-1">
                         {/* Action Panel: Set Invoice */}
-                        <Card className="border-blue-200 bg-blue-50/50">
+                        <Card className="border-border bg-secondary/30">
                             <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-bold text-blue-900 flex items-center gap-2">
+                                <CardTitle className="text-sm font-bold text-primary flex items-center gap-2">
                                     <DollarSign className="h-4 w-4" />
                                     {order.credit?.payment_method === 'cash' ? 'Payment Proof' : 'Submit Invoice / Update Order'}
                                 </CardTitle>

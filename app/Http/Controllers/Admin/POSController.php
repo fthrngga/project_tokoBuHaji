@@ -119,14 +119,15 @@ class POSController extends Controller
 
                 $product->decrement('stock', $item['quantity']);
 
-                $subtotal = $product->price * $item['quantity'];
+                $price = $variant ? $variant->selling_price : $product->selling_price;
+                $subtotal = $price * $item['quantity'];
                 $totalAmount += $subtotal;
 
                 $orderItemsData[] = [
                     'product_id' => $product->id,
                     'product_variant_id' => $item['product_variant_id'] ?? null,
                     'quantity' => $item['quantity'],
-                    'price' => $product->price,
+                    'price' => $price,
                     'subtotal' => $subtotal,
                 ];
             }
@@ -170,10 +171,22 @@ class POSController extends Controller
             ]);
             
             // 6. Buat Log Pembayaran
-            $payment->paymentLogs()->create([
+            $paymentLog = $payment->paymentLogs()->create([
                 'type' => 'down_payment', // <--- UBAH INI: Gunakan 'down_payment' agar sesuai dengan ENUM database
                 'amount' => $totalAmount,
                 'status' => 'verified', 
+            ]);
+
+            // 7. Catat ke Laporan Keuangan (Uang Masuk dari POS)
+            \App\Models\FinancialTransaction::create([
+                'transaction_date' => now(),
+                'type' => 'income',
+                'category' => 'cash_sale',
+                'amount' => $totalAmount,
+                'description' => "Penjualan Langsung POS (Order #{$order->id})",
+                'payment_method' => $request->payment_method ?? 'cash',
+                'related_id' => $paymentLog->id,
+                'related_type' => \App\Models\PaymentLog::class,
             ]);
 
             return redirect()->route('admin.pos.index')->with('success', 'Transaksi berhasil disimpan!');

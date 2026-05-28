@@ -82,25 +82,115 @@ class WelcomeController extends Controller
             }),
         ];
 
-        // Statistik Finance
-        $financeData = [
-            'totalCashIn' => PaymentLog::where('status', 'verified')->sum('amount'),
-            'totalReceivables' => Payment::where('status', '!=', 'paid_off')
-                ->where('payment_method', 'credit')
-                ->get()
-                ->sum(fn($p) => ($p->installment_amount * $p->duration_months) - ($p->installment_amount * $p->installments_paid)),
-            'pendingVerifications' => PaymentLog::where('status', 'pending')->whereNotNull('proof_path')->count(),
-            'activeInstallments' => Payment::where('payment_method', 'credit')->where('status', '!=', 'paid_off')->count(),
-            'recentPayments' => PaymentLog::with('payment.order.user')->latest()->take(5)->get()->map(function($log) {
-                return [
-                    'id' => 'PAY-' . str_pad($log->id, 4, '0', STR_PAD_LEFT),
-                    'customer' => $log->payment->order->user->name ?? 'N/A',
-                    'type' => str_replace('_', ' ', ucfirst($log->type)),
-                    'amount' => $log->amount,
-                    'status' => $log->status == 'pending' ? 'pending_verification' : ($log->status == 'verified' ? 'verified' : 'overdue'),
-                    'date' => $log->created_at->diffForHumans(),
+        // Statistik Finance Baru (Berdasarkan Wireframe)
+        $totalIncome = \App\Models\FinancialTransaction::where('type', 'income')->sum('amount');
+        $totalExpense = \App\Models\FinancialTransaction::where('type', 'expense')->sum('amount');
+        $saldoKas = $totalIncome - $totalExpense;
+
+        // Tunggakan Pelanggan
+        $activeCredits = \App\Models\Payment::with(['order.user', 'customer.user', 'paymentLogs'])
+            ->where('payment_method', 'credit')
+            ->where('status', 'ongoing')
+            ->get();
+            
+        $arrearsList = [];
+        foreach ($activeCredits as $credit) {
+            $monthsElapsed = min($credit->duration_months, $credit->created_at->diffInMonths(now()));
+            $expectedTotal = $monthsElapsed * $credit->installment_amount;
+            $actualVerified = $credit->paymentLogs->where('type', 'installment')->where('status', 'verified')->sum('amount');
+            $tunggakan_amount = max(0, $expectedTotal - $actualVerified);
+            $tunggakan_months = $credit->installment_amount > 0 ? floor($tunggakan_amount / $credit->installment_amount) : 0;
+            
+            if ($tunggakan_months > 0) {
+                $arrearsList[] = [
+                    'id' => $credit->id,
+                    'customer_name' => $credit->customer->user->name ?? $credit->order->user->name ?? 'Guest',
+                    'amount' => $tunggakan_amount,
+                    'months' => $tunggakan_months,
                 ];
-            }),
+            }
+        }
+        
+        // Urutkan berdasarkan tunggakan terbesar
+        usort($arrearsList, function($a, $b) { return $b['amount'] <=> $a['amount']; });
+        $topArrears = array_slice($arrearsList, 0, 5);
+
+        // Arus Kas Harian (7 Hari Terakhir)
+        $startDate = now()->subDays(6)->startOfDay();
+        $dailyTransactions = \App\Models\FinancialTransaction::where('transaction_date', '>=', $startDate)
+            ->selectRaw('DATE(transaction_date) as date, type, SUM(amount) as total')
+            ->groupBy('date', 'type')
+            ->get();
+            
+        $cashFlowData = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $dayName = now()->subDays($i)->format('D');
+            $income = $dailyTransactions->where('date', $date)->where('type', 'income')->first()->total ?? 0;
+            $expense = $dailyTransactions->where('date', $date)->where('type', 'expense')->first()->total ?? 0;
+            $cashFlowData[] = [
+                'day' => $dayName,
+                'income' => $income,
+                'expense' => $expense
+            ];
+        }
+
+        // Tunai vs Kredit (Pemasukan)
+        $cashIncome = \App\Models\FinancialTransaction::where('type', 'income')->where('category', 'cash_sale')->sum('amount');
+        $creditIncome = \App\Models\FinancialTransaction::where('type', 'income')->whereIn('category', ['down_payment', 'installment', 'full_payment'])->sum('amount');
+
+        // Recent Transactions
+        $recentTransactions = \App\Models\FinancialTransaction::latest('transaction_date')
+            ->latest('id')
+            ->take(5)
+            ->get()
+            ->map(function($t) {
+                return [
+                    'id' => $t->id,
+                    'desc' => $t->description,
+                    'amount' => $t->amount,
+                    'time' => $t->transaction_date->diffForHumans(),
+                    'type' => $t->type,
+                ];
+            });
+
+        // Notifications
+        $pendingRestocks = \App\Models\RestockRequest::where('status', 'pending')->with('product')->get();
+        $inventoryAlerts = \App\Features\Product\Product::where('stock', '<', 5)->where('is_published', true)->get();
+
+        $notifications = [];
+        foreach($pendingRestocks as $r) {
+            $notifications[] = [
+                'id' => 'req-'.$r->id,
+                'type' => 'restock',
+                'title' => 'Pending Restock Request',
+                'message' => "Request untuk {$r->product->name}",
+                'time' => $r->created_at->diffForHumans()
+            ];
+        }
+        foreach($inventoryAlerts as $p) {
+            $notifications[] = [
+                'id' => 'alert-'.$p->id,
+                'type' => 'inventory',
+                'title' => 'Inventory Alert',
+                'message' => "Stok {$p->name} menipis (Sisa {$p->stock})",
+                'time' => 'Terbaru'
+            ];
+        }
+
+        $financeData = [
+            'totalIncome' => $totalIncome,
+            'totalExpense' => $totalExpense,
+            'saldoKas' => $saldoKas,
+            'arrearsCount' => count($arrearsList),
+            'topArrears' => $topArrears,
+            'cashFlowChart' => $cashFlowData,
+            'paymentStats' => [
+                'cash' => $cashIncome,
+                'credit' => $creditIncome
+            ],
+            'recentTransactions' => $recentTransactions,
+            'notifications' => $notifications
         ];
 
         return Inertia::render('dashboard', [

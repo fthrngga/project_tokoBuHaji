@@ -236,24 +236,24 @@ export default function InstallmentPayment({ customers, history = [], filters = 
                     {/* RIGHT COLUMN: DYNAMIC CONTENT */}
                     <div className="hidden md:block space-y-6">
                         {selectedCustomer ? (
-                            <Card className="border-blue-200 bg-blue-50/50">
+                            <Card className="border-border bg-secondary/30">
                                 <CardHeader>
-                                    <CardTitle className="text-blue-900">Detail Pelanggan</CardTitle>
+                                    <CardTitle className="text-foreground">Detail Pelanggan</CardTitle>
                                 </CardHeader>
-                                <CardContent className="space-y-4 text-blue-800">
+                                <CardContent className="space-y-4 text-foreground">
                                     <div>
-                                        <p className="text-xs text-blue-600 uppercase font-semibold">Nama Pelanggan</p>
+                                        <p className="text-xs text-primary uppercase font-semibold">Nama Pelanggan</p>
                                         <p className="text-lg font-medium">{selectedCustomer.customer_name}</p>
                                         <p className="text-sm opacity-80">{selectedCustomer.customer_address}</p>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <p className="text-xs text-blue-600 uppercase font-semibold">Sisa Tenor</p>
+                                            <p className="text-xs text-primary uppercase font-semibold">Sisa Tenor</p>
                                             <p className="text-2xl font-bold">{selectedCustomer.remaining_months} <span className="text-sm font-normal">Bulan</span></p>
                                         </div>
                                         <div>
-                                            <p className="text-xs text-blue-600 uppercase font-semibold">Angsuran / Bln</p>
-                                            <p className="text-lg font-medium text-blue-800">
+                                            <p className="text-xs text-primary uppercase font-semibold">Angsuran / Bln</p>
+                                            <p className="text-lg font-medium text-foreground">
                                                 {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(selectedCustomer.installment_amount)}
                                             </p>
                                             {(selectedCustomer.tunggakan || 0) > 0 && (
@@ -266,20 +266,20 @@ export default function InstallmentPayment({ customers, history = [], filters = 
                                             )}
                                         </div>
                                     </div>
-                                    <div className="pt-4 border-t border-blue-200">
-                                        <p className="text-xs text-blue-600 uppercase font-semibold">Status Pembayaran</p>
+                                    <div className="pt-4 border-t border-border">
+                                        <p className="text-xs text-primary uppercase font-semibold">Status Pembayaran</p>
                                         <div className="flex items-center gap-2 mt-1">
-                                            <CheckCircle2 className="w-5 h-5 text-green-600" />
-                                            <span className="font-medium">Kredit Aktif (Lancar)</span>
+                                            <CheckCircle2 className="w-5 h-5 text-green-500" />
+                                            <span className="font-medium text-foreground">Kredit Aktif (Lancar)</span>
                                         </div>
                                     </div>
                                 </CardContent>
                             </Card>
                         ) : (
-                            <Alert className="bg-green-50 border-green-200 text-green-800">
-                                <CheckCircle2 className="h-4 w-4" />
+                            <Alert className="bg-secondary/30 border-border text-foreground">
+                                <CheckCircle2 className="h-4 w-4 text-green-500" />
                                 <AlertTitle>Tips Admin</AlertTitle>
-                                <AlertDescription className="mt-2">
+                                <AlertDescription className="mt-2 text-muted-foreground">
                                     Pilih pelanggan dari dropdown di sebelah kiri untuk melihat detail tagihan.
                                     Pastikan uang tunai sudah diterima sebelum menyimpan data.
                                 </AlertDescription>

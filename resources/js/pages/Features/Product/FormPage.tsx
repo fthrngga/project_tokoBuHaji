@@ -167,12 +167,16 @@ export default function FormPage({ auth, item, categories = [] }: PageProps<{ it
                                         </div>
                                         <div className="space-y-2"><Label htmlFor="description">Deskripsi</Label><Textarea id="description" value={data.description} onChange={e => setData('description', e.target.value)} rows={5} /></div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                            <div className="space-y-2"><Label htmlFor="price">Harga</Label><Input id="price" type="number" value={data.price} onChange={e => setData('price', parseInt(e.target.value))} /></div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="price">Harga Modal (Dasar)</Label>
+                                                <div className="text-[10px] text-muted-foreground leading-tight">Sistem akan +10% untuk Harga Jual.</div>
+                                                <Input id="price" type="number" value={data.price} onChange={e => setData('price', parseInt(e.target.value))} />
+                                            </div>
                                             <div className="space-y-2"><Label htmlFor="stock">Stok</Label><Input id="stock" type="number" value={data.stock} onChange={e => setData('stock', parseInt(e.target.value))} /></div>
                                             <div className="space-y-2"><Label htmlFor="weight">Berat (gram)</Label><Input id="weight" type="number" value={data.weight} onChange={e => setData('weight', parseInt(e.target.value))} /></div>
                                             <div className="space-y-2"><Label htmlFor="category_id">Kategori</Label><Select value={String(data.category_id)} onValueChange={value => setData('category_id', parseInt(value))}><SelectTrigger><SelectValue placeholder="Pilih kategori..." /></SelectTrigger><SelectContent>{categories.map(category => (<SelectItem key={category.id} value={String(category.id)}>{category.name}</SelectItem>))}</SelectContent></Select></div>
                                         </div>
-                                        <div className="space-y-2"><Label>Spesifikasi</Label><div className="space-y-3 rounded-md border bg-slate-50/50 p-4">{specItems.map((spec, index) => (<div key={index} className="flex items-center gap-2"><Input placeholder="Key (e.g., Dimensi)" value={spec.key} onChange={(e) => handleSpecChange(index, 'key', e.target.value)} className="flex-1 bg-white" /><Input placeholder="Value (e.g., 120cm x 60cm)" value={spec.value} onChange={(e) => handleSpecChange(index, 'value', e.target.value)} className="flex-1 bg-white" /><Button type="button" variant="ghost" size="icon" onClick={() => removeSpecItem(index)} className="text-slate-500 hover:bg-red-100 hover:text-red-600"><X className="h-4 w-4" /></Button></div>))}<Button type="button" variant="outline" size="sm" onClick={addSpecItem} className="mt-2 border-dashed"><PlusCircle className="mr-2 h-4 w-4" /> Tambah Spesifikasi</Button></div></div>
+                                        <div className="space-y-2"><Label>Spesifikasi</Label><div className="space-y-3 rounded-md border border-border bg-secondary/20 p-4">{specItems.map((spec, index) => (<div key={index} className="flex items-center gap-2"><Input placeholder="Key (e.g., Dimensi)" value={spec.key} onChange={(e) => handleSpecChange(index, 'key', e.target.value)} className="flex-1 bg-background" /><Input placeholder="Value (e.g., 120cm x 60cm)" value={spec.value} onChange={(e) => handleSpecChange(index, 'value', e.target.value)} className="flex-1 bg-background" /><Button type="button" variant="ghost" size="icon" onClick={() => removeSpecItem(index)} className="text-muted-foreground hover:bg-red-500/20 hover:text-red-500"><X className="h-4 w-4" /></Button></div>))}<Button type="button" variant="outline" size="sm" onClick={addSpecItem} className="mt-2 border-dashed"><PlusCircle className="mr-2 h-4 w-4" /> Tambah Spesifikasi</Button></div></div>
                                     </CardContent>
                                 </Card>
 
@@ -247,7 +251,7 @@ export default function FormPage({ auth, item, categories = [] }: PageProps<{ it
                                                     const newVariants = combinations.map(comb => {
                                                         const existing = data.variants.find(v => JSON.stringify(v.options) === JSON.stringify(comb));
                                                         if (existing) return existing;
-                                                        return { sku: '', stock: 0, options: comb };
+                                                        return { sku: '', stock: 0, price: '', options: comb };
                                                     });
                                                     
                                                     setData('variants', newVariants);
@@ -256,27 +260,35 @@ export default function FormPage({ auth, item, categories = [] }: PageProps<{ it
                                             
                                             {data.variants.length > 0 ? (
                                                 <div className="border rounded-md divide-y overflow-hidden">
-                                                    <div className="grid grid-cols-12 gap-2 p-3 bg-slate-50 font-medium text-sm text-slate-500">
-                                                        <div className="col-span-6">Kombinasi Opsi</div>
-                                                        <div className="col-span-3">SKU</div>
+                                                    <div className="grid grid-cols-12 gap-2 p-3 bg-secondary/30 border-b border-border font-medium text-sm text-muted-foreground">
+                                                        <div className="col-span-4">Kombinasi Opsi</div>
+                                                        <div className="col-span-2">SKU</div>
+                                                        <div className="col-span-3">Harga Modal (Opsional)</div>
                                                         <div className="col-span-2">Stok</div>
                                                         <div className="col-span-1"></div>
                                                     </div>
                                                     {data.variants.map((variant, i) => (
                                                         <div key={i} className="grid grid-cols-12 gap-2 p-3 items-center">
-                                                            <div className="col-span-6 flex flex-wrap gap-1">
+                                                            <div className="col-span-4 flex flex-wrap gap-1">
                                                                 {Object.entries(variant.options).map(([k, v]) => (
-                                                                    <span key={k} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                                                    <span key={k} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/20 text-primary">
                                                                         {k}: {v}
                                                                     </span>
                                                                 ))}
                                                             </div>
-                                                            <div className="col-span-3">
+                                                            <div className="col-span-2">
                                                                 <Input value={variant.sku || ''} onChange={e => {
                                                                     const newV = [...data.variants];
                                                                     newV[i].sku = e.target.value;
                                                                     setData('variants', newV);
                                                                 }} placeholder="SKU" />
+                                                            </div>
+                                                            <div className="col-span-3">
+                                                                <Input type="number" placeholder="Harga Modal" value={variant.price || ''} onChange={e => {
+                                                                    const newV = [...data.variants];
+                                                                    newV[i].price = e.target.value ? parseInt(e.target.value) : '';
+                                                                    setData('variants', newV);
+                                                                }} min={0} />
                                                             </div>
                                                             <div className="col-span-2">
                                                                 <Input type="number" value={variant.stock} onChange={e => {
@@ -294,7 +306,7 @@ export default function FormPage({ auth, item, categories = [] }: PageProps<{ it
                                                     ))}
                                                 </div>
                                             ) : (
-                                                <div className="text-center py-6 text-sm text-slate-500 border rounded-md bg-slate-50">
+                                                <div className="text-center py-6 text-sm text-muted-foreground border border-border rounded-md bg-secondary/20">
                                                     Belum ada varian. Tambahkan opsi di atas lalu klik "Buat Kombinasi Otomatis".
                                                 </div>
                                             )}
@@ -324,7 +336,7 @@ export default function FormPage({ auth, item, categories = [] }: PageProps<{ it
                                                 </div>
                                             ))}
                                         </div>
-                                        <Label htmlFor="images" className="p-4 border-2 border-dashed rounded-md text-center block cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors"><UploadCloud className="mx-auto h-10 w-10 text-slate-400" /><span className="mt-2 block text-sm font-medium text-slate-700">Klik untuk memilih file</span><p className="text-xs text-slate-500">PNG, JPG, WEBP hingga 2MB</p><Input id="images" type="file" multiple className="sr-only" onChange={handleImageChange} /></Label>
+                                        <Label htmlFor="images" className="p-4 border-2 border-dashed border-border rounded-md text-center block cursor-pointer hover:border-primary hover:bg-secondary/50 transition-colors"><UploadCloud className="mx-auto h-10 w-10 text-muted-foreground" /><span className="mt-2 block text-sm font-medium text-foreground">Klik untuk memilih file</span><p className="text-xs text-muted-foreground">PNG, JPG, WEBP hingga 2MB</p><Input id="images" type="file" multiple className="sr-only" onChange={handleImageChange} /></Label>
                                         {errors.images && <p className="text-sm text-red-500 mt-1">{errors.images}</p>}
                                         {progress && (<div className="w-full bg-gray-200 rounded-full h-2.5"><div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${progress.percentage}%` }}></div></div>)}
                                     </CardContent>

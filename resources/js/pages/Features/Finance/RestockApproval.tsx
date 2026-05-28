@@ -36,10 +36,10 @@ export default function RestockApproval({ restockRequests }: { restockRequests: 
                     <p className="text-muted-foreground text-sm">Tinjau dan setujui permintaan penambahan stok dari tim Sales/Gudang.</p>
                 </div>
 
-                <div className="bg-white dark:bg-slate-900 border rounded-xl shadow-sm overflow-hidden">
+                <div className="bg-card text-card-foreground border border-border rounded-xl shadow-sm overflow-hidden">
                     <Table>
                         <TableHeader>
-                            <TableRow className="bg-slate-50 dark:bg-slate-800/50">
+                            <TableRow className="bg-secondary/30">
                                 <TableHead>Produk</TableHead>
                                 <TableHead>Diajukan Oleh</TableHead>
                                 <TableHead className="text-center">Stok Saat Ini</TableHead>
@@ -62,20 +62,20 @@ export default function RestockApproval({ restockRequests }: { restockRequests: 
                                             {req.notes && <p className="text-xs text-orange-600 mt-1 italic">"{req.notes}"</p>}
                                         </TableCell>
                                         <TableCell className="text-sm">{req.user.name}</TableCell>
-                                        <TableCell className="text-center font-medium text-red-500">{req.product.stock}</TableCell>
-                                        <TableCell className="text-center font-bold text-blue-600">+{req.requested_quantity}</TableCell>
+                                        <TableCell className="text-center font-medium text-red-400">{req.product.stock}</TableCell>
+                                        <TableCell className="text-center font-bold text-primary">+{req.requested_quantity}</TableCell>
                                         <TableCell>
-                                            {req.status === 'pending' && <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200"><Clock className="w-3 h-3 mr-1"/> Menunggu</Badge>}
-                                            {req.status === 'approved' && <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Disetujui</Badge>}
-                                            {req.status === 'rejected' && <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Ditolak</Badge>}
+                                            {req.status === 'pending' && <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20"><Clock className="w-3 h-3 mr-1"/> Menunggu</Badge>}
+                                            {req.status === 'approved' && <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">Disetujui</Badge>}
+                                            {req.status === 'rejected' && <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20">Ditolak</Badge>}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             {req.status === 'pending' ? (
                                                 <div className="flex justify-end gap-2">
-                                                    <Button size="sm" variant="outline" className="border-red-200 text-red-600 hover:bg-red-50" onClick={() => handleAction(req.id, 'reject')}>
+                                                    <Button size="sm" variant="outline" className="border-red-500/20 text-red-400 hover:bg-red-500/10" onClick={() => handleAction(req.id, 'reject')}>
                                                         <X className="w-4 h-4 mr-1" /> Tolak
                                                     </Button>
-                                                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={() => handleAction(req.id, 'approve')}>
+                                                    <Button size="sm" className="bg-primary hover:opacity-90 text-primary-foreground" onClick={() => handleAction(req.id, 'approve')}>
                                                         <Check className="w-4 h-4 mr-1" /> Setujui
                                                     </Button>
                                                 </div>

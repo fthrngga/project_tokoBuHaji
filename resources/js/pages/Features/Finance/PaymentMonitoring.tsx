@@ -334,7 +334,7 @@ export default function CreditMonitoring({ credits, cashPayments }: Props) {
                                 {/* Customer Info */}
                                 <div className="space-y-2">
                                     <h3 className="text-sm font-semibold border-b pb-1">Informasi Pelanggan</h3>
-                                    <div className="grid grid-cols-2 gap-4 text-sm bg-slate-50 p-3 rounded">
+                                    <div className="grid grid-cols-2 gap-4 text-sm bg-secondary/30 p-3 rounded">
                                         <div>
                                             <span className="text-muted-foreground block text-xs">Nama Pelanggan</span>
                                             <span className="font-medium">{selectedCredit.customer?.user?.name}</span>
@@ -353,10 +353,10 @@ export default function CreditMonitoring({ credits, cashPayments }: Props) {
                                 {/* Financial Details */}
                                 <div className="space-y-2">
                                     <h3 className="text-sm font-semibold border-b pb-1">Rincian Pembayaran</h3>
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm bg-blue-50/50 p-4 rounded border border-blue-100">
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm bg-secondary/20 p-4 rounded border border-border">
                                         <div>
                                             <span className="text-muted-foreground block text-xs">Total Order</span>
-                                            <span className="font-bold text-blue-700">{formatCurrency(selectedCredit.order.total_amount)}</span>
+                                            <span className="font-bold text-primary">{formatCurrency(selectedCredit.order.total_amount)}</span>
                                         </div>
                                         <div>
                                             <span className="text-muted-foreground block text-xs">Uang Muka (DP)</span>
@@ -495,7 +495,7 @@ export default function CreditMonitoring({ credits, cashPayments }: Props) {
                                         />
                                     </div>
                                 </div>
-                                <div className="border rounded-lg p-2 bg-slate-50 flex justify-center items-center min-h-[200px]">
+                                <div className="border border-border rounded-lg p-2 bg-secondary/20 flex justify-center items-center min-h-[200px]">
                                     <img
                                         src={`/storage/${selectedLog.proof_path}`}
                                         alt="Bukti Pembayaran"
@@ -543,7 +543,7 @@ export default function CreditMonitoring({ credits, cashPayments }: Props) {
 
                                 <div className="space-y-2">
                                     <Label>Bukti Pembayaran</Label>
-                                    <div className="border rounded-lg p-2 bg-slate-50 flex justify-center items-center min-h-[200px]">
+                                    <div className="border border-border rounded-lg p-2 bg-secondary/20 flex justify-center items-center min-h-[200px]">
                                         {selectedPayment.proof_of_payment_path ? (
                                             <img
                                                 src={`/storage/${selectedPayment.proof_of_payment_path}`}
@@ -583,7 +583,7 @@ export default function CreditMonitoring({ credits, cashPayments }: Props) {
                     </DialogHeader>
                     {selectedCredit && (
                         <div className="grid gap-4 py-4">
-                            <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg space-y-2">
+                            <div className="p-4 bg-secondary/30 border border-border rounded-lg space-y-2">
                                 <div className="flex justify-between text-sm">
                                     <span className="text-muted-foreground">Pelanggan:</span>
                                     <span className="font-medium">{selectedCredit.customer?.user?.name}</span>
@@ -592,9 +592,9 @@ export default function CreditMonitoring({ credits, cashPayments }: Props) {
                                     <span className="text-muted-foreground">Sisa Bulan:</span>
                                     <span className="font-medium">{selectedCredit.duration_months - (selectedCredit.installments_paid || 0)} Bulan</span>
                                 </div>
-                                <div className="flex justify-between text-sm font-bold pt-2 border-t border-blue-200 mt-2">
+                                <div className="flex justify-between text-sm font-bold pt-2 border-t border-border mt-2">
                                     <span>Total Harus Dibayar:</span>
-                                    <span className="text-blue-700">
+                                    <span className="text-primary">
                                         {formatCurrency((selectedCredit.duration_months - (selectedCredit.installments_paid || 0)) * selectedCredit.installment_amount)}
                                     </span>
                                 </div>

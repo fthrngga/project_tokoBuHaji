@@ -132,13 +132,13 @@ export default function Reports({ summary = { income: 0, expense: 0, profit: 0 }
                             <p className="text-xs text-muted-foreground">Gaji karyawan, operasional, dan lain-lain</p>
                         </CardContent>
                     </Card>
-                    <Card className={summary.profit >= 0 ? 'border-green-200' : 'border-red-200'}>
+                    <Card className={summary.profit >= 0 ? 'border-primary/30 shadow-sm' : 'border-red-500/30 shadow-sm'}>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Laba Bersih</CardTitle>
-                            <ArrowRightCircle className={`h-4 w-4 ${summary.profit >= 0 ? 'text-green-500' : 'text-red-500'}`} />
+                            <CardTitle className="text-sm font-medium">Total Saldo Kas</CardTitle>
+                            <ArrowRightCircle className={`h-4 w-4 ${summary.profit >= 0 ? 'text-primary' : 'text-red-500'}`} />
                         </CardHeader>
                         <CardContent>
-                            <div className={`text-2xl font-bold ${summary.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            <div className={`text-2xl font-bold ${summary.profit >= 0 ? 'text-primary' : 'text-red-500'}`}>
                                 {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(summary.profit)}
                             </div>
                             <p className="text-xs text-muted-foreground">Pemasukan dikurangi seluruh pengeluaran</p>
@@ -193,31 +193,35 @@ export default function Reports({ summary = { income: 0, expense: 0, profit: 0 }
 
             {/* Expense Modal */}
             <Dialog open={isExpenseModalOpen} onOpenChange={setIsExpenseModalOpen}>
-                <DialogContent className="sm:max-w-[425px]">
-                    <form onSubmit={submitExpense}>
-                        <DialogHeader>
-                            <DialogTitle>Catat Pengeluaran Baru</DialogTitle>
-                            <DialogDescription>
-                                Masukkan detail pengeluaran untuk gaji, operasional, atau restock.
-                            </DialogDescription>
-                        </DialogHeader>
+                <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden border-border bg-card">
+                    <div className="bg-gradient-to-r from-red-500/10 to-orange-500/10 px-6 py-5 border-b border-border">
+                        <DialogTitle className="text-xl font-bold flex items-center gap-2 text-foreground">
+                            <ArrowDownCircle className="w-5 h-5 text-red-500" />
+                            Catat Pengeluaran Baru
+                        </DialogTitle>
+                        <DialogDescription className="mt-1 text-xs text-muted-foreground">
+                            Masukkan detail pengeluaran untuk gaji, operasional, atau restock.
+                        </DialogDescription>
+                    </div>
+                    <form onSubmit={submitExpense} className="px-6 pb-6 pt-2">
                         <div className="grid gap-4 py-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="date">Tanggal</Label>
+                                <Label htmlFor="date" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tanggal</Label>
                                 <Input 
                                     id="date" 
                                     type="date" 
                                     value={data.transaction_date}
                                     onChange={(e) => setData('transaction_date', e.target.value)}
                                     required
+                                    className="bg-secondary/20"
                                 />
                                 {errors.transaction_date && <span className="text-sm text-red-500">{errors.transaction_date}</span>}
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="category">Kategori Pengeluaran</Label>
+                                <Label htmlFor="category" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tujuan Pengeluaran</Label>
                                 <Select value={data.category} onValueChange={(val) => setData('category', val)}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Pilih Kategori" />
+                                    <SelectTrigger className="bg-secondary/20">
+                                        <SelectValue placeholder="Pilih Tujuan Pengeluaran" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="operational">Operasional Toko (Listrik, Air, dll)</SelectItem>
@@ -228,7 +232,7 @@ export default function Reports({ summary = { income: 0, expense: 0, profit: 0 }
                                 {errors.category && <span className="text-sm text-red-500">{errors.category}</span>}
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="amount">Nominal (Rp)</Label>
+                                <Label htmlFor="amount" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nominal (Rp)</Label>
                                 <Input 
                                     id="amount" 
                                     type="number" 
@@ -237,39 +241,41 @@ export default function Reports({ summary = { income: 0, expense: 0, profit: 0 }
                                     value={data.amount}
                                     onChange={(e) => setData('amount', e.target.value)}
                                     required
+                                    className="bg-secondary/20 text-lg font-bold text-red-500"
                                 />
                                 {errors.amount && <span className="text-sm text-red-500">{errors.amount}</span>}
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="payment_method">Metode Pembayaran</Label>
+                                <Label htmlFor="payment_method" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Bayar Melalui</Label>
                                 <Select value={data.payment_method} onValueChange={(val) => setData('payment_method', val)}>
-                                    <SelectTrigger>
+                                    <SelectTrigger className="bg-secondary/20">
                                         <SelectValue placeholder="Pilih Metode" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="cash">Tunai / Cash</SelectItem>
-                                        <SelectItem value="transfer">Transfer Bank</SelectItem>
+                                        <SelectItem value="cash">Uang Kas Toko</SelectItem>
+                                        <SelectItem value="transfer">Rekening Bank Toko</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 {errors.payment_method && <span className="text-sm text-red-500">{errors.payment_method}</span>}
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="description">Keterangan</Label>
+                                <Label htmlFor="description" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Keterangan</Label>
                                 <Textarea 
                                     id="description" 
                                     placeholder="Contoh: Pembayaran tagihan listrik bulan ini"
                                     value={data.description}
                                     onChange={(e) => setData('description', e.target.value)}
                                     required
+                                    className="bg-secondary/20 min-h-[80px]"
                                 />
                                 {errors.description && <span className="text-sm text-red-500">{errors.description}</span>}
                             </div>
                         </div>
-                        <DialogFooter>
+                        <DialogFooter className="mt-2">
                             <Button type="button" variant="outline" onClick={() => setIsExpenseModalOpen(false)}>
                                 Batal
                             </Button>
-                            <Button type="submit" disabled={processing} className="bg-red-600 hover:bg-red-700 text-white">
+                            <Button type="submit" disabled={processing} className="bg-red-600 hover:bg-red-700 text-white font-semibold shadow-md">
                                 {processing ? 'Menyimpan...' : 'Simpan Pengeluaran'}
                             </Button>
                         </DialogFooter>

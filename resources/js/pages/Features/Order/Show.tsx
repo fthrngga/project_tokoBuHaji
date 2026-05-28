@@ -236,7 +236,7 @@ export default function Show({ order }: Props) {
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent 
-                                        className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 dark:bg-slate-900/50" 
+                                        className="flex-1 overflow-y-auto p-4 space-y-4 bg-secondary/20 dark:bg-slate-900/50" 
                                         ref={scrollRef}
                                         onScroll={handleScroll} 
                                     >
@@ -465,8 +465,8 @@ export default function Show({ order }: Props) {
                                                                         </div>
                                                                     )}
                                                                     {/* Simulasi Kredit Otomatis */}
-                                                                    <div className="bg-blue-50/50 border border-blue-100 rounded p-3 mt-4">
-                                                                        <h4 className="text-xs font-semibold text-blue-800 uppercase mb-2">Simulasi Kredit (10 Bulan)</h4>
+                                                                    <div className="bg-secondary/20 border border-border rounded p-3 mt-4">
+                                                                        <h4 className="text-xs font-semibold text-primary uppercase mb-2">Simulasi Kredit (10 Bulan)</h4>
                                                                         <div className="grid grid-cols-2 gap-1 text-xs">
                                                                             <div className="text-muted-foreground">Sisa Dicicil:</div>
                                                                             <div className="text-right font-medium">
@@ -564,7 +564,7 @@ export default function Show({ order }: Props) {
                                                                         ))}
                                                                     </div>
                                                                 )}
-                                                                <div className="bg-blue-50 text-blue-800 p-3 rounded text-sm mb-2 border border-blue-100">
+                                                                <div className="bg-secondary/30 text-foreground p-3 rounded text-sm mb-2 border border-border">
                                                                     Silakan lakukan pembayaran Lunas.
                                                                 </div>
                                                                 <MidtransButton orderId={order.id} amount={order.total_amount} type="Pembayaran Lunas" />
@@ -642,7 +642,7 @@ export default function Show({ order }: Props) {
                                                                                         ))}
                                                                                     </div>
                                                                                 )}
-                                                                                <div className="bg-blue-50 text-blue-800 p-3 rounded text-sm mb-2 border border-blue-100">
+                                                                                <div className="bg-secondary/30 text-foreground p-3 rounded text-sm mb-2 border border-border">
                                                                                     Silakan bayar Uang Muka (DP) sebesar <strong>{formatCurrency(payment.down_payment)}</strong>.
                                                                                 </div>
                                                                                 <MidtransButton orderId={order.id} amount={payment.down_payment} type="Uang Muka (DP)" />
@@ -708,7 +708,7 @@ export default function Show({ order }: Props) {
                                                                                             </Button>
                                                                                         </div>
                                                                                     )}
-                                                                                    <div className="bg-blue-50 text-blue-800 p-3 rounded text-sm mb-2 border border-blue-100">
+                                                                                    <div className="bg-secondary/30 text-foreground p-3 rounded text-sm mb-2 border border-border">
                                                                                         <strong>Tagihan Awal: Angsuran 1 (Tanpa DP)</strong>
                                                                                         <br />Nominal: <strong>{formatCurrency(payment.installment_amount)}</strong>
                                                                                     </div>

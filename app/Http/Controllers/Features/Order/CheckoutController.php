@@ -23,7 +23,8 @@ class CheckoutController extends Controller
         }
 
         $total = $cartItems->sum(function ($item) {
-            return $item->quantity * $item->product->price;
+            $price = $item->variant ? $item->variant->selling_price : $item->product->selling_price;
+            return $item->quantity * $price;
         });
 
         return \Inertia\Inertia::render('Features/Order/Checkout', [
@@ -53,7 +54,7 @@ class CheckoutController extends Controller
             ->with(['product', 'variant'])
             ->get(); // Should add check for user ownership here ideally
 
-        $totalAmount = $cartItems->sum(fn($item) => $item->quantity * $item->product->price);
+        $totalAmount = $cartItems->sum(fn($item) => $item->quantity * ($item->variant ? $item->variant->selling_price : $item->product->selling_price));
 
         // Transaction
         $order = \Illuminate\Support\Facades\DB::transaction(function () use ($request, $cartItems, $totalAmount, $ids) {
@@ -76,7 +77,7 @@ class CheckoutController extends Controller
                     'product_id' => $item->product_id,
                     'product_variant_id' => $item->product_variant_id,
                     'quantity' => $item->quantity,
-                    'price' => $item->product->price,
+                    'price' => $item->variant ? $item->variant->selling_price : $item->product->selling_price,
                 ]);
 
                 // Decrement stock (Pessimistic Locking ideally, but for now just decrement)
