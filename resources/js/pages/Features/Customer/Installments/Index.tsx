@@ -17,9 +17,9 @@ import { Input } from "@/components/ui/input";
 import { useState } from 'react';
 import axios from 'axios';
 
-function MidtransButton({ orderId, installmentAmount = 0, tunggakan = 0, onSuccess, onPayStart }: { orderId: number, installmentAmount?: number, tunggakan?: number, onSuccess?: () => void, onPayStart?: () => void }) {
+function MidtransButton({ orderId, installmentAmount = 0, tunggakan = 0, tunggakanMonths = 0, onSuccess, onPayStart }: { orderId: number, installmentAmount?: number, tunggakan?: number, tunggakanMonths?: number, onSuccess?: () => void, onPayStart?: () => void }) {
     const minBelanja = installmentAmount / 2;
-    const [amount, setAmount] = useState(installmentAmount + tunggakan);
+    const [amount, setAmount] = useState(tunggakan > 0 ? installmentAmount + tunggakan : installmentAmount);
     const [loading, setLoading] = useState(false);
 
     const handlePay = async () => {
@@ -73,36 +73,50 @@ function MidtransButton({ orderId, installmentAmount = 0, tunggakan = 0, onSucce
 
     return (
         <div className="space-y-6">
-            <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                <h4 className="text-base font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
+            <div className="bg-card text-card-foreground p-6 rounded-2xl border shadow-sm">
+                <h4 className="text-base font-bold mb-4 flex items-center gap-2">
                     <CheckCircle2 className="w-5 h-5 text-blue-600" /> Pilih Nominal Pembayaran
                 </h4>
                 <div className="space-y-4">
                     {tunggakan > 0 ? (
-                        <label className={`relative flex items-start gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${amount === installmentAmount + tunggakan ? 'border-red-500 bg-red-50 dark:bg-red-900/10 shadow-md ring-4 ring-red-500/20' : 'border-slate-200 bg-white dark:bg-slate-900 hover:border-red-300 hover:bg-red-50/50'}`}>
-                            <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white mt-0.5">
-                                {amount === installmentAmount + tunggakan && <div className="h-2.5 w-2.5 rounded-full bg-red-600" />}
-                            </div>
-                            <input
-                                type="radio"
-                                name="payment_option"
-                                checked={amount === installmentAmount + tunggakan}
-                                onChange={() => setAmount(installmentAmount + tunggakan)}
-                                className="sr-only"
-                            />
-                            <div className="flex-1">
-                                <div className={`font-bold ${amount === installmentAmount + tunggakan ? 'text-red-700 dark:text-red-400' : 'text-slate-700 dark:text-slate-300'}`}>Tagihan Penuh (+ Tunggakan)</div>
-                                <div className="text-xs text-slate-500 mt-0.5">Pokok + Sisa bulan lalu</div>
-                                <div className="text-lg font-black mt-2 text-slate-900 dark:text-white tracking-tight">
-                                    {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(installmentAmount + tunggakan)}
-                                </div>
-                                <div className="text-xs text-red-600 mt-2 font-medium bg-red-100 dark:bg-red-900/30 w-fit px-2 py-1 rounded-md">⚠️ Pembayaran sebagian dinonaktifkan karena tunggakan.</div>
-                            </div>
-                        </label>
+                        <div className="space-y-3">
+                            <div className="text-sm font-medium text-amber-600 dark:text-amber-500 mb-2">Anda memiliki tunggakan {tunggakanMonths} bulan. Pilih jumlah bulan yang ingin dibayar:</div>
+                            {Array.from({ length: Math.max(1, tunggakanMonths) }).map((_, i) => {
+                                const monthsToPay = i + 1;
+                                const isLunas = monthsToPay === Math.max(1, tunggakanMonths);
+                                const optionAmount = isLunas ? tunggakan : monthsToPay * installmentAmount;
+                                const isSelected = amount === optionAmount;
+                                return (
+                                    <label key={i} className={`relative flex items-start gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${isSelected ? 'border-amber-500 bg-amber-500/10 shadow-md ring-4 ring-amber-500/20' : 'border-border bg-background hover:border-amber-400 hover:bg-amber-500/5'}`}>
+                                        <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-input bg-background mt-0.5">
+                                            {isSelected && <div className="h-2.5 w-2.5 rounded-full bg-amber-600" />}
+                                        </div>
+                                        <input
+                                            type="radio"
+                                            name="payment_option"
+                                            checked={isSelected}
+                                            onChange={() => setAmount(optionAmount)}
+                                            className="sr-only"
+                                        />
+                                        <div className="flex-1">
+                                            <div className={`font-bold ${isSelected ? 'text-amber-600 dark:text-amber-500' : 'text-foreground'}`}>
+                                                Bayar {monthsToPay} Bulan {isLunas ? '(Lunas Tunggakan)' : ''}
+                                            </div>
+                                            <div className="text-xs text-muted-foreground mt-0.5">
+                                                {monthsToPay === 1 ? 'Hanya angsuran pokok' : `Pokok + ${monthsToPay - 1} bulan tunggakan`}
+                                            </div>
+                                            <div className="text-lg font-black mt-2 text-foreground tracking-tight">
+                                                {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(optionAmount)}
+                                            </div>
+                                        </div>
+                                    </label>
+                                );
+                            })}
+                        </div>
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <label className={`relative flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${amount === installmentAmount ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20 shadow-md ring-4 ring-blue-600/20' : 'border-slate-200 bg-white dark:bg-slate-900 hover:border-blue-300 hover:bg-blue-50/50'}`}>
-                                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white mt-0.5">
+                            <label className={`relative flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${amount === installmentAmount ? 'border-blue-600 bg-blue-500/10 shadow-md ring-4 ring-blue-600/20' : 'border-border bg-background hover:border-blue-400 hover:bg-blue-500/5'}`}>
+                                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-input bg-background mt-0.5">
                                     {amount === installmentAmount && <div className="h-2.5 w-2.5 rounded-full bg-blue-600" />}
                                 </div>
                                 <input
@@ -113,16 +127,16 @@ function MidtransButton({ orderId, installmentAmount = 0, tunggakan = 0, onSucce
                                     className="sr-only"
                                 />
                                 <div className="flex-1">
-                                    <div className={`font-bold ${amount === installmentAmount ? 'text-blue-700 dark:text-blue-400' : 'text-slate-700 dark:text-slate-300'}`}>Angsuran Pokok Saja</div>
-                                    <div className="text-xs text-slate-500 mt-0.5">Angsuran bulan ini</div>
-                                    <div className="text-lg font-black mt-2 text-slate-900 dark:text-white tracking-tight">
+                                    <div className={`font-bold ${amount === installmentAmount ? 'text-blue-600 dark:text-blue-400' : 'text-foreground'}`}>Angsuran Pokok Saja</div>
+                                    <div className="text-xs text-muted-foreground mt-0.5">Angsuran bulan ini</div>
+                                    <div className="text-lg font-black mt-2 text-foreground tracking-tight">
                                         {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(installmentAmount)}
                                     </div>
                                 </div>
                             </label>
 
-                            <label className={`relative flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${amount === minBelanja ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20 shadow-md ring-4 ring-orange-500/20' : 'border-slate-200 bg-white dark:bg-slate-900 hover:border-orange-300 hover:bg-orange-50/50'}`}>
-                                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white mt-0.5">
+                            <label className={`relative flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${amount === minBelanja ? 'border-orange-500 bg-orange-500/10 shadow-md ring-4 ring-orange-500/20' : 'border-border bg-background hover:border-orange-400 hover:bg-orange-500/5'}`}>
+                                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-input bg-background mt-0.5">
                                     {amount === minBelanja && <div className="h-2.5 w-2.5 rounded-full bg-orange-600" />}
                                 </div>
                                 <input
@@ -133,9 +147,9 @@ function MidtransButton({ orderId, installmentAmount = 0, tunggakan = 0, onSucce
                                     className="sr-only"
                                 />
                                 <div className="flex-1">
-                                    <div className={`font-bold ${amount === minBelanja ? 'text-orange-700 dark:text-orange-400' : 'text-slate-700 dark:text-slate-300'}`}>Keringanan (50%)</div>
-                                    <div className="text-xs text-slate-500 mt-0.5">Batas minimal bulan ini</div>
-                                    <div className="text-lg font-black mt-2 text-slate-900 dark:text-white tracking-tight">
+                                    <div className={`font-bold ${amount === minBelanja ? 'text-orange-600 dark:text-orange-400' : 'text-foreground'}`}>Keringanan (50%)</div>
+                                    <div className="text-xs text-muted-foreground mt-0.5">Batas minimal bulan ini</div>
+                                    <div className="text-lg font-black mt-2 text-foreground tracking-tight">
                                         {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(minBelanja)}
                                     </div>
                                 </div>
@@ -173,6 +187,7 @@ interface Installment {
         admin_notes: string;
     }[];
     tunggakan: number;
+    tunggakan_months: number;
     totalBillThisMonth: number;
     activePayments?: {
         id: number;
@@ -190,15 +205,15 @@ export default function InstallmentIndex({ auth, installments }: { auth: any, in
     const activeInstallmentsWithPending = installments.filter(i => (i.activePayments?.length || 0) > 0);
 
     return (
-        <div className="flex min-h-screen w-full flex-col bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-200">
+        <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
             <Head title="Cek Status Angsuran" />
             <Header user={auth?.user} />
 
             <main className="flex-1 py-12">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
                     <div className="text-center mb-8">
-                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Cek Status Angsuran Anda</h1>
-                        <p className="mt-2 text-gray-500">Pantau sisa tagihan dan riwayat pembayaran cicilan Anda di sini.</p>
+                        <h1 className="text-3xl font-bold text-foreground">Cek Status Angsuran Anda</h1>
+                        <p className="mt-2 text-muted-foreground">Pantau sisa tagihan dan riwayat pembayaran cicilan Anda di sini.</p>
                     </div>
 
                     {/* Search Bar (Optional decoration) */}
@@ -213,13 +228,13 @@ export default function InstallmentIndex({ auth, installments }: { auth: any, in
 
                     <div className="space-y-6">
                         {/* User Greeting Card */}
-                        <div className="bg-white dark:bg-gray-900 p-4 rounded-lg border shadow-sm flex items-center gap-3">
+                        <div className="bg-card p-4 rounded-lg border shadow-sm flex items-center gap-3">
                             <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
                                 {auth.user.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}
                             </div>
                             <div>
-                                <h3 className="font-semibold">Halo, {auth.user.name}</h3>
-                                <p className="text-sm text-gray-500">{auth.user.email}</p>
+                                <h3 className="font-semibold text-card-foreground">Halo, {auth.user.name}</h3>
+                                <p className="text-sm text-muted-foreground">{auth.user.email}</p>
                             </div>
                         </div>
 
@@ -285,7 +300,7 @@ export default function InstallmentIndex({ auth, installments }: { auth: any, in
                         {/* LIST OF INSTALLMENTS */}
                         {installments.map((item) => (
                             <Card key={item.id} className="overflow-hidden">
-                                <CardHeader className="bg-gray-50/50 dark:bg-gray-800/50 pb-4">
+                                <CardHeader className="bg-muted/50 pb-4">
                                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                         <div>
                                             <CardTitle className="text-xl flex items-center gap-2">
@@ -301,8 +316,8 @@ export default function InstallmentIndex({ auth, installments }: { auth: any, in
                                             </CardDescription>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-sm text-gray-500">Sisa Tagihan</p>
-                                            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                                            <p className="text-sm text-muted-foreground">Sisa Tagihan</p>
+                                            <p className="text-2xl font-bold text-foreground">
                                                 {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(item.remainingDebt)}
                                             </p>
                                         </div>
@@ -358,13 +373,13 @@ export default function InstallmentIndex({ auth, installments }: { auth: any, in
                                     {/* Collapsible History Table */}
                                     <Accordion type="single" collapsible className="w-full">
                                         <AccordionItem value="history" className="border-b-0">
-                                            <AccordionTrigger className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-900/50">
-                                                <span className="font-medium text-gray-700 dark:text-gray-300">Lihat Riwayat Pembayaran ({item.history.length})</span>
+                                            <AccordionTrigger className="px-6 py-4 hover:bg-muted/50">
+                                                <span className="font-medium text-foreground">Lihat Riwayat Pembayaran ({item.history.length})</span>
                                             </AccordionTrigger>
                                             <AccordionContent>
                                                 <div className="overflow-x-auto">
                                                     <Table>
-                                                        <TableHeader className="bg-gray-50 dark:bg-gray-900">
+                                                        <TableHeader className="bg-muted/30">
                                                             <TableRow>
                                                                 <TableHead className="w-[100px] pl-6">Angsuran Ke</TableHead>
                                                                 <TableHead>Tanggal Bayar</TableHead>
@@ -427,7 +442,7 @@ export default function InstallmentIndex({ auth, installments }: { auth: any, in
                             </DialogDescription>
                         </div>
                         
-                        <div className="p-6 bg-white dark:bg-gray-950">
+                        <div className="p-6 bg-background max-h-[70vh] overflow-y-auto">
                             {selectedPaymentItem && (
                                 <div className="mb-6 pb-6 border-b border-dashed border-gray-300 dark:border-gray-800">
                                     <div className="flex justify-between items-center mb-2">
@@ -435,8 +450,8 @@ export default function InstallmentIndex({ auth, installments }: { auth: any, in
                                         <span className="font-medium">{selectedPaymentItem.contractNumber}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-sm text-gray-500">Sisa Tagihan Total</span>
-                                        <span className="font-bold text-gray-900 dark:text-white">
+                                        <span className="text-sm text-muted-foreground">Sisa Tagihan Total</span>
+                                        <span className="font-bold text-foreground">
                                             {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(selectedPaymentItem.remainingDebt)}
                                         </span>
                                     </div>
@@ -448,6 +463,7 @@ export default function InstallmentIndex({ auth, installments }: { auth: any, in
                                     orderId={selectedPaymentItem.order_id}
                                     installmentAmount={selectedPaymentItem.installment_amount}
                                     tunggakan={selectedPaymentItem.tunggakan}
+                                    tunggakanMonths={selectedPaymentItem.tunggakan_months}
                                     onSuccess={() => setSelectedPaymentItem(null)}
                                     onPayStart={() => setSelectedPaymentItem(null)}
                                 />

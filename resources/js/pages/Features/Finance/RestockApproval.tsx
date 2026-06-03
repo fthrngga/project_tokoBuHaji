@@ -14,6 +14,7 @@ interface RestockRequest {
     notes: string;
     created_at: string;
     product: { name: string; sku: string; stock: number; category?: { name: string } };
+    variant?: { name: string; sku: string; stock: number };
     user: { name: string };
 }
 
@@ -57,12 +58,12 @@ export default function RestockApproval({ restockRequests }: { restockRequests: 
                                 restockRequests.map((req) => (
                                     <TableRow key={req.id}>
                                         <TableCell>
-                                            <p className="font-semibold text-sm">{req.product.name}</p>
-                                            <p className="text-xs text-muted-foreground">SKU: {req.product.sku}</p>
+                                            <p className="font-semibold text-sm">{req.product.name}{req.variant ? ` - ${req.variant.name}` : ''}</p>
+                                            <p className="text-xs text-muted-foreground">SKU: {req.variant ? (req.variant.sku || req.product.sku) : req.product.sku}</p>
                                             {req.notes && <p className="text-xs text-orange-600 mt-1 italic">"{req.notes}"</p>}
                                         </TableCell>
                                         <TableCell className="text-sm">{req.user.name}</TableCell>
-                                        <TableCell className="text-center font-medium text-red-400">{req.product.stock}</TableCell>
+                                        <TableCell className="text-center font-medium text-red-400">{req.variant ? req.variant.stock : req.product.stock}</TableCell>
                                         <TableCell className="text-center font-bold text-primary">+{req.requested_quantity}</TableCell>
                                         <TableCell>
                                             {req.status === 'pending' && <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20"><Clock className="w-3 h-3 mr-1"/> Menunggu</Badge>}

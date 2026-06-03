@@ -38,25 +38,25 @@ const STATUS_CONFIG = {
     pending: {
         label: 'Menunggu Konfirmasi',
         icon: Clock,
-        badge: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800',
+        badge: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
         dot: 'bg-amber-500',
     },
     processing: {
         label: 'Sedang Diproses',
         icon: Loader2,
-        badge: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800',
+        badge: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
         dot: 'bg-blue-500',
     },
     completed: {
         label: 'Selesai',
         icon: CheckCircle2,
-        badge: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800',
+        badge: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
         dot: 'bg-emerald-500',
     },
     rejected: {
         label: 'Ditolak',
         icon: XCircle,
-        badge: 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800',
+        badge: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
         dot: 'bg-red-500',
     },
 };
@@ -125,10 +125,10 @@ export default function Index({ returns }: Props) {
                 {/* Stats Row */}
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                     {[
-                        { label: 'Menunggu', count: counts.pending, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/10', border: 'border-amber-100 dark:border-amber-900/30' },
-                        { label: 'Diproses', count: counts.processing, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/10', border: 'border-blue-100 dark:border-blue-900/30' },
-                        { label: 'Selesai', count: counts.completed, color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-900/10', border: 'border-emerald-100 dark:border-emerald-900/30' },
-                        { label: 'Ditolak', count: counts.rejected, color: 'text-red-600', bg: 'bg-red-50 dark:bg-red-900/10', border: 'border-red-100 dark:border-red-900/30' },
+                        { label: 'Menunggu', count: counts.pending, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
+                        { label: 'Diproses', count: counts.processing, color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+                        { label: 'Selesai', count: counts.completed, color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
+                        { label: 'Ditolak', count: counts.rejected, color: 'text-red-500', bg: 'bg-red-500/10', border: 'border-red-500/20' },
                     ].map((stat) => (
                         <div key={stat.label} className={`rounded-xl border p-4 ${stat.bg} ${stat.border}`}>
                             <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
@@ -292,10 +292,10 @@ export default function Index({ returns }: Props) {
                                 {/* Alasan */}
                                 <div className="space-y-2">
                                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Alasan Pelanggan</p>
-                                    <div className="rounded-xl border-l-4 border-l-amber-400 bg-amber-50 px-4 py-3 dark:bg-amber-900/10">
+                                    <div className="rounded-xl border-l-4 border-l-amber-500 bg-amber-500/10 px-4 py-3">
                                         <div className="flex gap-2">
                                             <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-500" />
-                                            <p className="text-sm leading-relaxed text-amber-900 dark:text-amber-200">
+                                            <p className="text-sm leading-relaxed text-amber-600 dark:text-amber-400">
                                                 {selectedReturn.reason}
                                             </p>
                                         </div>
@@ -340,6 +340,7 @@ export default function Index({ returns }: Props) {
                                         <Select
                                             value={data.status}
                                             onValueChange={(v) => setData('status', v)}
+                                            disabled={selectedReturn.status === 'completed' || selectedReturn.status === 'rejected'}
                                         >
                                             <SelectTrigger className="w-full">
                                                 <SelectValue />

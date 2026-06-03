@@ -57,7 +57,10 @@ export default function Index({ cartItems, total }: Props) {
     // Calculate total based on selected items
     const checkedTotal = cartItems
         .filter(item => selectedItems.has(item.id))
-        .reduce((sum, item) => sum + (item.quantity * item.product.price), 0);
+        .reduce((sum, item) => {
+            const price = item.variant?.selling_price || item.product.selling_price;
+            return sum + (item.quantity * price);
+        }, 0);
 
     const toggleItem = (id: number) => {
         const newSelected = new Set(selectedItems);
@@ -202,7 +205,7 @@ export default function Index({ cartItems, total }: Props) {
 
                                                 <div className="col-span-1 md:col-span-2 text-right font-medium md:font-normal">
                                                     <span className="md:hidden text-gray-500 mr-2">Harga:</span>
-                                                    {formatCurrency(item.product.price)}
+                                                    {formatCurrency(item.variant?.selling_price || item.product.selling_price)}
                                                 </div>
 
                                                 <div className="col-span-1 md:col-span-2 flex justify-start md:justify-center items-center gap-2">
@@ -232,7 +235,7 @@ export default function Index({ cartItems, total }: Props) {
                                                     <span className="md:hidden text-gray-500">Subtotal:</span>
                                                     <div className="flex items-center gap-4">
                                                         <span className="font-bold text-gray-900 dark:text-white">
-                                                            {formatCurrency(item.quantity * item.product.price)}
+                                                            {formatCurrency(item.quantity * (item.variant?.selling_price || item.product.selling_price))}
                                                         </span>
                                                         <button
                                                             onClick={() => confirmDelete(item.id)}

@@ -18,6 +18,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::resource('admin/returns', \App\Http\Controllers\Admin\ProductReturnController::class)
         ->only(['index', 'update'])
         ->names('admin.returns');
+
+    Route::resource('admin/defective-products', \App\Http\Controllers\Admin\DefectiveProductController::class)
+        ->only(['index', 'update'])
+        ->names('admin.defective_products');
 });
 
 Route::middleware(['auth', 'verified', 'role:customer'])->group(function () {

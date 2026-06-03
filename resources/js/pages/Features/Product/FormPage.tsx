@@ -30,7 +30,7 @@ interface Product {
     is_published: boolean;
     images: ProductImage[];
     custom_options?: { name: string; options: string[] }[];
-    variants?: { id?: number; sku: string | null; stock: number; options: Record<string, string> }[];
+    variants?: { id?: number; sku: string | null; stock: number; weight?: number; price?: number | string | null; options: Record<string, string> }[];
 }
 
 export default function FormPage({ auth, item, categories = [] }: PageProps<{ item?: Product; categories: Category[] }>) {
@@ -68,6 +68,7 @@ export default function FormPage({ auth, item, categories = [] }: PageProps<{ it
         }))
     }));
 
+    const [hasVariants, setHasVariants] = useState((item?.variants?.length ?? 0) > 0);
     const [specItems, setSpecItems] = useState<{ key: string; value: string }[]>([]);
     const [imagePreviews, setImagePreviews] = useState<string[]>([]);
     const [imageToDelete, setImageToDelete] = useState<ProductImage | null>(null); // State untuk dialog konfirmasi
@@ -159,28 +160,38 @@ export default function FormPage({ auth, item, categories = [] }: PageProps<{ it
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             <div className="lg:col-span-2 space-y-6">
                                 <Card>
-                                    <CardHeader><CardTitle>Detail Produk</CardTitle></CardHeader>
+                                    <CardHeader>
+                                        <div className="flex items-center justify-between">
+                                            <CardTitle>Detail Produk</CardTitle>
+                                            <div className="flex items-center space-x-2">
+                                                <Switch id="has-variants" checked={hasVariants} onCheckedChange={setHasVariants} />
+                                                <Label htmlFor="has-variants" className="font-semibold text-primary">Gunakan Varian</Label>
+                                            </div>
+                                        </div>
+                                    </CardHeader>
                                     <CardContent className="space-y-4">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                             <div className="space-y-2"><Label htmlFor="name">Nama Produk</Label><Input id="name" type="text" value={data.name} onChange={e => setData('name', e.target.value)} /></div>
                                             <div className="space-y-2"><Label htmlFor="sku">SKU</Label><Input id="sku" type="text" value={data.sku} onChange={e => setData('sku', e.target.value)} /></div>
-                                        </div>
-                                        <div className="space-y-2"><Label htmlFor="description">Deskripsi</Label><Textarea id="description" value={data.description} onChange={e => setData('description', e.target.value)} rows={5} /></div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                            <div className="space-y-2">
-                                                <Label htmlFor="price">Harga Modal (Dasar)</Label>
-                                                <div className="text-[10px] text-muted-foreground leading-tight">Sistem akan +10% untuk Harga Jual.</div>
-                                                <Input id="price" type="number" value={data.price} onChange={e => setData('price', parseInt(e.target.value))} />
-                                            </div>
-                                            <div className="space-y-2"><Label htmlFor="stock">Stok</Label><Input id="stock" type="number" value={data.stock} onChange={e => setData('stock', parseInt(e.target.value))} /></div>
-                                            <div className="space-y-2"><Label htmlFor="weight">Berat (gram)</Label><Input id="weight" type="number" value={data.weight} onChange={e => setData('weight', parseInt(e.target.value))} /></div>
                                             <div className="space-y-2"><Label htmlFor="category_id">Kategori</Label><Select value={String(data.category_id)} onValueChange={value => setData('category_id', parseInt(value))}><SelectTrigger><SelectValue placeholder="Pilih kategori..." /></SelectTrigger><SelectContent>{categories.map(category => (<SelectItem key={category.id} value={String(category.id)}>{category.name}</SelectItem>))}</SelectContent></Select></div>
                                         </div>
+                                        <div className="space-y-2"><Label htmlFor="description">Deskripsi</Label><Textarea id="description" value={data.description} onChange={e => setData('description', e.target.value)} rows={5} /></div>
+                                        
+                                        <div className={cn("grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-lg", hasVariants ? "bg-muted/50 opacity-60" : "bg-card border")}>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="price">Harga Modal {hasVariants && "(Diambil dari Varian)"}</Label>
+                                                {!hasVariants && <div className="text-[10px] text-muted-foreground leading-tight">Sistem akan +10% untuk Harga Jual.</div>}
+                                                <Input id="price" type="number" value={data.price} disabled={hasVariants} onChange={e => setData('price', parseInt(e.target.value))} />
+                                            </div>
+                                            <div className="space-y-2"><Label htmlFor="stock">Stok {hasVariants && "(Diambil dari Varian)"}</Label><Input id="stock" type="number" value={data.stock} disabled={hasVariants} onChange={e => setData('stock', parseInt(e.target.value))} /></div>
+                                            <div className="space-y-2"><Label htmlFor="weight">Berat (gram) {hasVariants && "(Diambil dari Varian)"}</Label><Input id="weight" type="number" value={data.weight} disabled={hasVariants} onChange={e => setData('weight', parseInt(e.target.value))} /></div>
+                                        </div>
+                                        
                                         <div className="space-y-2"><Label>Spesifikasi</Label><div className="space-y-3 rounded-md border border-border bg-secondary/20 p-4">{specItems.map((spec, index) => (<div key={index} className="flex items-center gap-2"><Input placeholder="Key (e.g., Dimensi)" value={spec.key} onChange={(e) => handleSpecChange(index, 'key', e.target.value)} className="flex-1 bg-background" /><Input placeholder="Value (e.g., 120cm x 60cm)" value={spec.value} onChange={(e) => handleSpecChange(index, 'value', e.target.value)} className="flex-1 bg-background" /><Button type="button" variant="ghost" size="icon" onClick={() => removeSpecItem(index)} className="text-muted-foreground hover:bg-red-500/20 hover:text-red-500"><X className="h-4 w-4" /></Button></div>))}<Button type="button" variant="outline" size="sm" onClick={addSpecItem} className="mt-2 border-dashed"><PlusCircle className="mr-2 h-4 w-4" /> Tambah Spesifikasi</Button></div></div>
                                     </CardContent>
                                 </Card>
 
-                                {/* Varian Produk Card */}
+                                {hasVariants && (
                                 <Card>
                                     <CardHeader>
                                         <CardTitle>Varian Produk (Opsional)</CardTitle>
@@ -251,7 +262,7 @@ export default function FormPage({ auth, item, categories = [] }: PageProps<{ it
                                                     const newVariants = combinations.map(comb => {
                                                         const existing = data.variants.find(v => JSON.stringify(v.options) === JSON.stringify(comb));
                                                         if (existing) return existing;
-                                                        return { sku: '', stock: 0, price: '', options: comb };
+                                                        return { sku: '', stock: 0, weight: 0, price: '', options: comb };
                                                     });
                                                     
                                                     setData('variants', newVariants);
@@ -261,15 +272,16 @@ export default function FormPage({ auth, item, categories = [] }: PageProps<{ it
                                             {data.variants.length > 0 ? (
                                                 <div className="border rounded-md divide-y overflow-hidden">
                                                     <div className="grid grid-cols-12 gap-2 p-3 bg-secondary/30 border-b border-border font-medium text-sm text-muted-foreground">
-                                                        <div className="col-span-4">Kombinasi Opsi</div>
+                                                        <div className="col-span-3">Kombinasi Opsi</div>
                                                         <div className="col-span-2">SKU</div>
-                                                        <div className="col-span-3">Harga Modal (Opsional)</div>
+                                                        <div className="col-span-2">Harga Modal (Ops)</div>
                                                         <div className="col-span-2">Stok</div>
+                                                        <div className="col-span-2">Berat (g)</div>
                                                         <div className="col-span-1"></div>
                                                     </div>
                                                     {data.variants.map((variant, i) => (
                                                         <div key={i} className="grid grid-cols-12 gap-2 p-3 items-center">
-                                                            <div className="col-span-4 flex flex-wrap gap-1">
+                                                            <div className="col-span-3 flex flex-wrap gap-1">
                                                                 {Object.entries(variant.options).map(([k, v]) => (
                                                                     <span key={k} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/20 text-primary">
                                                                         {k}: {v}
@@ -283,8 +295,8 @@ export default function FormPage({ auth, item, categories = [] }: PageProps<{ it
                                                                     setData('variants', newV);
                                                                 }} placeholder="SKU" />
                                                             </div>
-                                                            <div className="col-span-3">
-                                                                <Input type="number" placeholder="Harga Modal" value={variant.price || ''} onChange={e => {
+                                                            <div className="col-span-2">
+                                                                <Input type="number" placeholder="Modal" value={variant.price || ''} onChange={e => {
                                                                     const newV = [...data.variants];
                                                                     newV[i].price = e.target.value ? parseInt(e.target.value) : '';
                                                                     setData('variants', newV);
@@ -297,22 +309,30 @@ export default function FormPage({ auth, item, categories = [] }: PageProps<{ it
                                                                     setData('variants', newV);
                                                                 }} min={0} />
                                                             </div>
+                                                            <div className="col-span-2">
+                                                                <Input type="number" value={variant.weight || 0} onChange={e => {
+                                                                    const newV = [...data.variants];
+                                                                    newV[i].weight = parseInt(e.target.value) || 0;
+                                                                    setData('variants', newV);
+                                                                }} min={0} />
+                                                            </div>
                                                             <div className="col-span-1 text-right">
-                                                                <Button type="button" variant="ghost" size="icon" className="text-red-600" onClick={() => {
+                                                                <Button type="button" variant="ghost" className="h-8 w-8 p-0 text-red-600" onClick={() => {
                                                                     setData('variants', data.variants.filter((_, idx) => idx !== i));
-                                                                }}><Trash2 className="h-4 w-4"/></Button>
+                                                                }}><Trash2 className="h-4 w-4" /></Button>
                                                             </div>
                                                         </div>
                                                     ))}
                                                 </div>
                                             ) : (
-                                                <div className="text-center py-6 text-sm text-muted-foreground border border-border rounded-md bg-secondary/20">
-                                                    Belum ada varian. Tambahkan opsi di atas lalu klik "Buat Kombinasi Otomatis".
+                                                <div className="text-center py-8 text-muted-foreground border border-dashed rounded-md bg-secondary/10">
+                                                    Klik "Buat Kombinasi Otomatis" untuk menghasilkan tabel varian.
                                                 </div>
                                             )}
                                         </div>
                                     </CardContent>
                                 </Card>
+                                )}
                             </div>
                             <div className="space-y-6">
                                 <Card>

@@ -156,7 +156,7 @@ dashboard.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     
     dashboard.form = dashboardForm
 /**
- * @see routes/web.php:24
+ * @see routes/web.php:28
  * @route '/profil-saya'
  */
 export const profile = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -170,7 +170,7 @@ profile.definition = {
 } satisfies RouteDefinition<["get","head"]>
 
 /**
- * @see routes/web.php:24
+ * @see routes/web.php:28
  * @route '/profil-saya'
  */
 profile.url = (options?: RouteQueryOptions) => {
@@ -178,7 +178,7 @@ profile.url = (options?: RouteQueryOptions) => {
 }
 
 /**
- * @see routes/web.php:24
+ * @see routes/web.php:28
  * @route '/profil-saya'
  */
 profile.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -186,7 +186,7 @@ profile.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     method: 'get',
 })
 /**
- * @see routes/web.php:24
+ * @see routes/web.php:28
  * @route '/profil-saya'
  */
 profile.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -195,7 +195,7 @@ profile.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 })
 
     /**
- * @see routes/web.php:24
+ * @see routes/web.php:28
  * @route '/profil-saya'
  */
     const profileForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -204,7 +204,7 @@ profile.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     })
 
             /**
- * @see routes/web.php:24
+ * @see routes/web.php:28
  * @route '/profil-saya'
  */
         profileForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -212,7 +212,7 @@ profile.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
             method: 'get',
         })
             /**
- * @see routes/web.php:24
+ * @see routes/web.php:28
  * @route '/profil-saya'
  */
         profileForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -510,7 +510,7 @@ logout.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     logout.form = logoutForm
 /**
 * @see \App\Features\Finance\FinanceController::restockApproval
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/restock-approval'
  */
 export const restockApproval = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -525,7 +525,7 @@ restockApproval.definition = {
 
 /**
 * @see \App\Features\Finance\FinanceController::restockApproval
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/restock-approval'
  */
 restockApproval.url = (options?: RouteQueryOptions) => {
@@ -534,7 +534,7 @@ restockApproval.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Features\Finance\FinanceController::restockApproval
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/restock-approval'
  */
 restockApproval.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -543,7 +543,7 @@ restockApproval.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => (
 })
 /**
 * @see \App\Features\Finance\FinanceController::restockApproval
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/restock-approval'
  */
 restockApproval.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -553,7 +553,7 @@ restockApproval.head = (options?: RouteQueryOptions): RouteDefinition<'head'> =>
 
     /**
 * @see \App\Features\Finance\FinanceController::restockApproval
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/restock-approval'
  */
     const restockApprovalForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -563,7 +563,7 @@ restockApproval.head = (options?: RouteQueryOptions): RouteDefinition<'head'> =>
 
             /**
 * @see \App\Features\Finance\FinanceController::restockApproval
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/restock-approval'
  */
         restockApprovalForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -572,7 +572,7 @@ restockApproval.head = (options?: RouteQueryOptions): RouteDefinition<'head'> =>
         })
             /**
 * @see \App\Features\Finance\FinanceController::restockApproval
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/restock-approval'
  */
         restockApprovalForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({

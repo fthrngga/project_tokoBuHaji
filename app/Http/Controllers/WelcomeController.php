@@ -155,27 +155,49 @@ class WelcomeController extends Controller
             });
 
         // Notifications
-        $pendingRestocks = \App\Models\RestockRequest::where('status', 'pending')->with('product')->get();
-        $inventoryAlerts = \App\Features\Product\Product::where('stock', '<', 5)->where('is_published', true)->get();
+        $pendingRestocks = \App\Models\RestockRequest::where('status', 'pending')->with(['product', 'variant'])->get();
+        $inventoryAlerts = \App\Features\Product\Product::where('is_published', true)
+            ->with('variants')
+            ->where(function ($query) {
+                $query->where('stock', '<', 5)
+                      ->orWhereHas('variants', function ($q) {
+                          $q->where('stock', '<', 5);
+                      });
+            })->get();
 
         $notifications = [];
         foreach($pendingRestocks as $r) {
+            $variantName = $r->variant ? " ({$r->variant->name})" : "";
             $notifications[] = [
                 'id' => 'req-'.$r->id,
                 'type' => 'restock',
                 'title' => 'Pending Restock Request',
-                'message' => "Request untuk {$r->product->name}",
+                'message' => "Request untuk {$r->product->name}{$variantName}",
                 'time' => $r->created_at->diffForHumans()
             ];
         }
         foreach($inventoryAlerts as $p) {
-            $notifications[] = [
-                'id' => 'alert-'.$p->id,
-                'type' => 'inventory',
-                'title' => 'Inventory Alert',
-                'message' => "Stok {$p->name} menipis (Sisa {$p->stock})",
-                'time' => 'Terbaru'
-            ];
+            if ($p->variants->count() > 0) {
+                foreach($p->variants as $variant) {
+                    if ($variant->stock < 5) {
+                        $notifications[] = [
+                            'id' => 'alert-v-'.$variant->id,
+                            'type' => 'inventory',
+                            'title' => 'Inventory Alert',
+                            'message' => "Stok {$p->name} ({$variant->name}) menipis (Sisa {$variant->stock})",
+                            'time' => 'Terbaru'
+                        ];
+                    }
+                }
+            } else if ($p->stock < 5) {
+                $notifications[] = [
+                    'id' => 'alert-'.$p->id,
+                    'type' => 'inventory',
+                    'title' => 'Inventory Alert',
+                    'message' => "Stok {$p->name} menipis (Sisa {$p->stock})",
+                    'time' => 'Terbaru'
+                ];
+            }
         }
 
         $financeData = [

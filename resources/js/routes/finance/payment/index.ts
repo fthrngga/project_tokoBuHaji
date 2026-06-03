@@ -2,7 +2,7 @@ import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFo
 import terms from './terms'
 /**
 * @see \App\Features\Finance\FinanceController::pelunasanDini
- * @see app/Features/Finance/FinanceController.php:109
+ * @see app/Features/Finance/FinanceController.php:126
  * @route '/admin/finance/payment/{id}/pelunasan-dini'
  */
 export const pelunasanDini = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -17,7 +17,7 @@ pelunasanDini.definition = {
 
 /**
 * @see \App\Features\Finance\FinanceController::pelunasanDini
- * @see app/Features/Finance/FinanceController.php:109
+ * @see app/Features/Finance/FinanceController.php:126
  * @route '/admin/finance/payment/{id}/pelunasan-dini'
  */
 pelunasanDini.url = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -45,7 +45,7 @@ pelunasanDini.url = (args: { id: string | number } | [id: string | number ] | st
 
 /**
 * @see \App\Features\Finance\FinanceController::pelunasanDini
- * @see app/Features/Finance/FinanceController.php:109
+ * @see app/Features/Finance/FinanceController.php:126
  * @route '/admin/finance/payment/{id}/pelunasan-dini'
  */
 pelunasanDini.put = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -55,7 +55,7 @@ pelunasanDini.put = (args: { id: string | number } | [id: string | number ] | st
 
     /**
 * @see \App\Features\Finance\FinanceController::pelunasanDini
- * @see app/Features/Finance/FinanceController.php:109
+ * @see app/Features/Finance/FinanceController.php:126
  * @route '/admin/finance/payment/{id}/pelunasan-dini'
  */
     const pelunasanDiniForm = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -70,7 +70,7 @@ pelunasanDini.put = (args: { id: string | number } | [id: string | number ] | st
 
             /**
 * @see \App\Features\Finance\FinanceController::pelunasanDini
- * @see app/Features/Finance/FinanceController.php:109
+ * @see app/Features/Finance/FinanceController.php:126
  * @route '/admin/finance/payment/{id}/pelunasan-dini'
  */
         pelunasanDiniForm.put = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -85,8 +85,82 @@ pelunasanDini.put = (args: { id: string | number } | [id: string | number ] | st
     
     pelunasanDini.form = pelunasanDiniForm
 /**
+* @see \App\Features\Finance\FinanceController::tarik
+ * @see app/Features/Finance/FinanceController.php:177
+ * @route '/admin/finance/payment/{id}/tarik'
+ */
+export const tarik = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: tarik.url(args, options),
+    method: 'post',
+})
+
+tarik.definition = {
+    methods: ["post"],
+    url: '/admin/finance/payment/{id}/tarik',
+} satisfies RouteDefinition<["post"]>
+
+/**
+* @see \App\Features\Finance\FinanceController::tarik
+ * @see app/Features/Finance/FinanceController.php:177
+ * @route '/admin/finance/payment/{id}/tarik'
+ */
+tarik.url = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { id: args }
+    }
+
+    
+    if (Array.isArray(args)) {
+        args = {
+                    id: args[0],
+                }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+                        id: args.id,
+                }
+
+    return tarik.definition.url
+            .replace('{id}', parsedArgs.id.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Features\Finance\FinanceController::tarik
+ * @see app/Features/Finance/FinanceController.php:177
+ * @route '/admin/finance/payment/{id}/tarik'
+ */
+tarik.post = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: tarik.url(args, options),
+    method: 'post',
+})
+
+    /**
+* @see \App\Features\Finance\FinanceController::tarik
+ * @see app/Features/Finance/FinanceController.php:177
+ * @route '/admin/finance/payment/{id}/tarik'
+ */
+    const tarikForm = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        action: tarik.url(args, options),
+        method: 'post',
+    })
+
+            /**
+* @see \App\Features\Finance\FinanceController::tarik
+ * @see app/Features/Finance/FinanceController.php:177
+ * @route '/admin/finance/payment/{id}/tarik'
+ */
+        tarikForm.post = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: tarik.url(args, options),
+            method: 'post',
+        })
+    
+    tarik.form = tarikForm
+/**
 * @see \App\Features\Finance\FinanceController::verify
- * @see app/Features/Finance/FinanceController.php:218
+ * @see app/Features/Finance/FinanceController.php:269
  * @route '/admin/finance/payment/{id}/verify'
  */
 export const verify = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -101,7 +175,7 @@ verify.definition = {
 
 /**
 * @see \App\Features\Finance\FinanceController::verify
- * @see app/Features/Finance/FinanceController.php:218
+ * @see app/Features/Finance/FinanceController.php:269
  * @route '/admin/finance/payment/{id}/verify'
  */
 verify.url = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -129,7 +203,7 @@ verify.url = (args: { id: string | number } | [id: string | number ] | string | 
 
 /**
 * @see \App\Features\Finance\FinanceController::verify
- * @see app/Features/Finance/FinanceController.php:218
+ * @see app/Features/Finance/FinanceController.php:269
  * @route '/admin/finance/payment/{id}/verify'
  */
 verify.put = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -139,7 +213,7 @@ verify.put = (args: { id: string | number } | [id: string | number ] | string | 
 
     /**
 * @see \App\Features\Finance\FinanceController::verify
- * @see app/Features/Finance/FinanceController.php:218
+ * @see app/Features/Finance/FinanceController.php:269
  * @route '/admin/finance/payment/{id}/verify'
  */
     const verifyForm = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -154,7 +228,7 @@ verify.put = (args: { id: string | number } | [id: string | number ] | string | 
 
             /**
 * @see \App\Features\Finance\FinanceController::verify
- * @see app/Features/Finance/FinanceController.php:218
+ * @see app/Features/Finance/FinanceController.php:269
  * @route '/admin/finance/payment/{id}/verify'
  */
         verifyForm.put = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -170,7 +244,7 @@ verify.put = (args: { id: string | number } | [id: string | number ] | string | 
     verify.form = verifyForm
 /**
 * @see \App\Features\Finance\FinanceController::manual
- * @see app/Features/Finance/FinanceController.php:258
+ * @see app/Features/Finance/FinanceController.php:309
  * @route '/admin/finance/installments'
  */
 export const manual = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -185,7 +259,7 @@ manual.definition = {
 
 /**
 * @see \App\Features\Finance\FinanceController::manual
- * @see app/Features/Finance/FinanceController.php:258
+ * @see app/Features/Finance/FinanceController.php:309
  * @route '/admin/finance/installments'
  */
 manual.url = (options?: RouteQueryOptions) => {
@@ -194,7 +268,7 @@ manual.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Features\Finance\FinanceController::manual
- * @see app/Features/Finance/FinanceController.php:258
+ * @see app/Features/Finance/FinanceController.php:309
  * @route '/admin/finance/installments'
  */
 manual.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -203,7 +277,7 @@ manual.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 /**
 * @see \App\Features\Finance\FinanceController::manual
- * @see app/Features/Finance/FinanceController.php:258
+ * @see app/Features/Finance/FinanceController.php:309
  * @route '/admin/finance/installments'
  */
 manual.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -213,7 +287,7 @@ manual.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
     /**
 * @see \App\Features\Finance\FinanceController::manual
- * @see app/Features/Finance/FinanceController.php:258
+ * @see app/Features/Finance/FinanceController.php:309
  * @route '/admin/finance/installments'
  */
     const manualForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -223,7 +297,7 @@ manual.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
             /**
 * @see \App\Features\Finance\FinanceController::manual
- * @see app/Features/Finance/FinanceController.php:258
+ * @see app/Features/Finance/FinanceController.php:309
  * @route '/admin/finance/installments'
  */
         manualForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -232,7 +306,7 @@ manual.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
         })
             /**
 * @see \App\Features\Finance\FinanceController::manual
- * @see app/Features/Finance/FinanceController.php:258
+ * @see app/Features/Finance/FinanceController.php:309
  * @route '/admin/finance/installments'
  */
         manualForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -248,7 +322,7 @@ manual.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     manual.form = manualForm
 /**
 * @see \App\Features\Finance\FinanceController::storeInstallment
- * @see app/Features/Finance/FinanceController.php:316
+ * @see app/Features/Finance/FinanceController.php:367
  * @route '/admin/finance/installments'
  */
 export const storeInstallment = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -263,7 +337,7 @@ storeInstallment.definition = {
 
 /**
 * @see \App\Features\Finance\FinanceController::storeInstallment
- * @see app/Features/Finance/FinanceController.php:316
+ * @see app/Features/Finance/FinanceController.php:367
  * @route '/admin/finance/installments'
  */
 storeInstallment.url = (options?: RouteQueryOptions) => {
@@ -272,7 +346,7 @@ storeInstallment.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Features\Finance\FinanceController::storeInstallment
- * @see app/Features/Finance/FinanceController.php:316
+ * @see app/Features/Finance/FinanceController.php:367
  * @route '/admin/finance/installments'
  */
 storeInstallment.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -282,7 +356,7 @@ storeInstallment.post = (options?: RouteQueryOptions): RouteDefinition<'post'> =
 
     /**
 * @see \App\Features\Finance\FinanceController::storeInstallment
- * @see app/Features/Finance/FinanceController.php:316
+ * @see app/Features/Finance/FinanceController.php:367
  * @route '/admin/finance/installments'
  */
     const storeInstallmentForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -292,7 +366,7 @@ storeInstallment.post = (options?: RouteQueryOptions): RouteDefinition<'post'> =
 
             /**
 * @see \App\Features\Finance\FinanceController::storeInstallment
- * @see app/Features/Finance/FinanceController.php:316
+ * @see app/Features/Finance/FinanceController.php:367
  * @route '/admin/finance/installments'
  */
         storeInstallmentForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -304,6 +378,7 @@ storeInstallment.post = (options?: RouteQueryOptions): RouteDefinition<'post'> =
 const payment = {
     terms,
 pelunasanDini,
+tarik,
 verify,
 manual,
 storeInstallment,

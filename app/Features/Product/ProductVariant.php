@@ -11,6 +11,7 @@ class ProductVariant extends Model
         'product_id',
         'sku',
         'stock',
+        'weight',
         'options',
         'price',
     ];
@@ -19,11 +20,16 @@ class ProductVariant extends Model
         'options' => 'array',
     ];
 
-    protected $appends = ['selling_price'];
+    protected $appends = ['selling_price', 'name'];
 
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function getNameAttribute()
+    {
+        return $this->options ? implode(' - ', array_values($this->options)) : 'Default Variant';
     }
 
     public function getSellingPriceAttribute()

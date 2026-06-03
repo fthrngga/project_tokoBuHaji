@@ -15,7 +15,7 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::query()->with('category');
+        $query = Product::query()->with(['category', 'variants']);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -68,6 +68,7 @@ class ProductController extends Controller
             'variants.*.sku' => 'nullable|string|max:255',
             'variants.*.price' => 'nullable|numeric|min:0',
             'variants.*.stock' => 'required_with:variants|integer|min:0',
+            'variants.*.weight' => 'required_with:variants|integer|min:0',
             'variants.*.options' => 'required_with:variants|array',
         ]);
 
@@ -133,6 +134,7 @@ class ProductController extends Controller
             'variants.*.sku' => 'nullable|string|max:255',
             'variants.*.price' => 'nullable|numeric|min:0',
             'variants.*.stock' => 'required_with:variants|integer|min:0',
+            'variants.*.weight' => 'required_with:variants|integer|min:0',
             'variants.*.options' => 'required_with:variants|array',
         ]);
 
@@ -215,17 +217,24 @@ class ProductController extends Controller
     public function requestRestock(\Illuminate\Http\Request $request, Product $product)
     {
         $request->validate([
-            'requested_quantity' => 'required|integer|min:1',
-            'notes' => 'nullable|string'
+            'requests' => 'required|array|min:1',
+            'requests.*.product_variant_id' => 'nullable|exists:product_variants,id',
+            'requests.*.requested_quantity' => 'required|integer|min:1',
+            'requests.*.notes' => 'nullable|string'
         ]);
 
-        \App\Models\RestockRequest::create([
-            'product_id' => $product->id,
-            'user_id' => auth()->id(),
-            'requested_quantity' => $request->requested_quantity,
-            'notes' => $request->notes,
-            'status' => 'pending'
-        ]);
+        foreach ($request->input('requests') as $req) {
+            if (isset($req['requested_quantity']) && $req['requested_quantity'] > 0) {
+                \App\Models\RestockRequest::create([
+                    'product_id' => $product->id,
+                    'product_variant_id' => $req['product_variant_id'] ?? null,
+                    'user_id' => auth()->id(),
+                    'requested_quantity' => $req['requested_quantity'],
+                    'notes' => $req['notes'] ?? null,
+                    'status' => 'pending'
+                ]);
+            }
+        }
 
         return back()->with('success', 'Permintaan restock berhasil dikirim ke Finance.');
     }

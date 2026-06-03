@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../../wayfinder'
 /**
 * @see \App\Features\Finance\FinanceController::index
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/admin/finance/restock'
  */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ index.definition = {
 
 /**
 * @see \App\Features\Finance\FinanceController::index
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/admin/finance/restock'
  */
 index.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ index.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Features\Finance\FinanceController::index
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/admin/finance/restock'
  */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -34,7 +34,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 /**
 * @see \App\Features\Finance\FinanceController::index
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/admin/finance/restock'
  */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -44,7 +44,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
     /**
 * @see \App\Features\Finance\FinanceController::index
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/admin/finance/restock'
  */
     const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -54,7 +54,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
             /**
 * @see \App\Features\Finance\FinanceController::index
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/admin/finance/restock'
  */
         indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -63,7 +63,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
         })
             /**
 * @see \App\Features\Finance\FinanceController::index
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/admin/finance/restock'
  */
         indexForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({

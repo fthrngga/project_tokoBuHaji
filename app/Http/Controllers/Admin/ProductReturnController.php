@@ -26,9 +26,33 @@ class ProductReturnController extends Controller
             'status' => 'required|in:processing,completed,rejected',
         ]);
 
+        $oldStatus = $return->status;
+
         $return->update([
             'status' => $request->status
         ]);
+
+        if ($request->status === 'completed' && $oldStatus !== 'completed') {
+            $orderItem = $return->orderItem;
+            
+            // 1. Kurangi stok utama
+            if ($orderItem->product_variant_id) {
+                $orderItem->variant->decrement('stock', $orderItem->quantity);
+            } else {
+                $orderItem->product->decrement('stock', $orderItem->quantity);
+            }
+
+            // 2. Masukkan ke Gudang Isolasi (Defective Products)
+            \App\Models\Features\Inventory\DefectiveProduct::create([
+                'product_id' => $orderItem->product_id,
+                'product_variant_id' => $orderItem->product_variant_id,
+                'source_type' => ProductReturn::class,
+                'source_id' => $return->id,
+                'quantity' => $orderItem->quantity,
+                'status' => 'in_warehouse',
+                'notes' => 'Dari Return Order #' . $return->order_id,
+            ]);
+        }
 
         $statusText = match ($request->status) {
             'processing' => 'SEDANG DIPROSES',

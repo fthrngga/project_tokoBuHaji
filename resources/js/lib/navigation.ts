@@ -32,6 +32,10 @@ export const mainNavItems: NavItem[] = [
                 href: route('admin.returns.index', undefined, false),
             },
             {
+                title: 'Gudang Isolasi',
+                href: route('admin.defective_products.index', undefined, false),
+            },
+            {
                 title: 'Customers',
                 href: route('customers.index', undefined, false),
             },

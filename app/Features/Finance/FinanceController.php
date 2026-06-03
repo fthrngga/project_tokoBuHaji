@@ -74,8 +74,25 @@ class FinanceController extends Controller
             })
             ->values();
 
+        $penarikanHistory = \App\Models\Features\Inventory\DefectiveProduct::with(['product', 'variant', 'source.customer.user'])
+            ->where('source_type', \App\Models\Payment::class)
+            ->where('notes', 'LIKE', '[PENARIKAN]%')
+            ->latest()
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'date' => $item->created_at->format('d-m-Y H:i'),
+                    'customer_name' => $item->source?->customer?->user?->name ?? 'Unknown',
+                    'product_name' => $item->variant ? "{$item->product->name} - {$item->variant->name}" : $item->product->name,
+                    'notes' => str_replace('[PENARIKAN] ', '', $item->notes),
+                    'quantity' => $item->quantity,
+                ];
+            });
+
         return Inertia::render('Features/Finance/ArrearsMonitoring', [
             'credits' => $credits,
+            'penarikanHistory' => $penarikanHistory,
             'pageParams' => [
                 'title' => 'Monitoring Tunggakan',
             ]
@@ -155,6 +172,40 @@ class FinanceController extends Controller
         });
 
         return back()->with('success', 'Pelunasan dini berhasil diproses. Nominal Rp ' . number_format($remainingDebt, 0, ',', '.') . ' telah tercatat di Laporan Keuangan.');
+    }
+
+    public function tarikBarang(\Illuminate\Http\Request $request, $id)
+    {
+        $payment = \App\Models\Payment::with(['order.items'])->findOrFail($id);
+
+        if ($payment->status !== 'ongoing') {
+            return back()->with('error', 'Kredit tidak aktif atau sudah lunas.');
+        }
+
+        $validated = $request->validate([
+            'notes' => 'required|string|max:500',
+        ]);
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($payment, $validated) {
+            // 1. Update Payment & Order Status
+            $payment->update(['status' => 'repossessed']);
+            $payment->order->update(['status' => 'cancelled']);
+
+            // 2. Masukkan semua barang ke Gudang Isolasi
+            foreach ($payment->order->items as $item) {
+                \App\Models\Features\Inventory\DefectiveProduct::create([
+                    'product_id' => $item->product_id,
+                    'product_variant_id' => $item->product_variant_id,
+                    'source_type' => \App\Models\Payment::class,
+                    'source_id' => $payment->id,
+                    'quantity' => $item->quantity,
+                    'status' => 'in_warehouse',
+                    'notes' => '[PENARIKAN] ' . $validated['notes'],
+                ]);
+            }
+        });
+
+        return back()->with('success', 'Barang berhasil ditarik dan dimasukkan ke gudang isolasi. Pembayaran hangus.');
     }
 
     public function verifyPaymentLog(\Illuminate\Http\Request $request, $id)
@@ -442,7 +493,7 @@ class FinanceController extends Controller
 
     public function restockApproval()
     {
-        $requests = \App\Models\RestockRequest::with(['product.category', 'user'])
+        $requests = \App\Models\RestockRequest::with(['product.category', 'variant', 'user'])
             ->latest()
             ->get();
             
@@ -456,9 +507,31 @@ class FinanceController extends Controller
         if ($restockRequest->status !== 'pending') return back();
 
         $restockRequest->update(['status' => 'approved']);
+        
+        // Increment base product stock
         $restockRequest->product->increment('stock', $restockRequest->requested_quantity);
         
-        return back()->with('success', 'Restock disetujui, stok produk otomatis bertambah!');
+        // Increment variant stock if applicable
+        if ($restockRequest->product_variant_id && $restockRequest->variant) {
+            $restockRequest->variant->increment('stock', $restockRequest->requested_quantity);
+        }
+        // Record Expense (Pengeluaran Modal)
+        $costPrice = $restockRequest->variant ? $restockRequest->variant->price : $restockRequest->product->price;
+        $totalExpense = $costPrice * $restockRequest->requested_quantity;
+        $variantText = $restockRequest->variant ? " (Varian: {$restockRequest->variant->name})" : "";
+
+        \App\Models\FinancialTransaction::create([
+            'transaction_date' => now()->toDateString(),
+            'type' => 'expense',
+            'category' => 'restock',
+            'amount' => $totalExpense,
+            'description' => "Biaya Restock untuk {$restockRequest->requested_quantity} unit " . $restockRequest->product->name . $variantText,
+            'payment_method' => 'transfer',
+            'related_type' => \App\Models\RestockRequest::class,
+            'related_id' => $restockRequest->id,
+        ]);
+        
+        return back()->with('success', 'Restock disetujui, stok bertambah, dan biaya pengeluaran modal berhasil dicatat!');
     }
 
     public function rejectRestock(\Illuminate\Http\Request $request, \App\Models\RestockRequest $restockRequest)

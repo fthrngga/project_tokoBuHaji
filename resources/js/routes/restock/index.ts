@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../wayfinder'
 /**
 * @see \App\Features\Finance\FinanceController::approve
- * @see app/Features/Finance/FinanceController.php:454
+ * @see app/Features/Finance/FinanceController.php:505
  * @route '/restock-approval/{restockRequest}/approve'
  */
 export const approve = (args: { restockRequest: number | { id: number } } | [restockRequest: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -16,7 +16,7 @@ approve.definition = {
 
 /**
 * @see \App\Features\Finance\FinanceController::approve
- * @see app/Features/Finance/FinanceController.php:454
+ * @see app/Features/Finance/FinanceController.php:505
  * @route '/restock-approval/{restockRequest}/approve'
  */
 approve.url = (args: { restockRequest: number | { id: number } } | [restockRequest: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -49,7 +49,7 @@ approve.url = (args: { restockRequest: number | { id: number } } | [restockReque
 
 /**
 * @see \App\Features\Finance\FinanceController::approve
- * @see app/Features/Finance/FinanceController.php:454
+ * @see app/Features/Finance/FinanceController.php:505
  * @route '/restock-approval/{restockRequest}/approve'
  */
 approve.patch = (args: { restockRequest: number | { id: number } } | [restockRequest: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -59,7 +59,7 @@ approve.patch = (args: { restockRequest: number | { id: number } } | [restockReq
 
     /**
 * @see \App\Features\Finance\FinanceController::approve
- * @see app/Features/Finance/FinanceController.php:454
+ * @see app/Features/Finance/FinanceController.php:505
  * @route '/restock-approval/{restockRequest}/approve'
  */
     const approveForm = (args: { restockRequest: number | { id: number } } | [restockRequest: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -74,7 +74,7 @@ approve.patch = (args: { restockRequest: number | { id: number } } | [restockReq
 
             /**
 * @see \App\Features\Finance\FinanceController::approve
- * @see app/Features/Finance/FinanceController.php:454
+ * @see app/Features/Finance/FinanceController.php:505
  * @route '/restock-approval/{restockRequest}/approve'
  */
         approveForm.patch = (args: { restockRequest: number | { id: number } } | [restockRequest: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -90,7 +90,7 @@ approve.patch = (args: { restockRequest: number | { id: number } } | [restockReq
     approve.form = approveForm
 /**
 * @see \App\Features\Finance\FinanceController::reject
- * @see app/Features/Finance/FinanceController.php:464
+ * @see app/Features/Finance/FinanceController.php:537
  * @route '/restock-approval/{restockRequest}/reject'
  */
 export const reject = (args: { restockRequest: number | { id: number } } | [restockRequest: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -105,7 +105,7 @@ reject.definition = {
 
 /**
 * @see \App\Features\Finance\FinanceController::reject
- * @see app/Features/Finance/FinanceController.php:464
+ * @see app/Features/Finance/FinanceController.php:537
  * @route '/restock-approval/{restockRequest}/reject'
  */
 reject.url = (args: { restockRequest: number | { id: number } } | [restockRequest: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -138,7 +138,7 @@ reject.url = (args: { restockRequest: number | { id: number } } | [restockReques
 
 /**
 * @see \App\Features\Finance\FinanceController::reject
- * @see app/Features/Finance/FinanceController.php:464
+ * @see app/Features/Finance/FinanceController.php:537
  * @route '/restock-approval/{restockRequest}/reject'
  */
 reject.patch = (args: { restockRequest: number | { id: number } } | [restockRequest: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -148,7 +148,7 @@ reject.patch = (args: { restockRequest: number | { id: number } } | [restockRequ
 
     /**
 * @see \App\Features\Finance\FinanceController::reject
- * @see app/Features/Finance/FinanceController.php:464
+ * @see app/Features/Finance/FinanceController.php:537
  * @route '/restock-approval/{restockRequest}/reject'
  */
     const rejectForm = (args: { restockRequest: number | { id: number } } | [restockRequest: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -163,7 +163,7 @@ reject.patch = (args: { restockRequest: number | { id: number } } | [restockRequ
 
             /**
 * @see \App\Features\Finance\FinanceController::reject
- * @see app/Features/Finance/FinanceController.php:464
+ * @see app/Features/Finance/FinanceController.php:537
  * @route '/restock-approval/{restockRequest}/reject'
  */
         rejectForm.patch = (args: { restockRequest: number | { id: number } } | [restockRequest: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

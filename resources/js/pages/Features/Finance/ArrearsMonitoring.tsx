@@ -58,6 +58,7 @@ interface Props {
     pageParams: {
         title: string;
     };
+    penarikanHistory: any[];
 }
 
 const formatCurrency = (value: number | string) => {
@@ -68,14 +69,40 @@ const formatCurrency = (value: number | string) => {
     }).format(Number(value));
 };
 
-export default function ArrearsMonitoring({ credits }: Props) {
+export default function ArrearsMonitoring({ credits, penarikanHistory = [] }: Props) {
     const [selectedCredit, setSelectedCredit] = useState<Credit | null>(null);
     const [isDetailOpen, setIsDetailOpen] = useState(false);
     const [filterTab, setFilterTab] = useState<'semua' | 'lewat_1' | 'lewat_3'>('semua');
+    
+    // Tarik Barang States
+    const [isTarikOpen, setIsTarikOpen] = useState(false);
+    const [selectedCreditForTarik, setSelectedCreditForTarik] = useState<Credit | null>(null);
+    const [tarikNotes, setTarikNotes] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleValuesDetail = (credit: Credit) => {
         setSelectedCredit(credit);
         setIsDetailOpen(true);
+    };
+
+    const handleOpenTarik = (credit: Credit) => {
+        setSelectedCreditForTarik(credit);
+        setTarikNotes('');
+        setIsTarikOpen(true);
+    };
+
+    const handleSubmitTarik = () => {
+        if (!selectedCreditForTarik || !tarikNotes) return;
+        setIsSubmitting(true);
+        router.post(route('finance.payment.tarik', selectedCreditForTarik.id), {
+            notes: tarikNotes
+        }, {
+            onSuccess: () => {
+                setIsTarikOpen(false);
+                setSelectedCreditForTarik(null);
+            },
+            onFinish: () => setIsSubmitting(false)
+        });
     };
 
     return (
@@ -159,6 +186,11 @@ export default function ArrearsMonitoring({ credits }: Props) {
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex justify-end gap-2">
+                                            {credit.is_kritis && (
+                                                <Button variant="destructive" size="sm" onClick={() => handleOpenTarik(credit)}>
+                                                    Tarik Barang
+                                                </Button>
+                                            )}
                                             <Button variant="outline" size="sm" onClick={() => handleValuesDetail(credit)}>
                                                 Detail
                                             </Button>
@@ -252,6 +284,73 @@ export default function ArrearsMonitoring({ credits }: Props) {
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
+                {/* Modal Penarikan Barang */}
+                <Dialog open={isTarikOpen} onOpenChange={setIsTarikOpen}>
+                    <DialogContent className="sm:max-w-[500px] bg-card">
+                        <DialogHeader>
+                            <DialogTitle className="text-red-600">Eksekusi Penarikan Barang</DialogTitle>
+                            <DialogDescription>
+                                Anda akan menarik barang dari pelanggan <span className="font-bold">{selectedCreditForTarik?.customer?.user?.name}</span> karena menunggak kritis.
+                                Seluruh uang yang sudah masuk (DP & Angsuran) akan hangus.
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <div className="py-4">
+                            <label className="block text-sm font-medium mb-2">Keterangan Kondisi Barang</label>
+                            <textarea 
+                                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                rows={4}
+                                placeholder="Misal: Barang terdapat goresan, mesin menyala normal..."
+                                value={tarikNotes}
+                                onChange={(e) => setTarikNotes(e.target.value)}
+                            />
+                        </div>
+
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setIsTarikOpen(false)} disabled={isSubmitting}>Batal</Button>
+                            <Button variant="destructive" onClick={handleSubmitTarik} disabled={isSubmitting || !tarikNotes}>
+                                {isSubmitting ? 'Memproses...' : 'Proses Penarikan'}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                {/* History Table */}
+                <div className="mt-8 flex flex-col gap-2 rounded-xl border border-border bg-card p-6 shadow">
+                    <h2 className="text-lg font-bold">Riwayat Penarikan Barang</h2>
+                    <p className="text-sm text-muted-foreground mb-4">Daftar barang yang ditarik masuk ke gudang isolasi</p>
+                    
+                    <div className="rounded-md border">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Tanggal</TableHead>
+                                    <TableHead>Nama Pelanggan</TableHead>
+                                    <TableHead>Barang</TableHead>
+                                    <TableHead>Keterangan Kondisi</TableHead>
+                                    <TableHead>Status Uang</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {penarikanHistory.length > 0 ? penarikanHistory.map((item, idx) => (
+                                    <TableRow key={idx}>
+                                        <TableCell>{item.date}</TableCell>
+                                        <TableCell className="font-medium">{item.customer_name}</TableCell>
+                                        <TableCell>{item.product_name} (x{item.quantity})</TableCell>
+                                        <TableCell>{item.notes}</TableCell>
+                                        <TableCell><Badge variant="outline" className="text-red-600 bg-red-50 border-red-200">Hangus</Badge></TableCell>
+                                    </TableRow>
+                                )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
+                                            Belum ada riwayat penarikan barang.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
+                </div>
 
             </div>
         </AppLayout>

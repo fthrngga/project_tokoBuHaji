@@ -72,12 +72,12 @@ const formatCurrency = (value: number | string) => {
 
 const getStatusBadge = (status: string) => {
     switch (status) {
-        case 'negotiation': return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Negosiasi</Badge>;
-        case 'pending': return <Badge variant="secondary" className="bg-gray-100 text-gray-800">Menunggu</Badge>;
-        case 'awaiting_payment': return <Badge variant="secondary" className="bg-blue-100 text-blue-800">Menunggu Pembayaran</Badge>;
-        case 'processing': return <Badge variant="secondary" className="bg-orange-100 text-orange-800">Diproses</Badge>;
-        case 'completed': return <Badge variant="default" className="bg-green-600 hover:bg-green-700">Selesai</Badge>;
-        case 'cancelled': return <Badge variant="destructive">Dibatalkan</Badge>;
+        case 'negotiation': return <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-500 hover:bg-yellow-500/30 border border-yellow-500/20">Negosiasi</Badge>;
+        case 'pending': return <Badge variant="secondary" className="bg-slate-500/20 text-slate-400 hover:bg-slate-500/30 border border-slate-500/20">Menunggu</Badge>;
+        case 'awaiting_payment': return <Badge variant="secondary" className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 border border-blue-500/20">Menunggu Pembayaran</Badge>;
+        case 'processing': return <Badge variant="secondary" className="bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 border border-orange-500/20">Diproses</Badge>;
+        case 'completed': return <Badge variant="default" className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/20">Selesai</Badge>;
+        case 'cancelled': return <Badge variant="destructive" className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/20">Dibatalkan</Badge>;
         default: return <Badge variant="outline">{status}</Badge>;
     }
 }
@@ -158,7 +158,7 @@ export default function Show({ order }: Props) {
             <Head title={`Admin - Order #${order.id}`} />
 
             <div className="flex flex-col space-y-4 p-4 h-[calc(100vh-4rem)]">
-                <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border">
+                <div className="flex justify-between items-center bg-card text-card-foreground p-6 rounded-xl shadow-sm border">
                     <div>
                         <h1 className="text-2xl font-bold flex items-center gap-3">
                             Order #{order.id}
@@ -196,7 +196,7 @@ export default function Show({ order }: Props) {
                                     <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                                         <div className={`max-w-[80%] rounded-lg p-3 text-sm shadow-sm ${isMe
                                             ? 'bg-primary text-primary-foreground rounded-br-none'
-                                            : 'bg-white border rounded-bl-none'
+                                            : 'bg-muted border border-border text-foreground rounded-bl-none'
                                             }`}>
                                             <p>{msg.message}</p>
                                             <div className={`text-[10px] mt-1 flex justify-between gap-4 ${isMe ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
@@ -264,13 +264,13 @@ export default function Show({ order }: Props) {
                                                 placeholder="e.g. 50000"
                                                 value={updateData.shipping_cost}
                                                 onChange={e => setUpdateData('shipping_cost', e.target.value)}
-                                                className="bg-white"
+                                                className="bg-background"
                                             />
                                         </div>
                                         <div className="space-y-2">
                                             <Label>Order Status</Label>
                                             <select
-                                                className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                                 value={updateData.status}
                                                 onChange={e => setUpdateData('status', e.target.value)}
                                                 disabled={['completed', 'cancelled'].includes(order.status)} // Kunci jika sudah final

@@ -8,6 +8,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin/finance')->
     Route::get('/arrears-monitoring', [FinanceController::class, 'arrearsMonitoring'])->name('arrears');
     Route::put('/payment/{id}/terms', [FinanceController::class, 'updateCreditTerms'])->name('payment.terms.update');
     Route::put('/payment/{id}/pelunasan-dini', [FinanceController::class, 'pelunasanDini'])->name('payment.pelunasan-dini');
+    Route::post('/payment/{id}/tarik', [FinanceController::class, 'tarikBarang'])->name('payment.tarik');
     Route::put('/payment/{id}/verify', [FinanceController::class, 'verifyCashPayment'])->name('payment.verify');
     Route::put('/payment-log/{id}/verify', [FinanceController::class, 'verifyPaymentLog'])->name('payment-log.verify');
     Route::get('/installments', [FinanceController::class, 'installmentPayment'])->name('payment.manual');

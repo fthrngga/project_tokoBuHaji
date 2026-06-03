@@ -157,7 +157,7 @@ arrearsMonitoring.head = (options?: RouteQueryOptions): RouteDefinition<'head'> 
     arrearsMonitoring.form = arrearsMonitoringForm
 /**
 * @see \App\Features\Finance\FinanceController::updateCreditTerms
- * @see app/Features/Finance/FinanceController.php:85
+ * @see app/Features/Finance/FinanceController.php:102
  * @route '/admin/finance/payment/{id}/terms'
  */
 export const updateCreditTerms = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -172,7 +172,7 @@ updateCreditTerms.definition = {
 
 /**
 * @see \App\Features\Finance\FinanceController::updateCreditTerms
- * @see app/Features/Finance/FinanceController.php:85
+ * @see app/Features/Finance/FinanceController.php:102
  * @route '/admin/finance/payment/{id}/terms'
  */
 updateCreditTerms.url = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -200,7 +200,7 @@ updateCreditTerms.url = (args: { id: string | number } | [id: string | number ] 
 
 /**
 * @see \App\Features\Finance\FinanceController::updateCreditTerms
- * @see app/Features/Finance/FinanceController.php:85
+ * @see app/Features/Finance/FinanceController.php:102
  * @route '/admin/finance/payment/{id}/terms'
  */
 updateCreditTerms.put = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -210,7 +210,7 @@ updateCreditTerms.put = (args: { id: string | number } | [id: string | number ] 
 
     /**
 * @see \App\Features\Finance\FinanceController::updateCreditTerms
- * @see app/Features/Finance/FinanceController.php:85
+ * @see app/Features/Finance/FinanceController.php:102
  * @route '/admin/finance/payment/{id}/terms'
  */
     const updateCreditTermsForm = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -225,7 +225,7 @@ updateCreditTerms.put = (args: { id: string | number } | [id: string | number ] 
 
             /**
 * @see \App\Features\Finance\FinanceController::updateCreditTerms
- * @see app/Features/Finance/FinanceController.php:85
+ * @see app/Features/Finance/FinanceController.php:102
  * @route '/admin/finance/payment/{id}/terms'
  */
         updateCreditTermsForm.put = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -241,7 +241,7 @@ updateCreditTerms.put = (args: { id: string | number } | [id: string | number ] 
     updateCreditTerms.form = updateCreditTermsForm
 /**
 * @see \App\Features\Finance\FinanceController::pelunasanDini
- * @see app/Features/Finance/FinanceController.php:109
+ * @see app/Features/Finance/FinanceController.php:126
  * @route '/admin/finance/payment/{id}/pelunasan-dini'
  */
 export const pelunasanDini = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -256,7 +256,7 @@ pelunasanDini.definition = {
 
 /**
 * @see \App\Features\Finance\FinanceController::pelunasanDini
- * @see app/Features/Finance/FinanceController.php:109
+ * @see app/Features/Finance/FinanceController.php:126
  * @route '/admin/finance/payment/{id}/pelunasan-dini'
  */
 pelunasanDini.url = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -284,7 +284,7 @@ pelunasanDini.url = (args: { id: string | number } | [id: string | number ] | st
 
 /**
 * @see \App\Features\Finance\FinanceController::pelunasanDini
- * @see app/Features/Finance/FinanceController.php:109
+ * @see app/Features/Finance/FinanceController.php:126
  * @route '/admin/finance/payment/{id}/pelunasan-dini'
  */
 pelunasanDini.put = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -294,7 +294,7 @@ pelunasanDini.put = (args: { id: string | number } | [id: string | number ] | st
 
     /**
 * @see \App\Features\Finance\FinanceController::pelunasanDini
- * @see app/Features/Finance/FinanceController.php:109
+ * @see app/Features/Finance/FinanceController.php:126
  * @route '/admin/finance/payment/{id}/pelunasan-dini'
  */
     const pelunasanDiniForm = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -309,7 +309,7 @@ pelunasanDini.put = (args: { id: string | number } | [id: string | number ] | st
 
             /**
 * @see \App\Features\Finance\FinanceController::pelunasanDini
- * @see app/Features/Finance/FinanceController.php:109
+ * @see app/Features/Finance/FinanceController.php:126
  * @route '/admin/finance/payment/{id}/pelunasan-dini'
  */
         pelunasanDiniForm.put = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -324,8 +324,82 @@ pelunasanDini.put = (args: { id: string | number } | [id: string | number ] | st
     
     pelunasanDini.form = pelunasanDiniForm
 /**
+* @see \App\Features\Finance\FinanceController::tarikBarang
+ * @see app/Features/Finance/FinanceController.php:177
+ * @route '/admin/finance/payment/{id}/tarik'
+ */
+export const tarikBarang = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: tarikBarang.url(args, options),
+    method: 'post',
+})
+
+tarikBarang.definition = {
+    methods: ["post"],
+    url: '/admin/finance/payment/{id}/tarik',
+} satisfies RouteDefinition<["post"]>
+
+/**
+* @see \App\Features\Finance\FinanceController::tarikBarang
+ * @see app/Features/Finance/FinanceController.php:177
+ * @route '/admin/finance/payment/{id}/tarik'
+ */
+tarikBarang.url = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { id: args }
+    }
+
+    
+    if (Array.isArray(args)) {
+        args = {
+                    id: args[0],
+                }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+                        id: args.id,
+                }
+
+    return tarikBarang.definition.url
+            .replace('{id}', parsedArgs.id.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Features\Finance\FinanceController::tarikBarang
+ * @see app/Features/Finance/FinanceController.php:177
+ * @route '/admin/finance/payment/{id}/tarik'
+ */
+tarikBarang.post = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: tarikBarang.url(args, options),
+    method: 'post',
+})
+
+    /**
+* @see \App\Features\Finance\FinanceController::tarikBarang
+ * @see app/Features/Finance/FinanceController.php:177
+ * @route '/admin/finance/payment/{id}/tarik'
+ */
+    const tarikBarangForm = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        action: tarikBarang.url(args, options),
+        method: 'post',
+    })
+
+            /**
+* @see \App\Features\Finance\FinanceController::tarikBarang
+ * @see app/Features/Finance/FinanceController.php:177
+ * @route '/admin/finance/payment/{id}/tarik'
+ */
+        tarikBarangForm.post = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: tarikBarang.url(args, options),
+            method: 'post',
+        })
+    
+    tarikBarang.form = tarikBarangForm
+/**
 * @see \App\Features\Finance\FinanceController::verifyCashPayment
- * @see app/Features/Finance/FinanceController.php:218
+ * @see app/Features/Finance/FinanceController.php:269
  * @route '/admin/finance/payment/{id}/verify'
  */
 export const verifyCashPayment = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -340,7 +414,7 @@ verifyCashPayment.definition = {
 
 /**
 * @see \App\Features\Finance\FinanceController::verifyCashPayment
- * @see app/Features/Finance/FinanceController.php:218
+ * @see app/Features/Finance/FinanceController.php:269
  * @route '/admin/finance/payment/{id}/verify'
  */
 verifyCashPayment.url = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -368,7 +442,7 @@ verifyCashPayment.url = (args: { id: string | number } | [id: string | number ] 
 
 /**
 * @see \App\Features\Finance\FinanceController::verifyCashPayment
- * @see app/Features/Finance/FinanceController.php:218
+ * @see app/Features/Finance/FinanceController.php:269
  * @route '/admin/finance/payment/{id}/verify'
  */
 verifyCashPayment.put = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -378,7 +452,7 @@ verifyCashPayment.put = (args: { id: string | number } | [id: string | number ] 
 
     /**
 * @see \App\Features\Finance\FinanceController::verifyCashPayment
- * @see app/Features/Finance/FinanceController.php:218
+ * @see app/Features/Finance/FinanceController.php:269
  * @route '/admin/finance/payment/{id}/verify'
  */
     const verifyCashPaymentForm = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -393,7 +467,7 @@ verifyCashPayment.put = (args: { id: string | number } | [id: string | number ] 
 
             /**
 * @see \App\Features\Finance\FinanceController::verifyCashPayment
- * @see app/Features/Finance/FinanceController.php:218
+ * @see app/Features/Finance/FinanceController.php:269
  * @route '/admin/finance/payment/{id}/verify'
  */
         verifyCashPaymentForm.put = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -409,7 +483,7 @@ verifyCashPayment.put = (args: { id: string | number } | [id: string | number ] 
     verifyCashPayment.form = verifyCashPaymentForm
 /**
 * @see \App\Features\Finance\FinanceController::verifyPaymentLog
- * @see app/Features/Finance/FinanceController.php:160
+ * @see app/Features/Finance/FinanceController.php:211
  * @route '/admin/finance/payment-log/{id}/verify'
  */
 export const verifyPaymentLog = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -424,7 +498,7 @@ verifyPaymentLog.definition = {
 
 /**
 * @see \App\Features\Finance\FinanceController::verifyPaymentLog
- * @see app/Features/Finance/FinanceController.php:160
+ * @see app/Features/Finance/FinanceController.php:211
  * @route '/admin/finance/payment-log/{id}/verify'
  */
 verifyPaymentLog.url = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -452,7 +526,7 @@ verifyPaymentLog.url = (args: { id: string | number } | [id: string | number ] |
 
 /**
 * @see \App\Features\Finance\FinanceController::verifyPaymentLog
- * @see app/Features/Finance/FinanceController.php:160
+ * @see app/Features/Finance/FinanceController.php:211
  * @route '/admin/finance/payment-log/{id}/verify'
  */
 verifyPaymentLog.put = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -462,7 +536,7 @@ verifyPaymentLog.put = (args: { id: string | number } | [id: string | number ] |
 
     /**
 * @see \App\Features\Finance\FinanceController::verifyPaymentLog
- * @see app/Features/Finance/FinanceController.php:160
+ * @see app/Features/Finance/FinanceController.php:211
  * @route '/admin/finance/payment-log/{id}/verify'
  */
     const verifyPaymentLogForm = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -477,7 +551,7 @@ verifyPaymentLog.put = (args: { id: string | number } | [id: string | number ] |
 
             /**
 * @see \App\Features\Finance\FinanceController::verifyPaymentLog
- * @see app/Features/Finance/FinanceController.php:160
+ * @see app/Features/Finance/FinanceController.php:211
  * @route '/admin/finance/payment-log/{id}/verify'
  */
         verifyPaymentLogForm.put = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -493,7 +567,7 @@ verifyPaymentLog.put = (args: { id: string | number } | [id: string | number ] |
     verifyPaymentLog.form = verifyPaymentLogForm
 /**
 * @see \App\Features\Finance\FinanceController::installmentPayment
- * @see app/Features/Finance/FinanceController.php:258
+ * @see app/Features/Finance/FinanceController.php:309
  * @route '/admin/finance/installments'
  */
 export const installmentPayment = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -508,7 +582,7 @@ installmentPayment.definition = {
 
 /**
 * @see \App\Features\Finance\FinanceController::installmentPayment
- * @see app/Features/Finance/FinanceController.php:258
+ * @see app/Features/Finance/FinanceController.php:309
  * @route '/admin/finance/installments'
  */
 installmentPayment.url = (options?: RouteQueryOptions) => {
@@ -517,7 +591,7 @@ installmentPayment.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Features\Finance\FinanceController::installmentPayment
- * @see app/Features/Finance/FinanceController.php:258
+ * @see app/Features/Finance/FinanceController.php:309
  * @route '/admin/finance/installments'
  */
 installmentPayment.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -526,7 +600,7 @@ installmentPayment.get = (options?: RouteQueryOptions): RouteDefinition<'get'> =
 })
 /**
 * @see \App\Features\Finance\FinanceController::installmentPayment
- * @see app/Features/Finance/FinanceController.php:258
+ * @see app/Features/Finance/FinanceController.php:309
  * @route '/admin/finance/installments'
  */
 installmentPayment.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -536,7 +610,7 @@ installmentPayment.head = (options?: RouteQueryOptions): RouteDefinition<'head'>
 
     /**
 * @see \App\Features\Finance\FinanceController::installmentPayment
- * @see app/Features/Finance/FinanceController.php:258
+ * @see app/Features/Finance/FinanceController.php:309
  * @route '/admin/finance/installments'
  */
     const installmentPaymentForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -546,7 +620,7 @@ installmentPayment.head = (options?: RouteQueryOptions): RouteDefinition<'head'>
 
             /**
 * @see \App\Features\Finance\FinanceController::installmentPayment
- * @see app/Features/Finance/FinanceController.php:258
+ * @see app/Features/Finance/FinanceController.php:309
  * @route '/admin/finance/installments'
  */
         installmentPaymentForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -555,7 +629,7 @@ installmentPayment.head = (options?: RouteQueryOptions): RouteDefinition<'head'>
         })
             /**
 * @see \App\Features\Finance\FinanceController::installmentPayment
- * @see app/Features/Finance/FinanceController.php:258
+ * @see app/Features/Finance/FinanceController.php:309
  * @route '/admin/finance/installments'
  */
         installmentPaymentForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -571,7 +645,7 @@ installmentPayment.head = (options?: RouteQueryOptions): RouteDefinition<'head'>
     installmentPayment.form = installmentPaymentForm
 /**
 * @see \App\Features\Finance\FinanceController::storeInstallment
- * @see app/Features/Finance/FinanceController.php:316
+ * @see app/Features/Finance/FinanceController.php:367
  * @route '/admin/finance/installments'
  */
 export const storeInstallment = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -586,7 +660,7 @@ storeInstallment.definition = {
 
 /**
 * @see \App\Features\Finance\FinanceController::storeInstallment
- * @see app/Features/Finance/FinanceController.php:316
+ * @see app/Features/Finance/FinanceController.php:367
  * @route '/admin/finance/installments'
  */
 storeInstallment.url = (options?: RouteQueryOptions) => {
@@ -595,7 +669,7 @@ storeInstallment.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Features\Finance\FinanceController::storeInstallment
- * @see app/Features/Finance/FinanceController.php:316
+ * @see app/Features/Finance/FinanceController.php:367
  * @route '/admin/finance/installments'
  */
 storeInstallment.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -605,7 +679,7 @@ storeInstallment.post = (options?: RouteQueryOptions): RouteDefinition<'post'> =
 
     /**
 * @see \App\Features\Finance\FinanceController::storeInstallment
- * @see app/Features/Finance/FinanceController.php:316
+ * @see app/Features/Finance/FinanceController.php:367
  * @route '/admin/finance/installments'
  */
     const storeInstallmentForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -615,7 +689,7 @@ storeInstallment.post = (options?: RouteQueryOptions): RouteDefinition<'post'> =
 
             /**
 * @see \App\Features\Finance\FinanceController::storeInstallment
- * @see app/Features/Finance/FinanceController.php:316
+ * @see app/Features/Finance/FinanceController.php:367
  * @route '/admin/finance/installments'
  */
         storeInstallmentForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -626,7 +700,7 @@ storeInstallment.post = (options?: RouteQueryOptions): RouteDefinition<'post'> =
     storeInstallment.form = storeInstallmentForm
 /**
 * @see \App\Features\Finance\FinanceController::reports
- * @see app/Features/Finance/FinanceController.php:363
+ * @see app/Features/Finance/FinanceController.php:414
  * @route '/admin/finance/reports'
  */
 export const reports = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -641,7 +715,7 @@ reports.definition = {
 
 /**
 * @see \App\Features\Finance\FinanceController::reports
- * @see app/Features/Finance/FinanceController.php:363
+ * @see app/Features/Finance/FinanceController.php:414
  * @route '/admin/finance/reports'
  */
 reports.url = (options?: RouteQueryOptions) => {
@@ -650,7 +724,7 @@ reports.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Features\Finance\FinanceController::reports
- * @see app/Features/Finance/FinanceController.php:363
+ * @see app/Features/Finance/FinanceController.php:414
  * @route '/admin/finance/reports'
  */
 reports.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -659,7 +733,7 @@ reports.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 /**
 * @see \App\Features\Finance\FinanceController::reports
- * @see app/Features/Finance/FinanceController.php:363
+ * @see app/Features/Finance/FinanceController.php:414
  * @route '/admin/finance/reports'
  */
 reports.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -669,7 +743,7 @@ reports.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
     /**
 * @see \App\Features\Finance\FinanceController::reports
- * @see app/Features/Finance/FinanceController.php:363
+ * @see app/Features/Finance/FinanceController.php:414
  * @route '/admin/finance/reports'
  */
     const reportsForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -679,7 +753,7 @@ reports.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
             /**
 * @see \App\Features\Finance\FinanceController::reports
- * @see app/Features/Finance/FinanceController.php:363
+ * @see app/Features/Finance/FinanceController.php:414
  * @route '/admin/finance/reports'
  */
         reportsForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -688,7 +762,7 @@ reports.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
         })
             /**
 * @see \App\Features\Finance\FinanceController::reports
- * @see app/Features/Finance/FinanceController.php:363
+ * @see app/Features/Finance/FinanceController.php:414
  * @route '/admin/finance/reports'
  */
         reportsForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -704,7 +778,7 @@ reports.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     reports.form = reportsForm
 /**
 * @see \App\Features\Finance\FinanceController::storeExpense
- * @see app/Features/Finance/FinanceController.php:421
+ * @see app/Features/Finance/FinanceController.php:472
  * @route '/admin/finance/expenses'
  */
 export const storeExpense = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -719,7 +793,7 @@ storeExpense.definition = {
 
 /**
 * @see \App\Features\Finance\FinanceController::storeExpense
- * @see app/Features/Finance/FinanceController.php:421
+ * @see app/Features/Finance/FinanceController.php:472
  * @route '/admin/finance/expenses'
  */
 storeExpense.url = (options?: RouteQueryOptions) => {
@@ -728,7 +802,7 @@ storeExpense.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Features\Finance\FinanceController::storeExpense
- * @see app/Features/Finance/FinanceController.php:421
+ * @see app/Features/Finance/FinanceController.php:472
  * @route '/admin/finance/expenses'
  */
 storeExpense.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -738,7 +812,7 @@ storeExpense.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
     /**
 * @see \App\Features\Finance\FinanceController::storeExpense
- * @see app/Features/Finance/FinanceController.php:421
+ * @see app/Features/Finance/FinanceController.php:472
  * @route '/admin/finance/expenses'
  */
     const storeExpenseForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -748,7 +822,7 @@ storeExpense.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
             /**
 * @see \App\Features\Finance\FinanceController::storeExpense
- * @see app/Features/Finance/FinanceController.php:421
+ * @see app/Features/Finance/FinanceController.php:472
  * @route '/admin/finance/expenses'
  */
         storeExpenseForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -759,7 +833,7 @@ storeExpense.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     storeExpense.form = storeExpenseForm
 /**
 * @see \App\Features\Finance\FinanceController::restockApproval
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/admin/finance/restock'
  */
 const restockApproval9ae75426f1c9d971e5e5ed3928059bae = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -774,7 +848,7 @@ restockApproval9ae75426f1c9d971e5e5ed3928059bae.definition = {
 
 /**
 * @see \App\Features\Finance\FinanceController::restockApproval
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/admin/finance/restock'
  */
 restockApproval9ae75426f1c9d971e5e5ed3928059bae.url = (options?: RouteQueryOptions) => {
@@ -783,7 +857,7 @@ restockApproval9ae75426f1c9d971e5e5ed3928059bae.url = (options?: RouteQueryOptio
 
 /**
 * @see \App\Features\Finance\FinanceController::restockApproval
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/admin/finance/restock'
  */
 restockApproval9ae75426f1c9d971e5e5ed3928059bae.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -792,7 +866,7 @@ restockApproval9ae75426f1c9d971e5e5ed3928059bae.get = (options?: RouteQueryOptio
 })
 /**
 * @see \App\Features\Finance\FinanceController::restockApproval
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/admin/finance/restock'
  */
 restockApproval9ae75426f1c9d971e5e5ed3928059bae.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -802,7 +876,7 @@ restockApproval9ae75426f1c9d971e5e5ed3928059bae.head = (options?: RouteQueryOpti
 
     /**
 * @see \App\Features\Finance\FinanceController::restockApproval
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/admin/finance/restock'
  */
     const restockApproval9ae75426f1c9d971e5e5ed3928059baeForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -812,7 +886,7 @@ restockApproval9ae75426f1c9d971e5e5ed3928059bae.head = (options?: RouteQueryOpti
 
             /**
 * @see \App\Features\Finance\FinanceController::restockApproval
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/admin/finance/restock'
  */
         restockApproval9ae75426f1c9d971e5e5ed3928059baeForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -821,7 +895,7 @@ restockApproval9ae75426f1c9d971e5e5ed3928059bae.head = (options?: RouteQueryOpti
         })
             /**
 * @see \App\Features\Finance\FinanceController::restockApproval
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/admin/finance/restock'
  */
         restockApproval9ae75426f1c9d971e5e5ed3928059baeForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -837,7 +911,7 @@ restockApproval9ae75426f1c9d971e5e5ed3928059bae.head = (options?: RouteQueryOpti
     restockApproval9ae75426f1c9d971e5e5ed3928059bae.form = restockApproval9ae75426f1c9d971e5e5ed3928059baeForm
     /**
 * @see \App\Features\Finance\FinanceController::restockApproval
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/restock-approval'
  */
 const restockApproval286c49ed9d56bfa4e809c65f53f32d95 = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -852,7 +926,7 @@ restockApproval286c49ed9d56bfa4e809c65f53f32d95.definition = {
 
 /**
 * @see \App\Features\Finance\FinanceController::restockApproval
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/restock-approval'
  */
 restockApproval286c49ed9d56bfa4e809c65f53f32d95.url = (options?: RouteQueryOptions) => {
@@ -861,7 +935,7 @@ restockApproval286c49ed9d56bfa4e809c65f53f32d95.url = (options?: RouteQueryOptio
 
 /**
 * @see \App\Features\Finance\FinanceController::restockApproval
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/restock-approval'
  */
 restockApproval286c49ed9d56bfa4e809c65f53f32d95.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -870,7 +944,7 @@ restockApproval286c49ed9d56bfa4e809c65f53f32d95.get = (options?: RouteQueryOptio
 })
 /**
 * @see \App\Features\Finance\FinanceController::restockApproval
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/restock-approval'
  */
 restockApproval286c49ed9d56bfa4e809c65f53f32d95.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -880,7 +954,7 @@ restockApproval286c49ed9d56bfa4e809c65f53f32d95.head = (options?: RouteQueryOpti
 
     /**
 * @see \App\Features\Finance\FinanceController::restockApproval
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/restock-approval'
  */
     const restockApproval286c49ed9d56bfa4e809c65f53f32d95Form = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -890,7 +964,7 @@ restockApproval286c49ed9d56bfa4e809c65f53f32d95.head = (options?: RouteQueryOpti
 
             /**
 * @see \App\Features\Finance\FinanceController::restockApproval
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/restock-approval'
  */
         restockApproval286c49ed9d56bfa4e809c65f53f32d95Form.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -899,7 +973,7 @@ restockApproval286c49ed9d56bfa4e809c65f53f32d95.head = (options?: RouteQueryOpti
         })
             /**
 * @see \App\Features\Finance\FinanceController::restockApproval
- * @see app/Features/Finance/FinanceController.php:443
+ * @see app/Features/Finance/FinanceController.php:494
  * @route '/restock-approval'
  */
         restockApproval286c49ed9d56bfa4e809c65f53f32d95Form.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -921,7 +995,7 @@ export const restockApproval = {
 
 /**
 * @see \App\Features\Finance\FinanceController::approveRestock
- * @see app/Features/Finance/FinanceController.php:454
+ * @see app/Features/Finance/FinanceController.php:505
  * @route '/restock-approval/{restockRequest}/approve'
  */
 export const approveRestock = (args: { restockRequest: number | { id: number } } | [restockRequest: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -936,7 +1010,7 @@ approveRestock.definition = {
 
 /**
 * @see \App\Features\Finance\FinanceController::approveRestock
- * @see app/Features/Finance/FinanceController.php:454
+ * @see app/Features/Finance/FinanceController.php:505
  * @route '/restock-approval/{restockRequest}/approve'
  */
 approveRestock.url = (args: { restockRequest: number | { id: number } } | [restockRequest: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -969,7 +1043,7 @@ approveRestock.url = (args: { restockRequest: number | { id: number } } | [resto
 
 /**
 * @see \App\Features\Finance\FinanceController::approveRestock
- * @see app/Features/Finance/FinanceController.php:454
+ * @see app/Features/Finance/FinanceController.php:505
  * @route '/restock-approval/{restockRequest}/approve'
  */
 approveRestock.patch = (args: { restockRequest: number | { id: number } } | [restockRequest: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -979,7 +1053,7 @@ approveRestock.patch = (args: { restockRequest: number | { id: number } } | [res
 
     /**
 * @see \App\Features\Finance\FinanceController::approveRestock
- * @see app/Features/Finance/FinanceController.php:454
+ * @see app/Features/Finance/FinanceController.php:505
  * @route '/restock-approval/{restockRequest}/approve'
  */
     const approveRestockForm = (args: { restockRequest: number | { id: number } } | [restockRequest: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -994,7 +1068,7 @@ approveRestock.patch = (args: { restockRequest: number | { id: number } } | [res
 
             /**
 * @see \App\Features\Finance\FinanceController::approveRestock
- * @see app/Features/Finance/FinanceController.php:454
+ * @see app/Features/Finance/FinanceController.php:505
  * @route '/restock-approval/{restockRequest}/approve'
  */
         approveRestockForm.patch = (args: { restockRequest: number | { id: number } } | [restockRequest: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -1010,7 +1084,7 @@ approveRestock.patch = (args: { restockRequest: number | { id: number } } | [res
     approveRestock.form = approveRestockForm
 /**
 * @see \App\Features\Finance\FinanceController::rejectRestock
- * @see app/Features/Finance/FinanceController.php:464
+ * @see app/Features/Finance/FinanceController.php:537
  * @route '/restock-approval/{restockRequest}/reject'
  */
 export const rejectRestock = (args: { restockRequest: number | { id: number } } | [restockRequest: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -1025,7 +1099,7 @@ rejectRestock.definition = {
 
 /**
 * @see \App\Features\Finance\FinanceController::rejectRestock
- * @see app/Features/Finance/FinanceController.php:464
+ * @see app/Features/Finance/FinanceController.php:537
  * @route '/restock-approval/{restockRequest}/reject'
  */
 rejectRestock.url = (args: { restockRequest: number | { id: number } } | [restockRequest: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -1058,7 +1132,7 @@ rejectRestock.url = (args: { restockRequest: number | { id: number } } | [restoc
 
 /**
 * @see \App\Features\Finance\FinanceController::rejectRestock
- * @see app/Features/Finance/FinanceController.php:464
+ * @see app/Features/Finance/FinanceController.php:537
  * @route '/restock-approval/{restockRequest}/reject'
  */
 rejectRestock.patch = (args: { restockRequest: number | { id: number } } | [restockRequest: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -1068,7 +1142,7 @@ rejectRestock.patch = (args: { restockRequest: number | { id: number } } | [rest
 
     /**
 * @see \App\Features\Finance\FinanceController::rejectRestock
- * @see app/Features/Finance/FinanceController.php:464
+ * @see app/Features/Finance/FinanceController.php:537
  * @route '/restock-approval/{restockRequest}/reject'
  */
     const rejectRestockForm = (args: { restockRequest: number | { id: number } } | [restockRequest: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -1083,7 +1157,7 @@ rejectRestock.patch = (args: { restockRequest: number | { id: number } } | [rest
 
             /**
 * @see \App\Features\Finance\FinanceController::rejectRestock
- * @see app/Features/Finance/FinanceController.php:464
+ * @see app/Features/Finance/FinanceController.php:537
  * @route '/restock-approval/{restockRequest}/reject'
  */
         rejectRestockForm.patch = (args: { restockRequest: number | { id: number } } | [restockRequest: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -1097,6 +1171,6 @@ rejectRestock.patch = (args: { restockRequest: number | { id: number } } | [rest
         })
     
     rejectRestock.form = rejectRestockForm
-const FinanceController = { creditMonitoring, arrearsMonitoring, updateCreditTerms, pelunasanDini, verifyCashPayment, verifyPaymentLog, installmentPayment, storeInstallment, reports, storeExpense, restockApproval, approveRestock, rejectRestock }
+const FinanceController = { creditMonitoring, arrearsMonitoring, updateCreditTerms, pelunasanDini, tarikBarang, verifyCashPayment, verifyPaymentLog, installmentPayment, storeInstallment, reports, storeExpense, restockApproval, approveRestock, rejectRestock }
 
 export default FinanceController

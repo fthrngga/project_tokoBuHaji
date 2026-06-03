@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Features\Finance\FinanceController::update
- * @see app/Features/Finance/FinanceController.php:85
+ * @see app/Features/Finance/FinanceController.php:102
  * @route '/admin/finance/payment/{id}/terms'
  */
 export const update = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -16,7 +16,7 @@ update.definition = {
 
 /**
 * @see \App\Features\Finance\FinanceController::update
- * @see app/Features/Finance/FinanceController.php:85
+ * @see app/Features/Finance/FinanceController.php:102
  * @route '/admin/finance/payment/{id}/terms'
  */
 update.url = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -44,7 +44,7 @@ update.url = (args: { id: string | number } | [id: string | number ] | string | 
 
 /**
 * @see \App\Features\Finance\FinanceController::update
- * @see app/Features/Finance/FinanceController.php:85
+ * @see app/Features/Finance/FinanceController.php:102
  * @route '/admin/finance/payment/{id}/terms'
  */
 update.put = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -54,7 +54,7 @@ update.put = (args: { id: string | number } | [id: string | number ] | string | 
 
     /**
 * @see \App\Features\Finance\FinanceController::update
- * @see app/Features/Finance/FinanceController.php:85
+ * @see app/Features/Finance/FinanceController.php:102
  * @route '/admin/finance/payment/{id}/terms'
  */
     const updateForm = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -69,7 +69,7 @@ update.put = (args: { id: string | number } | [id: string | number ] | string | 
 
             /**
 * @see \App\Features\Finance\FinanceController::update
- * @see app/Features/Finance/FinanceController.php:85
+ * @see app/Features/Finance/FinanceController.php:102
  * @route '/admin/finance/payment/{id}/terms'
  */
         updateForm.put = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

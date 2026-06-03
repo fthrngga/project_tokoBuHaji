@@ -24,6 +24,7 @@ interface Product {
     minimum_stock?: number;
     is_published: boolean;
     category?: Category;
+    variants?: any[];
 }
 
 interface Paginator<T> {
@@ -50,10 +51,18 @@ export default function Index({ products }: ProductIndexProps) {
     const [isRestockOpen, setIsRestockOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-    const { data: restockData, setData: setRestockData, post: postRestock, processing: restockProcessing, reset } = useForm({
-        requested_quantity: '',
+    const { data: restockData, setData: setRestockData, post: postRestock, processing: restockProcessing, reset, transform } = useForm<{
+        requests: Array<{ product_variant_id: number | null, requested_quantity: string }>,
+        notes: string
+    }>({
+        requests: [],
         notes: ''
     });
+
+    transform((data) => ({
+        ...data,
+        requests: data.requests.filter(req => req.requested_quantity && parseInt(req.requested_quantity) > 0)
+    }));
 
     const getProductsData = () => {
         if (!products) return [];
@@ -77,13 +86,29 @@ export default function Index({ products }: ProductIndexProps) {
 
     const openRestockModal = (product: Product) => {
         setSelectedProduct(product);
-        setRestockData({ requested_quantity: '', notes: '' });
+        if (product.variants && product.variants.length > 0) {
+            setRestockData({
+                requests: product.variants.map(v => ({ product_variant_id: v.id, requested_quantity: '' })),
+                notes: ''
+            });
+        } else {
+            setRestockData({
+                requests: [{ product_variant_id: null, requested_quantity: '' }],
+                notes: ''
+            });
+        }
         setIsRestockOpen(true);
     };
 
     const submitRestock = (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedProduct) return;
+        
+        const hasValidRequest = restockData.requests.some(req => req.requested_quantity && parseInt(req.requested_quantity) > 0);
+        if (!hasValidRequest) {
+            toast.error('Silakan isi setidaknya satu jumlah tambahan barang.');
+            return;
+        }
         
         postRestock(route('products.restock', selectedProduct.id), {
             onSuccess: () => {
@@ -150,8 +175,8 @@ export default function Index({ products }: ProductIndexProps) {
                                     </TableRow>
                                 ) : (
                                     productsList.map((product) => {
-                                        const minStock = product.minimum_stock ?? 5;
-                                        const isLowStock = product.stock <= minStock;
+                                        const minStock = product.minimum_stock ?? 2;
+                                        const isLowStock = product.stock <= minStock || (product.variants && product.variants.some(v => v.stock <= minStock));
 
                                         return (
                                             <TableRow key={product.id} className={isLowStock ? 'bg-secondary' : ''}>
@@ -234,23 +259,58 @@ export default function Index({ products }: ProductIndexProps) {
                         </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={submitRestock} className="space-y-4 pt-2">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label>Sisa Stok</Label>
-                                <Input value={selectedProduct?.stock || 0} disabled className="bg-muted text-red-600 font-bold" />
+                        {selectedProduct?.variants && selectedProduct.variants.length > 0 ? (
+                            <div className="space-y-4">
+                                <Label>Daftar Varian Produk</Label>
+                                {selectedProduct.variants.map((v, i) => (
+                                    <div key={v.id} className="grid grid-cols-12 gap-4 items-center">
+                                        <div className="col-span-5 text-sm font-medium">{v.name}</div>
+                                        <div className="col-span-3">
+                                            <div className="text-xs text-muted-foreground mb-1">Sisa Stok: <span className="text-red-500 font-bold">{v.stock}</span></div>
+                                        </div>
+                                        <div className="col-span-4">
+                                            <Input
+                                                type="number"
+                                                min="0"
+                                                placeholder="Tambahan"
+                                                value={restockData.requests[i]?.requested_quantity || ''}
+                                                onChange={e => {
+                                                    const newReqs = [...restockData.requests];
+                                                    if (newReqs[i]) {
+                                                        newReqs[i].requested_quantity = e.target.value;
+                                                        setRestockData('requests', newReqs);
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                            <div className="space-y-2">
-                                <Label>Jumlah Tambahan <span className="text-red-500">*</span></Label>
-                                <Input 
-                                    type="number" 
-                                    min="1" 
-                                    value={restockData.requested_quantity} 
-                                    onChange={e => setRestockData('requested_quantity', e.target.value)} 
-                                    required 
-                                    autoFocus
-                                />
+                        ) : (
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Sisa Stok</Label>
+                                    <Input value={selectedProduct?.stock || 0} disabled className="bg-muted text-red-600 font-bold" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Jumlah Tambahan <span className="text-red-500">*</span></Label>
+                                    <Input 
+                                        type="number" 
+                                        min="1" 
+                                        value={restockData.requests[0]?.requested_quantity || ''}
+                                        onChange={e => {
+                                            const newReqs = [...restockData.requests];
+                                            if (newReqs[0]) {
+                                                newReqs[0].requested_quantity = e.target.value;
+                                                setRestockData('requests', newReqs);
+                                            }
+                                        }}
+                                        required 
+                                        autoFocus
+                                    />
+                                </div>
                             </div>
-                        </div>
+                        )}
                         <div className="space-y-2">
                             <Label>Catatan (Opsional)</Label>
                             <Textarea 

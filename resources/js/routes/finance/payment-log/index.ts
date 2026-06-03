@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../wayfinder'
 /**
 * @see \App\Features\Finance\FinanceController::verify
- * @see app/Features/Finance/FinanceController.php:160
+ * @see app/Features/Finance/FinanceController.php:211
  * @route '/admin/finance/payment-log/{id}/verify'
  */
 export const verify = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -16,7 +16,7 @@ verify.definition = {
 
 /**
 * @see \App\Features\Finance\FinanceController::verify
- * @see app/Features/Finance/FinanceController.php:160
+ * @see app/Features/Finance/FinanceController.php:211
  * @route '/admin/finance/payment-log/{id}/verify'
  */
 verify.url = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -44,7 +44,7 @@ verify.url = (args: { id: string | number } | [id: string | number ] | string | 
 
 /**
 * @see \App\Features\Finance\FinanceController::verify
- * @see app/Features/Finance/FinanceController.php:160
+ * @see app/Features/Finance/FinanceController.php:211
  * @route '/admin/finance/payment-log/{id}/verify'
  */
 verify.put = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -54,7 +54,7 @@ verify.put = (args: { id: string | number } | [id: string | number ] | string | 
 
     /**
 * @see \App\Features\Finance\FinanceController::verify
- * @see app/Features/Finance/FinanceController.php:160
+ * @see app/Features/Finance/FinanceController.php:211
  * @route '/admin/finance/payment-log/{id}/verify'
  */
     const verifyForm = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -69,7 +69,7 @@ verify.put = (args: { id: string | number } | [id: string | number ] | string | 
 
             /**
 * @see \App\Features\Finance\FinanceController::verify
- * @see app/Features/Finance/FinanceController.php:160
+ * @see app/Features/Finance/FinanceController.php:211
  * @route '/admin/finance/payment-log/{id}/verify'
  */
         verifyForm.put = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

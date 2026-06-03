@@ -28,32 +28,29 @@ class InstallmentController extends Controller
             ->latest()
             ->get()
             ->map(function ($payment) {
-                // Calculation logic
-                $expectedPaidCycles = $payment->installments_paid;
-                $expectedTotalPaidForCycles = $expectedPaidCycles * $payment->installment_amount;
-
+                // Kalkulasi Tunggakan Waktu Nyata berdasarkan umur kredit (Bulan)
+                $monthsElapsed = min($payment->duration_months, $payment->created_at->diffInMonths(now()));
+                
+                $expectedTotal = $monthsElapsed * $payment->installment_amount;
                 $actualVerifiedAmount = $payment->paymentLogs->where('type', 'installment')->where('status', 'verified')->sum('amount');
-                $tunggakan = max(0, $expectedTotalPaidForCycles - $actualVerifiedAmount);
+                
+                $tunggakan = max(0, $expectedTotal - $actualVerifiedAmount);
+                $tunggakan_months = $payment->installment_amount > 0 ? floor($tunggakan / $payment->installment_amount) : 0;
 
                 $remainingMonths = max(0, $payment->duration_months - $payment->installments_paid);
-                $remainingDebt = max(0, ($remainingMonths * $payment->installment_amount) + $tunggakan);
+                $remainingDebt = max(0, ($remainingMonths * $payment->installment_amount)); // Sisanya adalah sisa bulan x pokok
                 $totalBillThisMonth = $payment->installment_amount + $tunggakan;
 
                 // Determine Product Name (First Item)
                 $productName = $payment->order->items->first()?->product->name ?? 'Produk dihapus';
 
-                // Next Due Date + Days Until Due (for US08 notification)
-                $lastLog = $payment->paymentLogs->sortByDesc('paid_at')->first();
-                $baseDate = $lastLog && $lastLog->paid_at
-                    ? \Carbon\Carbon::parse($lastLog->paid_at)
-                    : $payment->created_at;
-
+                $monthsPaidFully = $payment->installment_amount > 0 ? floor($actualVerifiedAmount / $payment->installment_amount) : 0;
                 $nextDueDateCarbon = null;
                 $daysUntilDue = null;
                 $dueStatus = null;
 
                 if ($remainingMonths > 0) {
-                    $nextDueDateCarbon = $baseDate->copy()->addMonth();
+                    $nextDueDateCarbon = $payment->created_at->copy()->addMonths($monthsPaidFully + 1);
                     $daysUntilDue = (int) now()->startOfDay()->diffInDays($nextDueDateCarbon->startOfDay(), false);
 
                     if ($daysUntilDue < 0) {
@@ -79,6 +76,7 @@ class InstallmentController extends Controller
                     'dueStatus' => $dueStatus,
                     'installment_amount' => $payment->installment_amount,
                     'tunggakan' => $tunggakan,
+                    'tunggakan_months' => $tunggakan_months,
                     'totalBillThisMonth' => $totalBillThisMonth,
                     'history' => $payment->paymentLogs->filter(function ($log) {
                         return $log->status !== 'pending' || !empty($log->proof_path);

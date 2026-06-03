@@ -280,8 +280,8 @@ export default function Checkout({ cartItems, total, addresses }: Props) {
                                                             </div>
                                                         )}
                                                         <div className="flex justify-between items-center mt-2">
-                                                            <p className="text-xs text-slate-500">{item.quantity} × {formatCurrency(item.product.price)}</p>
-                                                            <p className="text-sm font-bold text-white">{formatCurrency(item.quantity * item.product.price)}</p>
+                                                            <p className="text-xs text-slate-500">{item.quantity} × {formatCurrency(item.variant?.selling_price || item.product.selling_price)}</p>
+                                                            <p className="text-sm font-bold text-white">{formatCurrency(item.quantity * (item.variant?.selling_price || item.product.selling_price))}</p>
                                                         </div>
                                                     </div>
                                                 </div>
