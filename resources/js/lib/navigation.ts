@@ -1,7 +1,7 @@
 import { type NavItem } from "@/types";
 import { dashboard } from "@/routes"; // Impor fungsi route dashboard
 import { route } from 'ziggy-js';
-import { LayoutGrid, Package, ClipboardList, ShoppingCart, Banknote, Store } from "lucide-react"; // Impor ikon
+import { LayoutGrid, Package, ClipboardList, ShoppingCart, Banknote, Store, Database } from "lucide-react"; // Impor ikon
 
 export const mainNavItems: NavItem[] = [
     {
@@ -66,6 +66,17 @@ export const mainNavItems: NavItem[] = [
             {
                 title: 'Konfirmasi Restock',
                 href: route('finance.restock.index', undefined, false),
+            },
+        ],
+    },
+    {
+        title: 'Data Warehouse',
+        href: '#',
+        icon: Database,
+        items: [
+            {
+                title: 'Visualisasi Data',
+                href: route('datawarehouse.index', undefined, false),
             },
         ],
     },
