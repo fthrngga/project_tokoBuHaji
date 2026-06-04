@@ -75,7 +75,7 @@ store.post = (args: { order: string | number } | [order: string | number ] | str
     store.form = storeForm
 /**
 * @see \App\Http\Controllers\Features\Order\OrderController::proof
- * @see app/Http/Controllers/Features/Order/OrderController.php:82
+ * @see app/Http/Controllers/Features/Order/OrderController.php:90
  * @route '/orders/{order}/payment/proof'
  */
 export const proof = (args: { order: string | number } | [order: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -90,7 +90,7 @@ proof.definition = {
 
 /**
 * @see \App\Http\Controllers\Features\Order\OrderController::proof
- * @see app/Http/Controllers/Features/Order/OrderController.php:82
+ * @see app/Http/Controllers/Features/Order/OrderController.php:90
  * @route '/orders/{order}/payment/proof'
  */
 proof.url = (args: { order: string | number } | [order: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -118,7 +118,7 @@ proof.url = (args: { order: string | number } | [order: string | number ] | stri
 
 /**
 * @see \App\Http\Controllers\Features\Order\OrderController::proof
- * @see app/Http/Controllers/Features/Order/OrderController.php:82
+ * @see app/Http/Controllers/Features/Order/OrderController.php:90
  * @route '/orders/{order}/payment/proof'
  */
 proof.post = (args: { order: string | number } | [order: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -128,7 +128,7 @@ proof.post = (args: { order: string | number } | [order: string | number ] | str
 
     /**
 * @see \App\Http\Controllers\Features\Order\OrderController::proof
- * @see app/Http/Controllers/Features/Order/OrderController.php:82
+ * @see app/Http/Controllers/Features/Order/OrderController.php:90
  * @route '/orders/{order}/payment/proof'
  */
     const proofForm = (args: { order: string | number } | [order: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -138,7 +138,7 @@ proof.post = (args: { order: string | number } | [order: string | number ] | str
 
             /**
 * @see \App\Http\Controllers\Features\Order\OrderController::proof
- * @see app/Http/Controllers/Features/Order/OrderController.php:82
+ * @see app/Http/Controllers/Features/Order/OrderController.php:90
  * @route '/orders/{order}/payment/proof'
  */
         proofForm.post = (args: { order: string | number } | [order: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -149,7 +149,7 @@ proof.post = (args: { order: string | number } | [order: string | number ] | str
     proof.form = proofForm
 /**
 * @see \App\Http\Controllers\Features\Order\OrderController::snap
- * @see app/Http/Controllers/Features/Order/OrderController.php:227
+ * @see app/Http/Controllers/Features/Order/OrderController.php:235
  * @route '/orders/{order}/payment/snap'
  */
 export const snap = (args: { order: string | number } | [order: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -164,7 +164,7 @@ snap.definition = {
 
 /**
 * @see \App\Http\Controllers\Features\Order\OrderController::snap
- * @see app/Http/Controllers/Features/Order/OrderController.php:227
+ * @see app/Http/Controllers/Features/Order/OrderController.php:235
  * @route '/orders/{order}/payment/snap'
  */
 snap.url = (args: { order: string | number } | [order: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -192,7 +192,7 @@ snap.url = (args: { order: string | number } | [order: string | number ] | strin
 
 /**
 * @see \App\Http\Controllers\Features\Order\OrderController::snap
- * @see app/Http/Controllers/Features/Order/OrderController.php:227
+ * @see app/Http/Controllers/Features/Order/OrderController.php:235
  * @route '/orders/{order}/payment/snap'
  */
 snap.post = (args: { order: string | number } | [order: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -202,7 +202,7 @@ snap.post = (args: { order: string | number } | [order: string | number ] | stri
 
     /**
 * @see \App\Http\Controllers\Features\Order\OrderController::snap
- * @see app/Http/Controllers/Features/Order/OrderController.php:227
+ * @see app/Http/Controllers/Features/Order/OrderController.php:235
  * @route '/orders/{order}/payment/snap'
  */
     const snapForm = (args: { order: string | number } | [order: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -212,7 +212,7 @@ snap.post = (args: { order: string | number } | [order: string | number ] | stri
 
             /**
 * @see \App\Http\Controllers\Features\Order\OrderController::snap
- * @see app/Http/Controllers/Features/Order/OrderController.php:227
+ * @see app/Http/Controllers/Features/Order/OrderController.php:235
  * @route '/orders/{order}/payment/snap'
  */
         snapForm.post = (args: { order: string | number } | [order: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

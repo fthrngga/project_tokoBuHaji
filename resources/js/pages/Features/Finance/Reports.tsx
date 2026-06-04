@@ -43,6 +43,10 @@ interface Summary {
 
 export default function Reports({ summary = { income: 0, expense: 0, profit: 0 }, transactions = [], filters = {} }: { summary?: Summary, transactions?: Transaction[], filters?: any }) {
     const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+    const totalPages = Math.ceil(transactions.length / itemsPerPage);
+    const paginatedTransactions = transactions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
     
     const { data, setData, post, processing, reset, errors } = useForm({
         transaction_date: format(new Date(), 'yyyy-MM-dd'),
@@ -68,24 +72,24 @@ export default function Reports({ summary = { income: 0, expense: 0, profit: 0 }
             <div className="flex flex-col gap-6 p-4">
 
                 {/* Header & Controls */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Laporan Keuangan</h1>
                         <p className="text-muted-foreground">Ringkasan pemasukan, pengeluaran, dan laba bersih.</p>
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap items-center gap-3">
                         <Button 
-                            className="bg-red-600 hover:bg-red-700 text-white" 
+                            className="bg-red-600 hover:bg-red-700 text-white shadow-sm" 
                             onClick={() => setIsExpenseModalOpen(true)}
                         >
                             <Plus className="w-4 h-4 mr-2" /> Catat Pengeluaran
                         </Button>
-                        <div className="flex items-center gap-2 border rounded-md px-3 py-2 bg-white dark:bg-gray-800">
+                        <div className="flex items-center gap-2 border rounded-md px-3 py-2 bg-background shadow-sm h-10">
                             <CalendarIcon className="w-4 h-4 text-gray-500" />
-                            <span className="text-sm">Bulan Ini</span>
+                            <span className="text-sm font-medium">Bulan Ini</span>
                         </div>
                         <Select defaultValue="all">
-                            <SelectTrigger className="w-[180px]">
+                            <SelectTrigger className="w-[180px] bg-background shadow-sm h-10">
                                 <SelectValue placeholder="Kategori Transaksi" />
                             </SelectTrigger>
                             <SelectContent>
@@ -95,11 +99,11 @@ export default function Reports({ summary = { income: 0, expense: 0, profit: 0 }
                                 <SelectItem value="operational">Operasional</SelectItem>
                             </SelectContent>
                         </Select>
-                        <Button variant="outline" className="gap-2">
+                        <Button variant="outline" className="gap-2 shadow-sm h-10">
                             <Download className="w-4 h-4" />
                             Export PDF
                         </Button>
-                        <Button variant="outline" className="gap-2">
+                        <Button variant="outline" className="gap-2 shadow-sm h-10">
                             <Download className="w-4 h-4" />
                             Export Excel
                         </Button>
@@ -152,41 +156,68 @@ export default function Reports({ summary = { income: 0, expense: 0, profit: 0 }
                         <CardTitle>Rincian Transaksi</CardTitle>
                         <CardDescription>Daftar lengkap transaksi pada periode ini.</CardDescription>
                     </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Tanggal</TableHead>
-                                    <TableHead>Keterangan</TableHead>
-                                    <TableHead>Kategori</TableHead>
-                                    <TableHead>Tipe</TableHead>
-                                    <TableHead className="text-right">Nominal</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {transactions.length === 0 ? (
+                    <CardContent className="p-0 sm:p-6 sm:pt-0">
+                        <div className="max-h-[350px] overflow-auto border rounded-md relative">
+                            <Table>
+                                <TableHeader className="sticky top-0 bg-card z-10 shadow-[0_1px_3px_0_rgb(0,0,0,0.1)]">
                                     <TableRow>
-                                        <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
-                                            Belum ada log transaksi yang tercatat.
-                                        </TableCell>
+                                        <TableHead className="bg-card">Tanggal</TableHead>
+                                        <TableHead className="bg-card">Keterangan</TableHead>
+                                        <TableHead className="bg-card">Kategori</TableHead>
+                                        <TableHead className="bg-card">Tipe</TableHead>
+                                        <TableHead className="text-right bg-card">Nominal</TableHead>
                                     </TableRow>
-                                ) : transactions.map((item, i) => (
-                                    <TableRow key={item.id}>
-                                        <TableCell>{item.date}</TableCell>
-                                        <TableCell className="font-medium">{item.desc}</TableCell>
-                                        <TableCell>{item.category}</TableCell>
-                                        <TableCell>
-                                            <Badge variant={item.original_type === 'income' ? 'default' : 'destructive'} className={item.original_type === 'income' ? 'bg-green-100 text-green-800 hover:bg-green-100 border-none' : 'bg-red-100 text-red-800 hover:bg-red-100 border-none'}>
-                                                {item.original_type === 'income' ? '↑ Masuk' : '↓ Keluar'}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className={`text-right font-bold ${item.original_type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
-                                            {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(item.amount)}
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                                </TableHeader>
+                                <TableBody>
+                                    {paginatedTransactions.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
+                                                Belum ada log transaksi yang tercatat.
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : paginatedTransactions.map((item, i) => (
+                                        <TableRow key={item.id}>
+                                            <TableCell className="whitespace-nowrap">{item.date}</TableCell>
+                                            <TableCell className="font-medium">{item.desc}</TableCell>
+                                            <TableCell>{item.category}</TableCell>
+                                            <TableCell>
+                                                <Badge variant={item.original_type === 'income' ? 'default' : 'destructive'} className={item.original_type === 'income' ? 'bg-green-100 text-green-800 hover:bg-green-100 border-none' : 'bg-red-100 text-red-800 hover:bg-red-100 border-none'}>
+                                                    {item.original_type === 'income' ? '↑ Masuk' : '↓ Keluar'}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className={`text-right whitespace-nowrap font-bold ${item.original_type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+                                                {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(item.amount)}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+                        {totalPages > 1 && (
+                            <div className="flex items-center justify-between mt-4">
+                                <div className="text-sm text-muted-foreground">
+                                    Menampilkan {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, transactions.length)} dari {transactions.length} transaksi
+                                </div>
+                                <div className="flex gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                        disabled={currentPage === 1}
+                                    >
+                                        Sebelumnya
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                        disabled={currentPage === totalPages}
+                                    >
+                                        Selanjutnya
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             </div>

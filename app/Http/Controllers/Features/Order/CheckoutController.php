@@ -71,6 +71,8 @@ class CheckoutController extends Controller
                 'notes' => $request->notes,
             ]);
 
+            $preOrderMessages = [];
+
             foreach ($cartItems as $item) {
                 \App\Models\Features\Order\OrderItem::create([
                     'order_id' => $order->id,
@@ -80,13 +82,30 @@ class CheckoutController extends Controller
                     'price' => $item->variant ? $item->variant->selling_price : $item->product->selling_price,
                 ]);
 
-                // Decrement stock (Pessimistic Locking ideally, but for now just decrement)
+                // Check for Pre-Order before decrementing
                 if ($item->product_variant_id && $item->variant) {
+                    if ($item->variant->stock < $item->quantity) {
+                        $preOrderMessages[] = "{$item->product->name} - {$item->variant->name}";
+                    }
                     $item->variant->decrement('stock', $item->quantity);
-                    // Also decrement main product stock which is total of all variants
                     $item->product->decrement('stock', $item->quantity);
                 } else {
+                    if ($item->product->stock < $item->quantity) {
+                        $preOrderMessages[] = "{$item->product->name}";
+                    }
                     $item->product->decrement('stock', $item->quantity);
+                }
+            }
+
+            if (!empty($preOrderMessages)) {
+                $admin = \App\Models\User::where('role', 'admin')->first();
+                if ($admin) {
+                    \App\Models\Features\Order\OrderMessage::create([
+                        'order_id' => $order->id,
+                        'user_id' => $admin->id,
+                        'message' => "Informasi Sistem:\nPesanan ini mengandung barang Pre-Order (stok sedang kosong):\n- " . implode("\n- ", $preOrderMessages) . "\n\nMohon menunggu informasi lebih lanjut mengenai ketersediaan barang dan estimasi waktu dari pihak toko.",
+                        'is_read' => false,
+                    ]);
                 }
             }
 

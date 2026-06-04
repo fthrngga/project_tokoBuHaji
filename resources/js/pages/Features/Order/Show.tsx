@@ -417,6 +417,9 @@ export default function Show({ order }: Props) {
                                                                         <SelectItem value="credit" disabled={order.total_amount < 1000000}>
                                                                             Kredit / Cicilan {order.total_amount < 1000000 && "(Min. Rp 1.000.000)"}
                                                                         </SelectItem>
+                                                                        <SelectItem value="cash_gantung" disabled={order.total_amount < 1000000}>
+                                                                            Cash Gantung {order.total_amount < 1000000 && "(Min. Rp 1.000.000)"}
+                                                                        </SelectItem>
                                                                     </SelectContent>
                                                                 </Select>
                                                             </div>
@@ -432,15 +435,15 @@ export default function Show({ order }: Props) {
                                                                             <SelectValue placeholder="Pilih jenis cash" />
                                                                         </SelectTrigger>
                                                                         <SelectContent>
-                                                                            <SelectItem value="transfer">Transfer Bank</SelectItem>
-                                                                            <SelectItem value="direct">Bayar di Tempat (COD/Langsung)</SelectItem>
+                                                                            <SelectItem value="transfer">Transfer Otomatis (OVO/Gopay/Bank via Midtrans)</SelectItem>
+                                                                            <SelectItem value="direct">Bayar di Tempat (COD/Kasir)</SelectItem>
                                                                         </SelectContent>
                                                                     </Select>
                                                                     {paymentErrors.cash_type && <p className="text-red-500 text-xs">{paymentErrors.cash_type}</p>}
                                                                 </div>
                                                             )}
 
-                                                            {paymentData.payment_method === 'credit' && (
+                                                            {['credit', 'cash_gantung'].includes(paymentData.payment_method) && (
                                                                 <div className="space-y-4 border rounded-md p-4">
                                                                     <div className="flex items-center space-x-2">
                                                                         <Checkbox
@@ -464,20 +467,20 @@ export default function Show({ order }: Props) {
                                                                             {paymentErrors.down_payment && <p className="text-red-500 text-xs">{paymentErrors.down_payment}</p>}
                                                                         </div>
                                                                     )}
-                                                                    {/* Simulasi Kredit Otomatis */}
+                                                                    {/* Simulasi Kredit/Cash Gantung Otomatis */}
                                                                     <div className="bg-secondary/20 border border-border rounded p-3 mt-4">
-                                                                        <h4 className="text-xs font-semibold text-primary uppercase mb-2">Simulasi Kredit (10 Bulan)</h4>
+                                                                        <h4 className="text-xs font-semibold text-primary uppercase mb-2">Simulasi Angsuran (10 Bulan)</h4>
                                                                         <div className="grid grid-cols-2 gap-1 text-xs">
                                                                             <div className="text-muted-foreground">Sisa Dicicil:</div>
                                                                             <div className="text-right font-medium">
                                                                                 {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(
-                                                                                    Math.max(0, (order.total_amount * 1.5) - (paymentData.with_down_payment ? (parseFloat(paymentData.down_payment) || 0) : 0))
+                                                                                    Math.max(0, (paymentData.payment_method === 'credit' ? order.total_amount * 1.5 : order.total_amount) - (paymentData.with_down_payment ? (parseFloat(paymentData.down_payment) || 0) : 0))
                                                                                 )}
                                                                             </div>
                                                                             <div className="text-muted-foreground font-semibold mt-1">Estimasi Angsuran/Bulan:</div>
                                                                             <div className="text-right font-bold text-sm text-green-600 mt-1">
                                                                                 {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(
-                                                                                    Math.max(0, (order.total_amount * 1.5) - (paymentData.with_down_payment ? (parseFloat(paymentData.down_payment) || 0) : 0)) / 10
+                                                                                    Math.max(0, (paymentData.payment_method === 'credit' ? order.total_amount * 1.5 : order.total_amount) - (paymentData.with_down_payment ? (parseFloat(paymentData.down_payment) || 0) : 0)) / 10
                                                                                 )}
                                                                             </div>
                                                                         </div>
@@ -490,7 +493,7 @@ export default function Show({ order }: Props) {
                                                     <DialogFooter>
                                                         <Button type="button" variant="outline" onClick={() => setIsInvoiceOpen(false)}>Batal</Button>
                                                         <Button type="submit" form="payment-form" disabled={processingPayment}>
-                                                            {paymentData.payment_method === 'credit' ? 'Ajukan Kredit' : 'Konfirmasi Pembayaran'}
+                                                            {['credit', 'cash_gantung'].includes(paymentData.payment_method) ? 'Ajukan Angsuran' : 'Konfirmasi Pembayaran'}
                                                         </Button>
                                                     </DialogFooter>
                                                 </DialogContent>
@@ -564,10 +567,19 @@ export default function Show({ order }: Props) {
                                                                         ))}
                                                                     </div>
                                                                 )}
-                                                                <div className="bg-secondary/30 text-foreground p-3 rounded text-sm mb-2 border border-border">
-                                                                    Silakan lakukan pembayaran Lunas.
-                                                                </div>
-                                                                <MidtransButton orderId={order.id} amount={order.total_amount} type="Pembayaran Lunas" />
+                                                                {order.payment.cash_type === 'direct' ? (
+                                                                    <div className="bg-green-500/10 text-green-700 dark:text-green-400 p-4 rounded-md border border-green-500/20 text-center space-y-2">
+                                                                        <div className="font-semibold text-lg">Pesanan Sedang Diproses</div>
+                                                                        <p className="text-sm">Anda memilih metode Bayar di Tempat (COD/Kasir). Silakan siapkan uang tunai sebesar <strong>{formatCurrency(order.total_amount)}</strong> saat menerima pesanan atau mengambil ke toko.</p>
+                                                                    </div>
+                                                                ) : (
+                                                                    <>
+                                                                        <div className="bg-secondary/30 text-foreground p-3 rounded text-sm mb-2 border border-border">
+                                                                            Silakan selesaikan pembayaran menggunakan Midtrans.
+                                                                        </div>
+                                                                        <MidtransButton orderId={order.id} amount={order.total_amount} type="Pembayaran Lunas" />
+                                                                    </>
+                                                                )}
                                                             </div>
                                                         );
                                                     })()}

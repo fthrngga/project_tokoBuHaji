@@ -31,7 +31,9 @@ interface Address {
 
 export default function Profile({ mustVerifyEmail, status, customer, addresses = [] }: { mustVerifyEmail: boolean; status?: string; customer?: any; addresses?: Address[] }) {
     const { auth } = usePage<SharedData>().props;
-    const [activeTab, setActiveTab] = useState<'profile' | 'addresses' | 'password'>('profile');
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialTab = (urlParams.get('tab') as 'profile' | 'addresses' | 'password') || 'profile';
+    const [activeTab, setActiveTab] = useState<'profile' | 'addresses' | 'password'>(initialTab);
     const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
 
     // Profile Form

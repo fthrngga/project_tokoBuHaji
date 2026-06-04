@@ -250,7 +250,7 @@ storePayment.post = (args: { order: string | number } | [order: string | number 
     storePayment.form = storePaymentForm
 /**
 * @see \App\Http\Controllers\Features\Order\OrderController::uploadProof
- * @see app/Http/Controllers/Features/Order/OrderController.php:82
+ * @see app/Http/Controllers/Features/Order/OrderController.php:90
  * @route '/orders/{order}/payment/proof'
  */
 export const uploadProof = (args: { order: string | number } | [order: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -265,7 +265,7 @@ uploadProof.definition = {
 
 /**
 * @see \App\Http\Controllers\Features\Order\OrderController::uploadProof
- * @see app/Http/Controllers/Features/Order/OrderController.php:82
+ * @see app/Http/Controllers/Features/Order/OrderController.php:90
  * @route '/orders/{order}/payment/proof'
  */
 uploadProof.url = (args: { order: string | number } | [order: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -293,7 +293,7 @@ uploadProof.url = (args: { order: string | number } | [order: string | number ] 
 
 /**
 * @see \App\Http\Controllers\Features\Order\OrderController::uploadProof
- * @see app/Http/Controllers/Features/Order/OrderController.php:82
+ * @see app/Http/Controllers/Features/Order/OrderController.php:90
  * @route '/orders/{order}/payment/proof'
  */
 uploadProof.post = (args: { order: string | number } | [order: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -303,7 +303,7 @@ uploadProof.post = (args: { order: string | number } | [order: string | number ]
 
     /**
 * @see \App\Http\Controllers\Features\Order\OrderController::uploadProof
- * @see app/Http/Controllers/Features/Order/OrderController.php:82
+ * @see app/Http/Controllers/Features/Order/OrderController.php:90
  * @route '/orders/{order}/payment/proof'
  */
     const uploadProofForm = (args: { order: string | number } | [order: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -313,7 +313,7 @@ uploadProof.post = (args: { order: string | number } | [order: string | number ]
 
             /**
 * @see \App\Http\Controllers\Features\Order\OrderController::uploadProof
- * @see app/Http/Controllers/Features/Order/OrderController.php:82
+ * @see app/Http/Controllers/Features/Order/OrderController.php:90
  * @route '/orders/{order}/payment/proof'
  */
         uploadProofForm.post = (args: { order: string | number } | [order: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -324,7 +324,7 @@ uploadProof.post = (args: { order: string | number } | [order: string | number ]
     uploadProof.form = uploadProofForm
 /**
 * @see \App\Http\Controllers\Features\Order\OrderController::generateSnapToken
- * @see app/Http/Controllers/Features/Order/OrderController.php:227
+ * @see app/Http/Controllers/Features/Order/OrderController.php:235
  * @route '/orders/{order}/payment/snap'
  */
 export const generateSnapToken = (args: { order: string | number } | [order: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -339,7 +339,7 @@ generateSnapToken.definition = {
 
 /**
 * @see \App\Http\Controllers\Features\Order\OrderController::generateSnapToken
- * @see app/Http/Controllers/Features/Order/OrderController.php:227
+ * @see app/Http/Controllers/Features/Order/OrderController.php:235
  * @route '/orders/{order}/payment/snap'
  */
 generateSnapToken.url = (args: { order: string | number } | [order: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -367,7 +367,7 @@ generateSnapToken.url = (args: { order: string | number } | [order: string | num
 
 /**
 * @see \App\Http\Controllers\Features\Order\OrderController::generateSnapToken
- * @see app/Http/Controllers/Features/Order/OrderController.php:227
+ * @see app/Http/Controllers/Features/Order/OrderController.php:235
  * @route '/orders/{order}/payment/snap'
  */
 generateSnapToken.post = (args: { order: string | number } | [order: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -377,7 +377,7 @@ generateSnapToken.post = (args: { order: string | number } | [order: string | nu
 
     /**
 * @see \App\Http\Controllers\Features\Order\OrderController::generateSnapToken
- * @see app/Http/Controllers/Features/Order/OrderController.php:227
+ * @see app/Http/Controllers/Features/Order/OrderController.php:235
  * @route '/orders/{order}/payment/snap'
  */
     const generateSnapTokenForm = (args: { order: string | number } | [order: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -387,7 +387,7 @@ generateSnapToken.post = (args: { order: string | number } | [order: string | nu
 
             /**
 * @see \App\Http\Controllers\Features\Order\OrderController::generateSnapToken
- * @see app/Http/Controllers/Features/Order/OrderController.php:227
+ * @see app/Http/Controllers/Features/Order/OrderController.php:235
  * @route '/orders/{order}/payment/snap'
  */
         generateSnapTokenForm.post = (args: { order: string | number } | [order: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

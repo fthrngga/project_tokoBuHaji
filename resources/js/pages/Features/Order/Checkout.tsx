@@ -197,7 +197,7 @@ export default function Checkout({ cartItems, total, addresses }: Props) {
                             <div className="overflow-hidden rounded-2xl" style={{ border: '1px solid rgba(87,115,153,0.2)', background: '#1a2d42' }}>
                                 <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid rgba(87,115,153,0.15)' }}>
                                     <h2 className="font-semibold text-white">Alamat Pengiriman</h2>
-                                    <Link href={route('addresses.index')} className="text-sm font-medium transition-colors" style={{ color: '#BDD5EA' }}
+                                    <Link href={route('profile', { tab: 'addresses' })} className="text-sm font-medium transition-colors" style={{ color: '#BDD5EA' }}
                                         onMouseEnter={e => (e.currentTarget.style.color = '#FE5F55')}
                                         onMouseLeave={e => (e.currentTarget.style.color = '#BDD5EA')}
                                     >
@@ -240,7 +240,7 @@ export default function Checkout({ cartItems, total, addresses }: Props) {
                                             <div className="text-center py-8">
                                                 <p className="text-sm text-slate-400 mb-4">Anda belum memiliki alamat tersimpan.</p>
                                                 <Link
-                                                    href={route('addresses.index')}
+                                                    href={route('profile', { tab: 'addresses' })}
                                                     className="inline-flex items-center gap-2 rounded-xl border border-orange-500/40 bg-orange-500/10 px-5 py-2.5 text-sm font-medium text-orange-400 hover:bg-orange-500/20 transition-all"
                                                 >
                                                     Tambah Alamat Baru

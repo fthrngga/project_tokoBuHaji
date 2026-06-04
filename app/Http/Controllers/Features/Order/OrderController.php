@@ -42,14 +42,14 @@ class OrderController extends Controller
         $order = \App\Models\Features\Order\Order::where('user_id', auth()->id())->findOrFail($id);
 
         $validated = $request->validate([
-            'payment_method' => 'required|in:cash,credit',
+            'payment_method' => 'required|in:cash,credit,cash_gantung',
             'cash_type' => 'nullable|required_if:payment_method,cash|in:transfer,direct',
             'down_payment' => 'nullable|numeric|min:0',
         ]);
 
-        if ($validated['payment_method'] === 'credit' && $order->total_amount < 1000000) {
+        if (in_array($validated['payment_method'], ['credit', 'cash_gantung']) && $order->total_amount < 1000000) {
             throw \Illuminate\Validation\ValidationException::withMessages([
-                'payment_method' => 'Minimal total belanja untuk metode kredit adalah Rp 1.000.000'
+                'payment_method' => 'Minimal total belanja untuk metode kredit atau cash gantung adalah Rp 1.000.000'
             ]);
         }
 
@@ -63,6 +63,10 @@ class OrderController extends Controller
             $dp = $validated['down_payment'] ?? 0;
             $totalCredit = $order->total_amount * 1.5;
             $installmentAmount = ($totalCredit - $dp) / $durationMonths;
+        } elseif ($validated['payment_method'] === 'cash_gantung') {
+            $durationMonths = 10;
+            $dp = $validated['down_payment'] ?? 0;
+            $installmentAmount = ($order->total_amount - $dp) / $durationMonths;
         }
 
         $payment = \App\Models\Payment::create([
@@ -75,6 +79,10 @@ class OrderController extends Controller
             'installment_amount' => $installmentAmount,
             'status' => $status,
         ]);
+
+        if ($validated['payment_method'] === 'cash' && $validated['cash_type'] === 'direct') {
+            $order->update(['status' => 'processing']);
+        }
 
         return back()->with('success', 'Metode pembayaran berhasil disimpan.');
     }
