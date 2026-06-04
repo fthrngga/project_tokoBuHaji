@@ -79,7 +79,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     index.form = indexForm
 /**
 * @see \App\Http\Controllers\Admin\DefectiveProductController::update
- * @see app/Http/Controllers/Admin/DefectiveProductController.php:23
+ * @see app/Http/Controllers/Admin/DefectiveProductController.php:32
  * @route '/admin/defective-products/{defective_product}'
  */
 export const update = (args: { defective_product: string | number } | [defective_product: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -94,7 +94,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\DefectiveProductController::update
- * @see app/Http/Controllers/Admin/DefectiveProductController.php:23
+ * @see app/Http/Controllers/Admin/DefectiveProductController.php:32
  * @route '/admin/defective-products/{defective_product}'
  */
 update.url = (args: { defective_product: string | number } | [defective_product: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -122,7 +122,7 @@ update.url = (args: { defective_product: string | number } | [defective_product:
 
 /**
 * @see \App\Http\Controllers\Admin\DefectiveProductController::update
- * @see app/Http/Controllers/Admin/DefectiveProductController.php:23
+ * @see app/Http/Controllers/Admin/DefectiveProductController.php:32
  * @route '/admin/defective-products/{defective_product}'
  */
 update.put = (args: { defective_product: string | number } | [defective_product: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -131,7 +131,7 @@ update.put = (args: { defective_product: string | number } | [defective_product:
 })
 /**
 * @see \App\Http\Controllers\Admin\DefectiveProductController::update
- * @see app/Http/Controllers/Admin/DefectiveProductController.php:23
+ * @see app/Http/Controllers/Admin/DefectiveProductController.php:32
  * @route '/admin/defective-products/{defective_product}'
  */
 update.patch = (args: { defective_product: string | number } | [defective_product: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -141,7 +141,7 @@ update.patch = (args: { defective_product: string | number } | [defective_produc
 
     /**
 * @see \App\Http\Controllers\Admin\DefectiveProductController::update
- * @see app/Http/Controllers/Admin/DefectiveProductController.php:23
+ * @see app/Http/Controllers/Admin/DefectiveProductController.php:32
  * @route '/admin/defective-products/{defective_product}'
  */
     const updateForm = (args: { defective_product: string | number } | [defective_product: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -156,7 +156,7 @@ update.patch = (args: { defective_product: string | number } | [defective_produc
 
             /**
 * @see \App\Http\Controllers\Admin\DefectiveProductController::update
- * @see app/Http/Controllers/Admin/DefectiveProductController.php:23
+ * @see app/Http/Controllers/Admin/DefectiveProductController.php:32
  * @route '/admin/defective-products/{defective_product}'
  */
         updateForm.put = (args: { defective_product: string | number } | [defective_product: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -170,7 +170,7 @@ update.patch = (args: { defective_product: string | number } | [defective_produc
         })
             /**
 * @see \App\Http\Controllers\Admin\DefectiveProductController::update
- * @see app/Http/Controllers/Admin/DefectiveProductController.php:23
+ * @see app/Http/Controllers/Admin/DefectiveProductController.php:32
  * @route '/admin/defective-products/{defective_product}'
  */
         updateForm.patch = (args: { defective_product: string | number } | [defective_product: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -184,6 +184,85 @@ update.patch = (args: { defective_product: string | number } | [defective_produc
         })
     
     update.form = updateForm
-const DefectiveProductController = { index, update }
+/**
+* @see \App\Http\Controllers\Admin\DefectiveProductController::sellRepossessed
+ * @see app/Http/Controllers/Admin/DefectiveProductController.php:57
+ * @route '/admin/defective-products/{defectiveProduct}/sell'
+ */
+export const sellRepossessed = (args: { defectiveProduct: number | { id: number } } | [defectiveProduct: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: sellRepossessed.url(args, options),
+    method: 'post',
+})
+
+sellRepossessed.definition = {
+    methods: ["post"],
+    url: '/admin/defective-products/{defectiveProduct}/sell',
+} satisfies RouteDefinition<["post"]>
+
+/**
+* @see \App\Http\Controllers\Admin\DefectiveProductController::sellRepossessed
+ * @see app/Http/Controllers/Admin/DefectiveProductController.php:57
+ * @route '/admin/defective-products/{defectiveProduct}/sell'
+ */
+sellRepossessed.url = (args: { defectiveProduct: number | { id: number } } | [defectiveProduct: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { defectiveProduct: args }
+    }
+
+            if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
+            args = { defectiveProduct: args.id }
+        }
+    
+    if (Array.isArray(args)) {
+        args = {
+                    defectiveProduct: args[0],
+                }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+                        defectiveProduct: typeof args.defectiveProduct === 'object'
+                ? args.defectiveProduct.id
+                : args.defectiveProduct,
+                }
+
+    return sellRepossessed.definition.url
+            .replace('{defectiveProduct}', parsedArgs.defectiveProduct.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\Admin\DefectiveProductController::sellRepossessed
+ * @see app/Http/Controllers/Admin/DefectiveProductController.php:57
+ * @route '/admin/defective-products/{defectiveProduct}/sell'
+ */
+sellRepossessed.post = (args: { defectiveProduct: number | { id: number } } | [defectiveProduct: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: sellRepossessed.url(args, options),
+    method: 'post',
+})
+
+    /**
+* @see \App\Http\Controllers\Admin\DefectiveProductController::sellRepossessed
+ * @see app/Http/Controllers/Admin/DefectiveProductController.php:57
+ * @route '/admin/defective-products/{defectiveProduct}/sell'
+ */
+    const sellRepossessedForm = (args: { defectiveProduct: number | { id: number } } | [defectiveProduct: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        action: sellRepossessed.url(args, options),
+        method: 'post',
+    })
+
+            /**
+* @see \App\Http\Controllers\Admin\DefectiveProductController::sellRepossessed
+ * @see app/Http/Controllers/Admin/DefectiveProductController.php:57
+ * @route '/admin/defective-products/{defectiveProduct}/sell'
+ */
+        sellRepossessedForm.post = (args: { defectiveProduct: number | { id: number } } | [defectiveProduct: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: sellRepossessed.url(args, options),
+            method: 'post',
+        })
+    
+    sellRepossessed.form = sellRepossessedForm
+const DefectiveProductController = { index, update, sellRepossessed }
 
 export default DefectiveProductController

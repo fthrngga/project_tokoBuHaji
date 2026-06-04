@@ -50,8 +50,12 @@ class POSController extends Controller
             'items.*.id' => 'required|exists:products,id',
             'items.*.product_variant_id' => 'nullable|exists:product_variants,id',
             'items.*.quantity' => 'required|integer|min:1',
+            'payment_type' => 'required|in:cash,credit,cash_gantung',
             'payment_method' => 'required|string', 
-            'amount_paid' => 'required|numeric|min:0',
+            'amount_paid' => 'nullable|numeric|min:0',
+            'down_payment' => 'nullable|numeric|min:0',
+            'duration_months' => 'nullable|integer|min:1',
+            'installment_type' => 'nullable|in:fixed,flexible',
         ]);
 
         // Menggunakan DB::transaction agar jika terjadi error di tengah jalan, 
@@ -132,18 +136,28 @@ class POSController extends Controller
                 ];
             }
 
-            // 3. Validasi Uang Diterima
-            if ($request->amount_paid < $totalAmount) {
-                throw ValidationException::withMessages([
-                    'error' => "Uang yang diterima (Rp " . number_format($request->amount_paid, 0, ',', '.') . ") kurang dari Total Belanja (Rp " . number_format($totalAmount, 0, ',', '.') . ")."
-                ]);
+            // 3. Validasi Uang Diterima & Kredit
+            if ($request->payment_type === 'cash') {
+                if ($request->amount_paid < $totalAmount) {
+                    throw ValidationException::withMessages([
+                        'error' => "Uang yang diterima (Rp " . number_format($request->amount_paid, 0, ',', '.') . ") kurang dari Total Belanja (Rp " . number_format($totalAmount, 0, ',', '.') . ")."
+                    ]);
+                }
+            } else {
+                // Untuk kredit
+                $dp = $request->down_payment ?? 0;
+                if ($dp < 0) {
+                    throw ValidationException::withMessages([
+                        'error' => "Uang muka tidak boleh negatif."
+                    ]);
+                }
             }
 
             // 4. Buat Order & Detail Items
             $order = Order::create([
                 'user_id' => $userId,
-                'status' => 'completed', // Transaksi tunai POS langsung selesai
-                'total_amount' => $totalAmount,
+                'status' => $request->payment_type === 'credit' ? 'processing' : 'completed', // Transaksi POS tunai selesai, kredit processing (perlu pengantaran/konfirmasi)
+                'total_amount' => $request->payment_type === 'credit' ? ($totalAmount * 1.5) : $totalAmount,
                 'province' => 'Riau',
                 'city' => 'Pekanbaru',
                 'district' => 'Toko',
@@ -156,38 +170,88 @@ class POSController extends Controller
                 $order->items()->create($itemData);
             }
 
-            // 5. Catat Pembayaran (Menyelesaikan Error Foreign Key 1452)
+            // 5. Simpan Payment (Kredit, Cash, atau Cash Gantung)
+            $isCredit = $request->payment_type === 'credit';
+            $isCashGantung = $request->payment_type === 'cash_gantung';
+            
+            $durationMonths = 0;
+            $dp = $totalAmount;
+            $installmentAmount = 0;
+            $installmentType = null;
+            $status = 'paid_off';
+            
+            if ($isCredit) {
+                $durationMonths = 10;
+                $dp = $request->down_payment ?? 0;
+                $totalCredit = $totalAmount * 1.5;
+                $installmentAmount = ($totalCredit - $dp) / $durationMonths;
+                $status = 'ongoing';
+            } elseif ($isCashGantung) {
+                $durationMonths = (int) ($request->duration_months ?? 1);
+                $dp = $request->down_payment ?? 0;
+                $totalGantung = $totalAmount * 1.15;
+                $installmentType = $request->installment_type ?? 'fixed';
+                
+                if ($installmentType === 'fixed') {
+                    $installmentAmount = ($totalGantung - $dp) / $durationMonths;
+                } else {
+                    $installmentAmount = 0; // flexible
+                }
+                $status = 'ongoing';
+            }
+            
             $payment = Payment::create([
                 'order_id' => $order->id,
                 'customer_id' => $customerTableId, 
-                'payment_method' => 'cash',
+                'payment_method' => $request->payment_type, // 'cash', 'credit', 'cash_gantung'
                 'cash_type' => $request->payment_method, // tunai / transfer / qris
-                'down_payment' => $totalAmount, // <--- UBAH INI: Set DP sama dengan Total Harga
-                'installment_amount' => 0,
-                'duration_months' => 0,
-                'status' => 'paid_off', 
+                'installment_type' => $installmentType,
+                'down_payment' => $dp,
+                'installment_amount' => $installmentAmount,
+                'duration_months' => $durationMonths,
+                'status' => $status, 
                 'proof_of_payment_path' => null, 
                 'installments_paid' => 0,
             ]);
             
-            // 6. Buat Log Pembayaran
-            $paymentLog = $payment->paymentLogs()->create([
-                'type' => 'down_payment', // <--- UBAH INI: Gunakan 'down_payment' agar sesuai dengan ENUM database
-                'amount' => $totalAmount,
-                'status' => 'verified', 
-            ]);
+            // 6. Buat Log Pembayaran & Transaksi Keuangan
+            if ($isCredit || $isCashGantung) {
+                if ($dp > 0) {
+                    $paymentLog = $payment->paymentLogs()->create([
+                        'type' => 'down_payment',
+                        'amount' => $dp,
+                        'status' => 'verified', 
+                    ]);
 
-            // 7. Catat ke Laporan Keuangan (Uang Masuk dari POS)
-            \App\Models\FinancialTransaction::create([
-                'transaction_date' => now(),
-                'type' => 'income',
-                'category' => 'cash_sale',
-                'amount' => $totalAmount,
-                'description' => "Penjualan Langsung POS (Order #{$order->id})",
-                'payment_method' => $request->payment_method ?? 'cash',
-                'related_id' => $paymentLog->id,
-                'related_type' => \App\Models\PaymentLog::class,
-            ]);
+                    \App\Models\FinancialTransaction::create([
+                        'transaction_date' => now(),
+                        'type' => 'income',
+                        'category' => 'down_payment',
+                        'amount' => $dp,
+                        'description' => "DP Penjualan POS (Order #{$order->id})",
+                        'payment_method' => $request->payment_method ?? 'cash',
+                        'related_id' => $paymentLog->id,
+                        'related_type' => \App\Models\PaymentLog::class,
+                    ]);
+                }
+            } else {
+                $paymentLog = $payment->paymentLogs()->create([
+                    'type' => 'down_payment', // Walau cash, dicatat sbg initial payment lunas
+                    'amount' => $totalAmount,
+                    'status' => 'verified', 
+                ]);
+
+                \App\Models\FinancialTransaction::create([
+                    'transaction_date' => now(),
+                    'type' => 'income',
+                    'category' => 'cash_sale',
+                    'amount' => $totalAmount,
+                    'description' => "Penjualan Langsung POS (Order #{$order->id})",
+                    'payment_method' => $request->payment_method ?? 'cash',
+                    'related_id' => $paymentLog->id,
+                    'related_type' => \App\Models\PaymentLog::class,
+                ]);
+            }
 
             return redirect()->route('admin.pos.index')->with('success', 'Transaksi berhasil disimpan!');
         });

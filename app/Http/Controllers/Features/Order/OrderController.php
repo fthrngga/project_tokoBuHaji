@@ -237,9 +237,9 @@ class OrderController extends Controller
         $amount = 0;
         $paymentType = 'full_payment';
         $installmentNumber = null;
-        $monthsPaid = 1;
+        $monthsPaid = null;
 
-        if ($payment->payment_method === 'credit') {
+        if (in_array($payment->payment_method, ['credit', 'cash_gantung'])) {
             $hasDp = $payment->down_payment && $payment->down_payment > 0;
             $dpVerified = $payment->paymentLogs()
                 ->where('type', 'down_payment')
@@ -253,8 +253,8 @@ class OrderController extends Controller
             } else {
                 // Instalment
                 $nextInstallment = ($payment->installments_paid ?? 0) + 1;
-                $monthsPaid = $request->input('months_paid', 1);
-                $amount = $payment->installment_amount * $monthsPaid;
+                $monthsPaid = (float) $request->input('months_paid', 1);
+                $amount = $request->input('amount') ?? ($payment->installment_amount * $monthsPaid);
                 $paymentType = 'installment';
                 $installmentNumber = $nextInstallment;
             }

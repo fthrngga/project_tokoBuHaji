@@ -44,22 +44,22 @@ export default function Index({ orders }: Props) {
     return (
         <>
             <Head title="Pesanan Saya - Haji Elektronik" />
-            <div className="flex min-h-screen w-full flex-col bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-200">
+            <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
                 <Header user={auth.user} />
 
                 <main className="flex-1 py-12">
-                    <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
                         <div className="mb-8">
-                            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Pesanan Saya</h1>
-                            <p className="mt-2 text-gray-500">Riwayat transaksi dan status pesanan Anda.</p>
+                            <h1 className="text-3xl font-bold text-foreground">Pesanan Saya</h1>
+                            <p className="mt-2 text-muted-foreground">Riwayat transaksi dan status pesanan Anda.</p>
                         </div>
 
                         {orders.length > 0 ? (
-                            <div className="bg-white dark:bg-gray-900 shadow overflow-hidden sm:rounded-md">
-                                <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-800">
+                            <div className="bg-card shadow overflow-hidden sm:rounded-md border border-border">
+                                <ul role="list" className="divide-y divide-border">
                                     {orders.map((order) => (
                                         <li key={order.id}>
-                                            <Link href={route('orders.show', order.id)} className="block hover:bg-gray-50 dark:hover:bg-gray-800 transition duration-150 ease-in-out">
+                                            <Link href={route('orders.show', order.id)} className="block hover:bg-muted transition duration-150 ease-in-out">
                                                 <div className="px-4 py-4 sm:px-6">
                                                     <div className="flex items-center justify-between">
                                                         <div className="text-sm font-medium text-blue-600 truncate">
@@ -71,11 +71,11 @@ export default function Index({ orders }: Props) {
                                                     </div>
                                                     <div className="mt-2 sm:flex sm:justify-between">
                                                         <div className="sm:flex">
-                                                            <p className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                                            <p className="flex items-center text-sm text-muted-foreground">
                                                                 Total: {formatCurrency(order.total_amount)}
                                                             </p>
                                                         </div>
-                                                        <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                                                        <div className="mt-2 flex items-center text-sm text-muted-foreground sm:mt-0">
                                                             <p>
                                                                 Dibuat pada {format(new Date(order.created_at), "d MMM yyyy", { locale: id })}
                                                             </p>
@@ -88,11 +88,11 @@ export default function Index({ orders }: Props) {
                                 </ul>
                             </div>
                         ) : (
-                            <div className="text-center py-20 bg-white dark:bg-gray-900 rounded-lg shadow-sm">
-                                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Belum ada pesanan</h3>
-                                <p className="mt-1 text-sm text-gray-500">Anda belum melakukan pembelian apapun.</p>
+                            <div className="text-center py-20 bg-card border border-border rounded-lg shadow-sm">
+                                <h3 className="text-lg font-medium text-foreground">Belum ada pesanan</h3>
+                                <p className="mt-1 text-sm text-muted-foreground">Anda belum melakukan pembelian apapun.</p>
                                 <div className="mt-6">
-                                    <Link href="/" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-black hover:bg-gray-800">
+                                    <Link href="/" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary/90">
                                         Mulai Belanja
                                     </Link>
                                 </div>

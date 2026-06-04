@@ -16,11 +16,15 @@ import debounce from 'lodash.debounce';
 interface Customer {
     id: number;
     // SYNC_ITEM_TYPE_START
-    user_id: string;
+    user_id: number | string;
     phone_number: string;
     address: string;
     city: string;
     province: string;
+    user?: {
+        name: string;
+        email: string;
+    };
     // SYNC_ITEM_TYPE_END
 }
 
@@ -91,12 +95,12 @@ export default function Index({ auth, items, filters }: PageProps<{ items: Pagin
                                     <TableRow>
                                         {/* SYNC_TABLE_HEADERS_START */}
 <TableHead className="w-[40px]"><Checkbox /></TableHead>
-<TableHead>User Id</TableHead>
-<TableHead>Phone Number</TableHead>
-<TableHead>Address</TableHead>
-<TableHead>City</TableHead>
-<TableHead>Province</TableHead>
-<TableHead className="text-right">Action</TableHead>
+<TableHead>Nama</TableHead>
+<TableHead>Email</TableHead>
+<TableHead>Nomor HP</TableHead>
+<TableHead>Alamat</TableHead>
+<TableHead>Kota/Provinsi</TableHead>
+<TableHead className="text-right">Aksi</TableHead>
 {/* SYNC_TABLE_HEADERS_END */}
                                     </TableRow>
                                 </TableHeader>
@@ -105,11 +109,11 @@ export default function Index({ auth, items, filters }: PageProps<{ items: Pagin
                                         <TableRow key={item.id}>
                                             {/* SYNC_TABLE_ROWS_START */}
 <TableCell><Checkbox /></TableCell>
-<TableCell className="font-medium">{ item.user_id }</TableCell>
-<TableCell className="font-medium">{ item.phone_number }</TableCell>
-<TableCell>{ item.address ? (item.address.substring(0, 50) + (item.address.length > 50 ? '...' : '')) : '' }</TableCell>
-<TableCell className="font-medium">{ item.city }</TableCell>
-<TableCell className="font-medium">{ item.province }</TableCell>
+<TableCell className="font-medium">{ item.user?.name || '-' }</TableCell>
+<TableCell>{ item.user?.email || '-' }</TableCell>
+<TableCell>{ item.phone_number || '-' }</TableCell>
+<TableCell>{ item.address ? (item.address.substring(0, 50) + (item.address.length > 50 ? '...' : '')) : '-' }</TableCell>
+<TableCell>{ [item.city, item.province].filter(Boolean).join(', ') || '-' }</TableCell>
 <TableCell className="text-right">
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>

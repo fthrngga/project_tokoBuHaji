@@ -51,6 +51,16 @@ class HandleInertiaRequests extends Middleware
                 ] : null
             ],
             'cartCount' => $request->user() ? \App\Features\Cart\Cart::where('user_id', $request->user()->id)->first()?->items()->count() ?? 0 : 0,
+            'notifications' => $request->user() ? [
+                'count' => $request->user()->unreadNotifications()->count(),
+                'items' => $request->user()->unreadNotifications()->take(10)->get()->map(function($notif) {
+                    return [
+                        'id' => $notif->id,
+                        'data' => $notif->data,
+                        'created_at' => $notif->created_at->diffForHumans(),
+                    ];
+                })->values()->toArray()
+            ] : null,
             'sidebarOpen' => !$request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'flash' => [
                 'message' => fn() => $request->session()->get('message'),

@@ -18,10 +18,21 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
-        return Inertia::render('settings/profile', [
+        $request->user()->load('customer');
+        
+        $data = [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => $request->session()->get('status'),
-        ]);
+            'customer' => $request->user()->customer,
+        ];
+
+        if ($request->user()->isCustomer()) {
+            $data['addresses'] = $request->user()->addresses()->latest()->get();
+        }
+
+        $view = $request->user()->isCustomer() ? 'Customer/Profile' : 'settings/profile';
+        
+        return Inertia::render($view, $data);
     }
 
     /**
@@ -36,6 +47,11 @@ class ProfileController extends Controller
         }
 
         $request->user()->save();
+
+        $request->user()->customer()->updateOrCreate(
+            ['user_id' => $request->user()->id],
+            $request->only(['phone_number', 'address', 'city', 'province'])
+        );
 
         return to_route('profile.edit');
     }

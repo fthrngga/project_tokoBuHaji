@@ -18,10 +18,11 @@ interface Product {
     name: string;
     sku: string;
     price: number;
+    selling_price: number;
     stock: number;
     images?: { image_path: string }[];
     category?: { name: string };
-    variants?: { id: number; sku: string; stock: number; options: Record<string, string> }[];
+    variants?: { id: number; sku: string; stock: number; options: Record<string, string>; selling_price: number }[];
 }
 
 interface Customer {
@@ -46,9 +47,13 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
         customer_id: '',
         customer_name: '',
         customer_phone: '',
-        items: [] as { id: number, product_variant_id: number | null, quantity: number }[],
+        payment_type: 'cash',
         payment_method: 'tunai',
         amount_paid: '',
+        down_payment: '',
+        duration_months: '1',
+        installment_type: 'fixed',
+        items: [] as { id: number, product_variant_id: number | null, quantity: number }[],
     });
 
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -82,7 +87,7 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
         setSelectedProduct(null);
     };
 
-    const addToCart = (product: Product, variant: { id: number, stock: number, options: Record<string, string> } | null) => {
+    const addToCart = (product: Product, variant: { id: number, stock: number, options: Record<string, string>, selling_price: number } | null) => {
         setCart(prev => {
             const cartId = variant ? `${product.id}-${variant.id}` : `${product.id}`;
             const existing = prev.find(item => item.cart_id === cartId);
@@ -100,6 +105,7 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
                 cart_id: cartId, 
                 product_variant_id: variant ? variant.id : null,
                 variant_options: variant ? variant.options : undefined,
+                price: variant ? variant.selling_price : product.selling_price,
                 quantity: 1 
             }];
         });
@@ -146,12 +152,17 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
 
         const items = cart.map(item => ({ id: item.id, product_variant_id: item.product_variant_id, quantity: item.quantity }));
         
-        const payloadData = {
+        let payloadData: any = {
             ...data,
             items: items,
-            amount_paid: data.amount_paid || totalAmount.toString(),
             customer_name: data.customer_id ? undefined : data.customer_name,
         };
+
+        if (data.payment_type === 'cash') {
+            payloadData.amount_paid = data.amount_paid || totalAmount.toString();
+        } else {
+            payloadData.down_payment = data.down_payment || '0';
+        }
 
         router.post(route('admin.pos.store'), payloadData, {
             onSuccess: () => {
@@ -220,7 +231,7 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
                                                 <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1 truncate">{product.category?.name}</p>
                                                 <h3 className="font-semibold text-sm line-clamp-2 leading-tight">{product.name}</h3>
                                             </div>
-                                            <p className="font-bold text-sm mt-2">{formatCurrency(product.price)}</p>
+                                            <p className="font-bold text-sm mt-2">{formatCurrency(product.selling_price)}</p>
                                         </div>
                                     </div>
                                 ))}
@@ -287,8 +298,13 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
                         )}
                     </div>
 
-                    <div className="p-4 border-t border-border bg-secondary/30 rounded-b-xl">
-                        <form onSubmit={handleCheckout} className="space-y-4">
+                    <div className="p-4 border-t border-border bg-secondary/30 rounded-b-xl relative shrink-0 overflow-y-auto max-h-[55vh] custom-scrollbar">
+                        {cart.length === 0 && (
+                            <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/40 backdrop-blur-[1px] rounded-b-xl">
+                                <span className="text-sm font-medium text-muted-foreground bg-background px-3 py-1.5 rounded-full shadow-sm border border-border">Pilih produk terlebih dahulu</span>
+                            </div>
+                        )}
+                        <form onSubmit={handleCheckout} className={`space-y-4 ${cart.length === 0 ? 'opacity-40 pointer-events-none' : ''}`}>
                             <div className="flex items-center justify-between mb-4">
                                 <span className="font-semibold text-muted-foreground">Total Pembayaran</span>
                                 <span className="text-2xl font-bold text-primary">{formatCurrency(totalAmount)}</span>
@@ -318,7 +334,6 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
                                                 value={data.customer_name} 
                                                 onChange={e => setData('customer_name', e.target.value)}
                                                 className="bg-card text-sm"
-                                                required={!data.customer_id}
                                             />
                                         </div>
                                         <div className="space-y-1.5">
@@ -332,29 +347,159 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
                                     </div>
                                 )}
 
-                                <div className="grid grid-cols-2 gap-2">
-                                    <div className="space-y-1.5">
-                                        <Label className="text-xs text-muted-foreground">Metode Bayar</Label>
-                                        <Select value={data.payment_method} onValueChange={val => setData('payment_method', val)}>
-                                            <SelectTrigger className="bg-card">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="tunai">Tunai / Cash</SelectItem>
-                                                <SelectItem value="transfer">Transfer Bank</SelectItem>
-                                                <SelectItem value="qris">QRIS</SelectItem>
-                                            </SelectContent>
-                                        </Select>
+                                <div className="space-y-4 pt-4 border-t border-border mt-4">
+                                    <div className="flex justify-between items-center bg-muted/50 p-3 rounded-lg">
+                                        <span className="text-muted-foreground font-medium">Total Belanja</span>
+                                        <span className="text-2xl font-bold text-red-500">{formatCurrency(totalAmount)}</span>
                                     </div>
-                                    <div className="space-y-1.5">
-                                        <Label className="text-xs text-muted-foreground">Uang Diterima (Opsional)</Label>
-                                        <Input 
-                                            type="number"
-                                            placeholder={totalAmount.toString()}
-                                            value={data.amount_paid}
-                                            onChange={e => setData('amount_paid', e.target.value)}
-                                            className="bg-card text-sm font-medium"
-                                        />
+                                    
+                                    <div className="space-y-3 pt-2">
+                                        <div className="space-y-1.5">
+                                            <Label className="text-xs text-muted-foreground">Jenis Pembayaran</Label>
+                                            <Select value={data.payment_type} onValueChange={val => setData('payment_type', val)}>
+                                                <SelectTrigger className="bg-card text-sm font-medium">
+                                                    <SelectValue placeholder="Pilih Jenis" />
+                                                </SelectTrigger>
+                                                    <SelectContent className="z-[9999]">
+                                                        <SelectItem value="cash">Bayar Penuh (Cash)</SelectItem>
+                                                        <SelectItem value="credit">Kredit / Cicilan</SelectItem>
+                                                        <SelectItem value="cash_gantung">Cash Gantung</SelectItem>
+                                                    </SelectContent>
+                                            </Select>
+                                        </div>
+
+                                        {data.payment_type === 'cash' ? (
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div className="space-y-1.5">
+                                                    <Label className="text-xs text-muted-foreground">Metode Bayar</Label>
+                                                    <Select value={data.payment_method} onValueChange={val => setData('payment_method', val)}>
+                                                        <SelectTrigger className="bg-card text-sm font-medium">
+                                                            <SelectValue placeholder="Pilih Metode" />
+                                                        </SelectTrigger>
+                                                        <SelectContent className="z-[9999]">
+                                                            <SelectItem value="tunai">Tunai / Cash</SelectItem>
+                                                            <SelectItem value="transfer">Transfer Bank</SelectItem>
+                                                            <SelectItem value="qris">QRIS</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                                <div className="space-y-1.5">
+                                                    <Label className="text-xs text-muted-foreground">Uang Diterima (Opsional)</Label>
+                                                    <Input 
+                                                        type="number"
+                                                        placeholder={totalAmount.toString()}
+                                                        value={data.amount_paid}
+                                                        onChange={e => setData('amount_paid', e.target.value)}
+                                                        className="bg-card text-sm font-medium"
+                                                    />
+                                                </div>
+                                            </div>
+                                        ) : data.payment_type === 'credit' ? (
+                                            <div className="space-y-3 border border-border p-3 rounded-lg bg-card/50">
+                                                <div className="flex justify-between items-center text-sm border-b border-border pb-2">
+                                                    <span className="text-muted-foreground">Harga Kredit (Total x 1.5)</span>
+                                                    <span className="font-semibold text-red-500">{formatCurrency(totalAmount * 1.5)}</span>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <div className="space-y-1.5">
+                                                        <Label className="text-xs text-muted-foreground">Metode Bayar DP</Label>
+                                                        <Select value={data.payment_method} onValueChange={val => setData('payment_method', val)}>
+                                                            <SelectTrigger className="bg-card text-sm font-medium">
+                                                                <SelectValue placeholder="Pilih Metode" />
+                                                            </SelectTrigger>
+                                                            <SelectContent className="z-[9999]">
+                                                                <SelectItem value="tunai">Tunai / Cash</SelectItem>
+                                                                <SelectItem value="transfer">Transfer Bank</SelectItem>
+                                                                <SelectItem value="qris">QRIS</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                    <div className="space-y-1.5">
+                                                        <Label className="text-xs text-muted-foreground">Uang Muka / DP</Label>
+                                                        <Input 
+                                                            type="number"
+                                                            placeholder="0"
+                                                            value={data.down_payment}
+                                                            onChange={e => setData('down_payment', e.target.value)}
+                                                            className="bg-card text-sm font-medium"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="flex justify-between items-center text-sm pt-1">
+                                                    <span className="text-muted-foreground">Tenor Cicilan</span>
+                                                    <span className="font-semibold">10 Bulan</span>
+                                                </div>
+                                                <div className="flex justify-between items-center text-sm">
+                                                    <span className="text-muted-foreground">Angsuran per Bulan</span>
+                                                    <span className="font-semibold">{formatCurrency((totalAmount * 1.5 - (parseFloat(data.down_payment || '0'))) / 10)}</span>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-3 border border-border p-3 rounded-lg bg-card/50">
+                                                <div className="flex justify-between items-center text-sm border-b border-border pb-2">
+                                                    <span className="text-muted-foreground">Harga Cash Gantung (Total + 15%)</span>
+                                                    <span className="font-semibold text-red-500">{formatCurrency(totalAmount * 1.15)}</span>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <div className="space-y-1.5">
+                                                        <Label className="text-xs text-muted-foreground">Tenor Cicilan</Label>
+                                                        <Select value={data.duration_months} onValueChange={val => setData('duration_months', val)}>
+                                                            <SelectTrigger className="bg-card text-sm font-medium">
+                                                                <SelectValue placeholder="Pilih Tenor" />
+                                                            </SelectTrigger>
+                                                            <SelectContent className="z-[9999]">
+                                                                <SelectItem value="1">1 Bulan</SelectItem>
+                                                                <SelectItem value="2">2 Bulan</SelectItem>
+                                                                <SelectItem value="3">3 Bulan</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                    <div className="space-y-1.5">
+                                                        <Label className="text-xs text-muted-foreground">Tipe Cicilan</Label>
+                                                        <Select value={data.installment_type} onValueChange={val => setData('installment_type', val)}>
+                                                            <SelectTrigger className="bg-card text-sm font-medium">
+                                                                <SelectValue placeholder="Pilih Tipe" />
+                                                            </SelectTrigger>
+                                                            <SelectContent className="z-[9999]">
+                                                                <SelectItem value="fixed">Tetap (Dibagi Rata)</SelectItem>
+                                                                <SelectItem value="flexible">Bebas / Suka-suka</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <div className="space-y-1.5">
+                                                        <Label className="text-xs text-muted-foreground">Metode Bayar DP</Label>
+                                                        <Select value={data.payment_method} onValueChange={val => setData('payment_method', val)}>
+                                                            <SelectTrigger className="bg-card text-sm font-medium">
+                                                                <SelectValue placeholder="Pilih Metode" />
+                                                            </SelectTrigger>
+                                                            <SelectContent className="z-[9999]">
+                                                                <SelectItem value="tunai">Tunai / Cash</SelectItem>
+                                                                <SelectItem value="transfer">Transfer Bank</SelectItem>
+                                                                <SelectItem value="qris">QRIS</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                    <div className="space-y-1.5">
+                                                        <Label className="text-xs text-muted-foreground">Uang Muka / DP</Label>
+                                                        <Input 
+                                                            type="number"
+                                                            placeholder="0"
+                                                            value={data.down_payment}
+                                                            onChange={e => setData('down_payment', e.target.value)}
+                                                            className="bg-card text-sm font-medium"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                {data.installment_type === 'fixed' && (
+                                                    <div className="flex justify-between items-center text-sm pt-1">
+                                                        <span className="text-muted-foreground">Angsuran per Bulan</span>
+                                                        <span className="font-semibold">{formatCurrency((totalAmount * 1.15 - (parseFloat(data.down_payment || '0'))) / parseInt(data.duration_months || '1'))}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -385,7 +530,7 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
                             <SelectTrigger>
                                 <SelectValue placeholder="Pilih Varian" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="z-[9999]">
                                 {selectedProduct?.variants?.map(variant => {
                                     const optionStr = Object.entries(variant.options).map(([k, v]) => `${k}: ${v}`).join(', ');
                                     const stockStr = variant.stock > 0 ? `Stok: ${variant.stock}` : 'Pre-order';

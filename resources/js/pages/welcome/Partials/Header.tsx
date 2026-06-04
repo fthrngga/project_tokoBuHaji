@@ -7,10 +7,12 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ShoppingCart, Search, LogOut, ShoppingBag, LayoutDashboard, User as UserIcon, CreditCard, X } from 'lucide-react';
+import { ShoppingCart, Search, LogOut, ShoppingBag, LayoutDashboard, User as UserIcon, CreditCard, X, MapPin } from 'lucide-react';
 import { route } from 'ziggy-js';
 import { useState, useEffect, useRef } from 'react';
 import React from 'react';
+import { NotificationDropdown } from '@/components/NotificationDropdown';
+import AppLogoIcon from '@/components/app-logo-icon';
 
 const NAV_LINKS = [
     { label: "Elektronik", href: "/kategori/elektronik" },
@@ -146,21 +148,8 @@ export default function Header({ user }: { user: User | null }) {
                             textDecoration: "none",
                         }}
                     >
-                        <div
-                            style={{
-                                width: "30px",
-                                height: "30px",
-                                borderRadius: "7px",
-                                background: "linear-gradient(135deg, #577399, #3d5a80)",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontSize: "10px",
-                                fontWeight: 900,
-                                color: "white",
-                            }}
-                        >
-                            HE
+                        <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-[#3d5a80] text-white">
+                            <AppLogoIcon className="size-5 fill-current" />
                         </div>
                         <span
                             style={{
@@ -170,7 +159,7 @@ export default function Header({ user }: { user: User | null }) {
                                 letterSpacing: "-0.025em",
                             }}
                         >
-                            Haji Elektronik
+                            Toko Pak Haji Elektronik
                         </span>
                     </Link>
 
@@ -231,6 +220,7 @@ export default function Header({ user }: { user: User | null }) {
 
                         {user ? (
                             <>
+                                <NotificationDropdown />
                                 {/* Cart */}
                                 <Link
                                     href={route('cart.index')}
@@ -316,8 +306,8 @@ export default function Header({ user }: { user: User | null }) {
                                         ) : (
                                             <>
                                                 <DropdownMenuItem asChild>
-                                                    <Link href={route('addresses.index')} className="flex items-center gap-2" style={{ color: "#BDD5EA", fontSize: "13px" }}>
-                                                        <UserIcon size={14} /> Profil & Alamat
+                                                    <Link href={route('profile.edit')} className="flex items-center gap-2" style={{ color: "#BDD5EA", fontSize: "13px" }}>
+                                                        <UserIcon size={14} /> Profil & Buku Alamat
                                                     </Link>
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem asChild>

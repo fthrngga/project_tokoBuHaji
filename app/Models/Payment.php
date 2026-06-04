@@ -12,6 +12,7 @@ class Payment extends Model
         'customer_id',
         'payment_method',
         'cash_type',
+        'installment_type',
         'down_payment',
         'installment_amount',
         'duration_months',

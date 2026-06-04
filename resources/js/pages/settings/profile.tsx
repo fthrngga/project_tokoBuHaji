@@ -10,6 +10,7 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { edit } from '@/routes/profile';
@@ -21,7 +22,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: boolean; status?: string }) {
+export default function Profile({ mustVerifyEmail, status, customer }: { mustVerifyEmail: boolean; status?: string; customer?: any }) {
     const { auth } = usePage<SharedData>().props;
 
     return (
@@ -72,6 +73,56 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                     />
 
                                     <InputError className="mt-2" message={errors.email} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="phone_number">Phone number</Label>
+                                    <Input
+                                        id="phone_number"
+                                        className="mt-1 block w-full"
+                                        defaultValue={customer?.phone_number || ''}
+                                        name="phone_number"
+                                        autoComplete="tel"
+                                        placeholder="Phone number"
+                                    />
+                                    <InputError className="mt-2" message={errors.phone_number} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="province">Province</Label>
+                                    <Input
+                                        id="province"
+                                        className="mt-1 block w-full"
+                                        defaultValue={customer?.province || ''}
+                                        name="province"
+                                        placeholder="Province"
+                                    />
+                                    <InputError className="mt-2" message={errors.province} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="city">City</Label>
+                                    <Input
+                                        id="city"
+                                        className="mt-1 block w-full"
+                                        defaultValue={customer?.city || ''}
+                                        name="city"
+                                        placeholder="City"
+                                    />
+                                    <InputError className="mt-2" message={errors.city} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="address">Full Address</Label>
+                                    <Textarea
+                                        id="address"
+                                        className="mt-1 block w-full"
+                                        defaultValue={customer?.address || ''}
+                                        name="address"
+                                        placeholder="Full address"
+                                        rows={3}
+                                    />
+                                    <InputError className="mt-2" message={errors.address} />
                                 </div>
 
                                 {mustVerifyEmail && auth.user.email_verified_at === null && (

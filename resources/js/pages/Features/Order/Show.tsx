@@ -200,22 +200,22 @@ export default function Show({ order }: Props) {
     return (
         <>
             <Head title={`Pesanan #${order.id} - Haji Elektronik`} />
-            <div className="flex min-h-screen w-full flex-col bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-200">
+            <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
                 <Header user={auth.user} />
 
                 <main className="flex-1 py-12">
                     <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="mb-6">
-                            <Link href={route('orders.index')} className="inline-flex items-center text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white mb-4">
+                            <Link href={route('orders.index')} className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
                                 <ArrowLeft className="mr-2 h-4 w-4" /> Kembali ke Daftar Pesanan
                             </Link>
                             <div className="flex justify-between items-start md:items-center flex-col md:flex-row gap-4">
                                 <div>
-                                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                                    <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
                                         Pesanan #{order.id}
                                         {getStatusBadge(order.status)}
                                     </h1>
-                                    <p className="mt-1 text-gray-500 text-sm">
+                                    <p className="mt-1 text-muted-foreground text-sm">
                                         Dibuat pada {format(new Date(order.created_at), "d MMMM yyyy, HH:mm", { locale: id })}
                                     </p>
                                 </div>
@@ -236,11 +236,11 @@ export default function Show({ order }: Props) {
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent 
-                                        className="flex-1 overflow-y-auto p-4 space-y-4 bg-secondary/20 dark:bg-slate-900/50" 
+                                        className="flex-1 overflow-y-auto p-4 space-y-4 bg-secondary/20" 
                                         ref={scrollRef}
                                         onScroll={handleScroll} 
                                     >
-                                        <div className="text-center text-xs text-gray-400 py-4">
+                                        <div className="text-center text-xs text-muted-foreground py-4">
                                             Pesanan dibuat. Silakan diskusikan ongkos kirim dan detail pengiriman dengan admin di sini.
                                         </div>
 
@@ -248,9 +248,9 @@ export default function Show({ order }: Props) {
                                             const isMe = msg.user_id === auth.user?.id;
                                             return (
                                                 <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                                                    <div className={`max-w-[80%] rounded-lg p-3 ${isMe ? 'bg-black text-white dark:bg-white dark:text-black rounded-tr-none' : 'bg-white border text-gray-800 dark:bg-gray-800 dark:text-gray-200 rounded-tl-none'}`}>
+                                                    <div className={`max-w-[80%] rounded-lg p-3 ${isMe ? 'bg-primary text-primary-foreground rounded-tr-none' : 'bg-card border border-border text-card-foreground rounded-tl-none'}`}>
                                                         <p className="text-sm">{msg.message}</p>
-                                                        <p className={`text-[10px] mt-1 text-right ${isMe ? 'text-gray-300 dark:text-gray-500' : 'text-gray-400'}`}>
+                                                        <p className={`text-[10px] mt-1 text-right ${isMe ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
                                                             {format(new Date(msg.created_at), "HH:mm")}
                                                         </p>
                                                     </div>
@@ -258,7 +258,7 @@ export default function Show({ order }: Props) {
                                             );
                                         })}
                                     </CardContent>
-                                    <CardFooter className="p-4 border-t bg-white dark:bg-gray-900">
+                                    <CardFooter className="p-4 border-t bg-card">
                                         <form onSubmit={handleSendMessage} className="flex w-full gap-2">
                                             <Input
                                                 value={data.message}
@@ -397,9 +397,9 @@ export default function Show({ order }: Props) {
                                                         </DialogDescription>
                                                     </DialogHeader>
                                                     <div className="grid gap-4 py-4">
-                                                        <div className="flex justify-between items-center bg-gray-50 p-3 rounded-md">
-                                                            <span className="font-medium">Total Tagihan</span>
-                                                            <span className="font-bold text-lg">{formatCurrency(order.total_amount)}</span>
+                                                        <div className="flex justify-between items-center bg-muted/50 p-3 rounded-md">
+                                                            <span className="font-medium text-foreground">Total Tagihan</span>
+                                                            <span className="font-bold text-lg text-primary">{formatCurrency(order.total_amount)}</span>
                                                         </div>
 
                                                         <form id="payment-form" onSubmit={handlePaymentSubmit} className="grid gap-4">
@@ -498,14 +498,14 @@ export default function Show({ order }: Props) {
                                         </CardFooter>
                                     )}
                                     {order.payment && (
-                                        <CardFooter className="bg-gray-50 flex flex-col gap-4 items-center p-4">
+                                        <CardFooter className="bg-muted/10 flex flex-col gap-4 items-center p-4 border-t border-border">
                                             <div className="w-full text-center">
                                                 <p className="text-gray-700 font-medium text-sm">Status Pembayaran: <span className="font-bold">{order.payment.status === 'pending_approval' ? 'Menunggu Konfirmasi' : order.payment.status}</span></p>
                                             </div>
 
                                             {/* CASH PAYMENT LOGIC */}
                                             {order.payment.payment_method === 'cash' && order.payment.status !== 'paid_off' && (
-                                                <div className="w-full border-t pt-4">
+                                                <div className="w-full border-t pt-4 border-border">
                                                     {(() => {
                                                         const logs = order.payment!.payment_logs || [];
                                                         const cashManualPending = logs.some(l => l.type === 'full_payment' && l.status === 'pending' && l.proof_path);
@@ -513,7 +513,7 @@ export default function Show({ order }: Props) {
 
                                                         if (cashManualPending) {
                                                             return (
-                                                                <div className="bg-yellow-50 text-yellow-800 p-3 rounded text-sm text-center border border-yellow-200">
+                                                                <div className="bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 p-3 rounded text-sm text-center border border-yellow-500/20">
                                                                     Bukti pembayaran telah diupload.<br />Mohon tunggu verifikasi admin.
                                                                 </div>
                                                             );
@@ -522,10 +522,10 @@ export default function Show({ order }: Props) {
                                                         return (
                                                             <div className="space-y-3">
                                                                 {cashMidtransPending && (
-                                                                    <div className="bg-amber-50 text-amber-900 p-4 rounded-lg text-sm mb-3 border border-amber-200 shadow-sm relative overflow-hidden">
-                                                                        <div className="absolute top-0 right-0 w-16 h-16 bg-amber-200 rounded-bl-full opacity-20 transform translate-x-1/3 -translate-y-1/3"></div>
-                                                                        <div className="font-bold text-amber-800 text-base mb-1">Tagihan Sedang Diproses</div>
-                                                                        <p className="mb-3 text-amber-800/90 leading-relaxed">
+                                                                    <div className="bg-amber-500/10 text-amber-600 dark:text-amber-400 p-4 rounded-lg text-sm mb-3 border border-amber-500/20 shadow-sm relative overflow-hidden">
+                                                                        <div className="absolute top-0 right-0 w-16 h-16 bg-amber-500/20 rounded-bl-full opacity-20 transform translate-x-1/3 -translate-y-1/3"></div>
+                                                                        <div className="font-bold text-amber-600 dark:text-amber-500 text-base mb-1">Tagihan Sedang Diproses</div>
+                                                                        <p className="mb-3 text-amber-600/90 dark:text-amber-400/90 leading-relaxed">
                                                                             Anda memiliki transaksi Midtrans yang belum diselesaikan. Selesaikan di aplikasi bank Anda.
                                                                         </p>
                                                                         {logs.filter(l => l.type === 'full_payment' && l.status === 'pending' && !l.proof_path && l.snap_token).map(payment => (
@@ -575,8 +575,8 @@ export default function Show({ order }: Props) {
                                             )}
 
                                             {/* CREDIT PAYMENT LOGIC */}
-                                            {order.payment.payment_method === 'credit' && (
-                                                <div className="w-full border-t pt-4">
+                                            {['credit', 'cash_gantung'].includes(order.payment.payment_method) && (
+                                                <div className="w-full border-t pt-4 border-border">
                                                     <div className="space-y-4">
                                                         {/* Logic to determine what to show: DP or Installment */}
                                                         {(() => {
@@ -592,7 +592,7 @@ export default function Show({ order }: Props) {
                                                                 if (hasDp && !dpVerified) {
                                                                     if (dpManualPending) {
                                                                         return (
-                                                                            <div className="bg-yellow-50 text-yellow-800 p-3 rounded text-sm text-center border border-yellow-200">
+                                                                            <div className="bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 p-3 rounded text-sm text-center border border-yellow-500/20">
                                                                                 Bukti Uang Muka (DP) sebesar <strong>{formatCurrency(payment.down_payment)}</strong> sedang diverifikasi.
                                                                             </div>
                                                                         );
@@ -600,10 +600,10 @@ export default function Show({ order }: Props) {
                                                                         return (
                                                                             <div className="space-y-3">
                                                                                 {dpMidtransPending && (
-                                                                                    <div className="bg-amber-50 text-amber-900 p-4 rounded-lg text-sm mb-3 border border-amber-200 shadow-sm relative overflow-hidden">
-                                                                                        <div className="absolute top-0 right-0 w-16 h-16 bg-amber-200 rounded-bl-full opacity-20 transform translate-x-1/3 -translate-y-1/3"></div>
-                                                                                        <div className="font-bold text-amber-800 text-base mb-1">Tagihan Sedang Diproses</div>
-                                                                                        <p className="mb-3 text-amber-800/90 leading-relaxed">
+                                                                                    <div className="bg-amber-500/10 text-amber-600 dark:text-amber-400 p-4 rounded-lg text-sm mb-3 border border-amber-500/20 shadow-sm relative overflow-hidden">
+                                                                                        <div className="absolute top-0 right-0 w-16 h-16 bg-amber-500/20 rounded-bl-full opacity-20 transform translate-x-1/3 -translate-y-1/3"></div>
+                                                                                        <div className="font-bold text-amber-600 dark:text-amber-500 text-base mb-1">Tagihan Sedang Diproses</div>
+                                                                                        <p className="mb-3 text-amber-600/90 dark:text-amber-400/90 leading-relaxed">
                                                                                             Anda memiliki transaksi Midtrans yang belum diselesaikan. Selesaikan di aplikasi bank Anda.
                                                                                         </p>
                                                                                         {logs.filter(l => l.type === 'down_payment' && l.status === 'pending' && !l.proof_path && l.snap_token).map(payment => (
@@ -651,6 +651,15 @@ export default function Show({ order }: Props) {
                                                                     }
                                                                 }
 
+                                                                // Repossessed Logic
+                                                                if (payment.status === 'repossessed') {
+                                                                    return (
+                                                                        <div className="bg-red-500/10 text-red-600 dark:text-red-400 p-3 rounded text-sm text-center border border-red-500/20 font-bold">
+                                                                            Kontrak kredit telah dihentikan karena dilakukan penarikan barang (Tunggakan Kritis). Seluruh pembayaran sebelumnya dinyatakan hangus.
+                                                                        </div>
+                                                                    );
+                                                                }
+
                                                                 // Installment Logic
                                                                 if (payment.status !== 'paid_off') {
                                                                     const installmentsPaid = payment.installments_paid || 0;
@@ -661,7 +670,7 @@ export default function Show({ order }: Props) {
 
                                                                         if (manualPendingInst) {
                                                                             return (
-                                                                                <div className="bg-yellow-50 text-yellow-800 p-3 rounded text-sm text-center border border-yellow-200">
+                                                                                <div className="bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 p-3 rounded text-sm text-center border border-yellow-500/20">
                                                                                     Bukti Angsuran Bulan ke-{nextInstallment} sedang diverifikasi.
                                                                                 </div>
                                                                             );
@@ -669,10 +678,10 @@ export default function Show({ order }: Props) {
                                                                             return (
                                                                                 <div className="space-y-3">
                                                                                     {midtransPendingInst && (
-                                                                                        <div className="bg-amber-50 text-amber-900 p-4 rounded-lg text-sm mb-3 border border-amber-200 shadow-sm relative overflow-hidden">
-                                                                                            <div className="absolute top-0 right-0 w-16 h-16 bg-amber-200 rounded-bl-full opacity-20 transform translate-x-1/3 -translate-y-1/3"></div>
-                                                                                            <div className="font-bold text-amber-800 text-base mb-1">Tagihan Sedang Diproses</div>
-                                                                                            <p className="mb-3 text-amber-800/90 leading-relaxed">
+                                                                                        <div className="bg-amber-500/10 text-amber-600 dark:text-amber-400 p-4 rounded-lg text-sm mb-3 border border-amber-500/20 shadow-sm relative overflow-hidden">
+                                                                                            <div className="absolute top-0 right-0 w-16 h-16 bg-amber-500/20 rounded-bl-full opacity-20 transform translate-x-1/3 -translate-y-1/3"></div>
+                                                                                            <div className="font-bold text-amber-600 dark:text-amber-500 text-base mb-1">Tagihan Sedang Diproses</div>
+                                                                                            <p className="mb-3 text-amber-600/90 dark:text-amber-400/90 leading-relaxed">
                                                                                                 Anda memiliki transaksi Midtrans yang belum diselesaikan. Selesaikan di aplikasi bank Anda.
                                                                                             </p>
                                                                                             <Button 
@@ -723,8 +732,8 @@ export default function Show({ order }: Props) {
                                                                     }
 
                                                                     return (
-                                                                        <div className="bg-green-50 text-green-800 p-3 rounded text-sm text-center border border-green-200">
-                                                                            <strong>Kredit Sedang Berjalan</strong>
+                                                                        <div className="bg-green-500/10 text-green-600 dark:text-green-400 p-3 rounded text-sm text-center border border-green-500/20">
+                                                                            <strong>Kredit / Cash Gantung Sedang Berjalan</strong>
                                                                             <br />
                                                                             Silakan cek menu <strong>Angsuran</strong> untuk melakukan pembayaran angsuran selanjutnya.
                                                                         </div>
@@ -732,7 +741,7 @@ export default function Show({ order }: Props) {
                                                                 }
 
                                                                 return (
-                                                                    <div className="bg-green-50 text-green-800 p-3 rounded text-sm text-center border border-green-200 font-bold">
+                                                                    <div className="bg-green-500/10 text-green-600 dark:text-green-400 p-3 rounded text-sm text-center border border-green-500/20 font-bold">
                                                                         Lunas! Terima kasih telah menyelesaikan pembayaran.
                                                                     </div>
                                                                 );

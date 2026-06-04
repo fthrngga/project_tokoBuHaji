@@ -22,6 +22,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::resource('admin/defective-products', \App\Http\Controllers\Admin\DefectiveProductController::class)
         ->only(['index', 'update'])
         ->names('admin.defective_products');
+    
+    Route::post('admin/defective-products/{defectiveProduct}/sell', [\App\Http\Controllers\Admin\DefectiveProductController::class, 'sellRepossessed'])
+        ->name('admin.defective_products.sell');
 });
 
 Route::middleware(['auth', 'verified', 'role:customer'])->group(function () {
@@ -34,6 +37,11 @@ Route::middleware(['auth', 'verified', 'role:customer'])->group(function () {
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('/notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead');
+    Route::get('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+});
 
 foreach (glob(base_path('routes/features/*.php')) as $route) {
     require $route;

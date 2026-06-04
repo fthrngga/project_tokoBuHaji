@@ -17,9 +17,9 @@ import { Input } from "@/components/ui/input";
 import { useState } from 'react';
 import axios from 'axios';
 
-function MidtransButton({ orderId, installmentAmount = 0, tunggakan = 0, tunggakanMonths = 0, onSuccess, onPayStart }: { orderId: number, installmentAmount?: number, tunggakan?: number, tunggakanMonths?: number, onSuccess?: () => void, onPayStart?: () => void }) {
+function MidtransButton({ orderId, installmentAmount = 0, tunggakan = 0, tunggakanMonths = 0, isFlexible = false, remainingDebt = 0, onSuccess, onPayStart }: { orderId: number, installmentAmount?: number, tunggakan?: number, tunggakanMonths?: number, isFlexible?: boolean, remainingDebt?: number, onSuccess?: () => void, onPayStart?: () => void }) {
     const minBelanja = installmentAmount / 2;
-    const [amount, setAmount] = useState(tunggakan > 0 ? installmentAmount + tunggakan : installmentAmount);
+    const [amount, setAmount] = useState<number>(isFlexible ? remainingDebt : (tunggakan > 0 ? installmentAmount + tunggakan : installmentAmount));
     const [loading, setLoading] = useState(false);
 
     const handlePay = async () => {
@@ -113,6 +113,19 @@ function MidtransButton({ orderId, installmentAmount = 0, tunggakan = 0, tunggak
                                 );
                             })}
                         </div>
+                    ) : isFlexible ? (
+                        <div className="flex flex-col gap-3 p-4 border-2 rounded-xl border-blue-500 bg-blue-500/10 shadow-md">
+                            <Label className="text-sm font-bold text-blue-700">Nominal Pembayaran (Suka-suka)</Label>
+                            <Input 
+                                type="number" 
+                                min={10000}
+                                max={remainingDebt}
+                                value={amount}
+                                onChange={(e) => setAmount(Number(e.target.value))}
+                                className="h-14 text-2xl font-black tracking-tight"
+                            />
+                            <div className="text-xs text-muted-foreground mt-1">Masukkan nominal berapapun yang ingin dibayarkan bulan ini.</div>
+                        </div>
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <label className={`relative flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${amount === installmentAmount ? 'border-blue-600 bg-blue-500/10 shadow-md ring-4 ring-blue-600/20' : 'border-border bg-background hover:border-blue-400 hover:bg-blue-500/5'}`}>
@@ -188,6 +201,9 @@ interface Installment {
     }[];
     tunggakan: number;
     tunggakan_months: number;
+    tunggakanMonths: number;
+    isFlexible: boolean;
+    totalBillThisMonth: number;
     totalBillThisMonth: number;
     activePayments?: {
         id: number;
@@ -463,7 +479,9 @@ export default function InstallmentIndex({ auth, installments }: { auth: any, in
                                     orderId={selectedPaymentItem.order_id}
                                     installmentAmount={selectedPaymentItem.installment_amount}
                                     tunggakan={selectedPaymentItem.tunggakan}
-                                    tunggakanMonths={selectedPaymentItem.tunggakan_months}
+                                    tunggakanMonths={selectedPaymentItem.tunggakanMonths}
+                                    isFlexible={selectedPaymentItem.isFlexible}
+                                    remainingDebt={selectedPaymentItem.remainingDebt}
                                     onSuccess={() => setSelectedPaymentItem(null)}
                                     onPayStart={() => setSelectedPaymentItem(null)}
                                 />

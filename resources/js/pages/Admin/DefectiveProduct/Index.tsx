@@ -27,8 +27,15 @@ interface DefectiveProductData {
     variant: { options: any } | null;
 }
 
+interface Customer {
+    id: number;
+    name: string;
+    phone_number: string;
+}
+
 interface Props {
     defectiveProducts: DefectiveProductData[];
+    customers: Customer[];
 }
 
 const STATUS_CONFIG = {
@@ -56,6 +63,12 @@ const STATUS_CONFIG = {
         badge: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
         dot: 'bg-red-500',
     },
+    sold: {
+        label: 'Terjual (Penarikan)',
+        icon: Package,
+        badge: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20',
+        dot: 'bg-indigo-500',
+    },
 };
 
 function StatusBadge({ status }: { status: string }) {
@@ -69,12 +82,23 @@ function StatusBadge({ status }: { status: string }) {
     );
 }
 
-export default function Index({ defectiveProducts }: Props) {
+export default function Index({ defectiveProducts, customers }: Props) {
+    const [activeTab, setActiveTab] = useState<'return' | 'repossession'>('return');
     const [selectedItem, setSelectedItem] = useState<DefectiveProductData | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isSellDialogOpen, setIsSellDialogOpen] = useState(false);
 
     const { data, setData, put, processing, reset } = useForm({
         status: 'in_warehouse'
+    });
+
+    const sellForm = useForm({
+        buyer_id: '',
+        sale_type: 'cash',
+        agreed_price: '',
+        down_payment: '',
+        installment_amount: '',
+        duration_months: ''
     });
 
     const handleOpenDialog = (item: DefectiveProductData) => {
@@ -94,11 +118,34 @@ export default function Index({ defectiveProducts }: Props) {
         });
     };
 
+    const handleOpenSellDialog = (item: DefectiveProductData) => {
+        setSelectedItem(item);
+        sellForm.reset();
+        setIsSellDialogOpen(true);
+    };
+
+    const handleSell = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedItem) return;
+        sellForm.post(route('admin.defective_products.sell', selectedItem.id), {
+            onSuccess: () => {
+                setIsSellDialogOpen(false);
+                sellForm.reset();
+            }
+        });
+    };
+
+    const returnsList = defectiveProducts.filter(item => !item.notes?.startsWith('[PENARIKAN]'));
+    const repossessionsList = defectiveProducts.filter(item => item.notes?.startsWith('[PENARIKAN]'));
+
+    const currentList = activeTab === 'return' ? returnsList : repossessionsList;
+
     const counts = {
-        in_warehouse: defectiveProducts.filter(r => r.status === 'in_warehouse').length,
-        sent_to_agent: defectiveProducts.filter(r => r.status === 'sent_to_agent').length,
-        repaired: defectiveProducts.filter(r => r.status === 'repaired').length,
-        written_off: defectiveProducts.filter(r => r.status === 'written_off').length,
+        in_warehouse: currentList.filter(r => r.status === 'in_warehouse').length,
+        sent_to_agent: currentList.filter(r => r.status === 'sent_to_agent').length,
+        repaired: currentList.filter(r => r.status === 'repaired').length,
+        written_off: currentList.filter(r => r.status === 'written_off').length,
+        sold: currentList.filter(r => r.status === 'sold').length,
     };
 
     return (
@@ -122,27 +169,46 @@ export default function Index({ defectiveProducts }: Props) {
                 {/* Stats Row */}
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                     {[
-                        { label: 'Di Gudang', count: counts.in_warehouse, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
-                        { label: 'Dikirim ke Agen', count: counts.sent_to_agent, color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
-                        { label: 'Selesai Diperbaiki', count: counts.repaired, color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
-                        { label: 'Dibuang/Rusak Total', count: counts.written_off, color: 'text-red-500', bg: 'bg-red-500/10', border: 'border-red-500/20' },
-                    ].map((stat) => (
-                        <div key={stat.label} className={`rounded-xl border p-4 ${stat.bg} ${stat.border}`}>
+                        { label: 'Di Gudang', count: counts.in_warehouse, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20', show: true },
+                        { label: 'Dikirim ke Agen', count: counts.sent_to_agent, color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20', show: activeTab === 'return' },
+                        { label: 'Selesai Diperbaiki', count: counts.repaired, color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', show: true },
+                        { label: 'Dibuang/Rusak Total', count: counts.written_off, color: 'text-red-500', bg: 'bg-red-500/10', border: 'border-red-500/20', show: true },
+                        { label: 'Terjual (Penarikan)', count: counts.sold, color: 'text-indigo-500', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20', show: activeTab === 'repossession' },
+                    ]
+                    .filter(stat => stat.show)
+                    .map((stat) => (
+                        <div key={stat.label} className={`rounded-xl border p-4 ${stat.bg} ${stat.border} transition-all`}>
                             <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
                             <p className={`mt-1 text-3xl font-bold ${stat.color}`}>{stat.count}</p>
                         </div>
                     ))}
                 </div>
 
+                {/* Custom Tabs Navigation (Pill Style) */}
+                <div className="inline-flex h-10 items-center justify-start rounded-lg bg-muted p-1 text-muted-foreground self-start">
+                    <button
+                        className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-medium transition-all ${activeTab === 'return' ? 'bg-background text-foreground shadow-sm' : 'hover:bg-muted-foreground/10 hover:text-foreground'}`}
+                        onClick={() => setActiveTab('return')}
+                    >
+                        Barang Retur
+                    </button>
+                    <button
+                        className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-medium transition-all ${activeTab === 'repossession' ? 'bg-background text-foreground shadow-sm' : 'hover:bg-muted-foreground/10 hover:text-foreground'}`}
+                        onClick={() => setActiveTab('repossession')}
+                    >
+                        Barang Tarikan
+                    </button>
+                </div>
+
                 {/* Table Card */}
                 <Card className="overflow-hidden border shadow-sm">
-                    <div className="border-b bg-muted/30 px-6 py-4">
-                        <h2 className="text-sm font-semibold text-foreground">Inventaris Barang Rusak</h2>
-                        <p className="text-xs text-muted-foreground mt-0.5">Total {defectiveProducts.length} item tercatat</p>
+                    <div className="border-b bg-muted/20 px-6 py-4">
+                        <h3 className="font-semibold">{activeTab === 'return' ? 'Inventaris Barang Retur' : 'Inventaris Barang Tarikan'}</h3>
+                        <p className="text-xs text-muted-foreground mt-1">Total {currentList.length} item tercatat</p>
                     </div>
                     <CardContent className="p-0">
-                        {defectiveProducts.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
+                        {currentList.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center p-12 text-center">
                                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
                                     <Warehouse className="h-8 w-8 text-muted-foreground" />
                                 </div>
@@ -164,8 +230,8 @@ export default function Index({ defectiveProducts }: Props) {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-border">
-                                        {defectiveProducts.map((item) => (
-                                            <tr key={item.id} className="group transition-colors hover:bg-muted/30">
+                                        {currentList.map((item) => (
+                                            <tr key={item.id} className="border-b transition-colors hover:bg-muted/50">
                                                 <td className="px-6 py-4 whitespace-nowrap text-muted-foreground">
                                                     {format(new Date(item.created_at), "d MMM yyyy, HH:mm", { locale: id })}
                                                 </td>
@@ -205,15 +271,38 @@ export default function Index({ defectiveProducts }: Props) {
                                                     <StatusBadge status={item.status} />
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        onClick={() => handleOpenDialog(item)}
-                                                        className="gap-1.5 text-xs font-medium transition-all hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
-                                                    >
-                                                        <FileText className="h-3.5 w-3.5" />
-                                                        Kelola
-                                                    </Button>
+                                                    <div className="flex justify-end gap-2">
+                                                        {item.notes?.startsWith('[PENARIKAN]') && item.status !== 'sold' ? (
+                                                            <Button
+                                                                size="sm"
+                                                                className="gap-1.5 text-xs font-medium bg-emerald-600 hover:bg-emerald-700 text-white"
+                                                                onClick={() => handleOpenSellDialog(item)}
+                                                            >
+                                                                <ArrowUpRight className="h-3.5 w-3.5" />
+                                                                Jual Barang
+                                                            </Button>
+                                                        ) : item.status === 'sold' ? (
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                onClick={() => handleOpenDialog(item)}
+                                                                className="gap-1.5 text-xs font-medium transition-all hover:bg-muted"
+                                                            >
+                                                                <FileText className="h-3.5 w-3.5" />
+                                                                Detail Terjual
+                                                            </Button>
+                                                        ) : (
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                onClick={() => handleOpenDialog(item)}
+                                                                className="gap-1.5 text-xs font-medium transition-all hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+                                                            >
+                                                                <FileText className="h-3.5 w-3.5" />
+                                                                Kelola
+                                                            </Button>
+                                                        )}
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}
@@ -237,10 +326,23 @@ export default function Index({ defectiveProducts }: Props) {
                             <div className="rounded-xl border bg-muted/30 p-4">
                                 <div className="font-semibold">{selectedItem.product.name}</div>
                                 <div className="text-sm text-muted-foreground mt-1">Jumlah: {selectedItem.quantity} Unit</div>
-                                <div className="text-xs text-muted-foreground mt-1">{selectedItem.notes}</div>
+                                {selectedItem.status !== 'sold' && (
+                                    <div className="text-xs text-muted-foreground mt-1">{selectedItem.notes}</div>
+                                )}
                             </div>
 
-                            <form id="update-warehouse-form" onSubmit={handleUpdateStatus} className="space-y-4">
+                            {selectedItem.status === 'sold' ? (
+                                <div className="rounded-lg border border-indigo-500/20 bg-indigo-500/5 p-4 flex gap-3">
+                                    <Info className="h-5 w-5 text-indigo-600 flex-shrink-0 mt-0.5" />
+                                    <div>
+                                        <p className="text-sm font-medium text-indigo-900 dark:text-indigo-400">Status: Telah Terjual</p>
+                                        <p className="text-sm leading-relaxed text-indigo-700 dark:text-indigo-300 mt-1">
+                                            {selectedItem.notes?.includes('|') ? selectedItem.notes.split('|').pop()?.trim() : (selectedItem.notes || 'Detail penjualan tidak tersedia.')}
+                                        </p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <form id="update-warehouse-form" onSubmit={handleUpdateStatus} className="space-y-4">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">Ubah Status</label>
                                     <Select
@@ -275,16 +377,145 @@ export default function Index({ defectiveProducts }: Props) {
                                     </p>
                                 </div>
                             </form>
+                            )}
                         </div>
                     )}
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                            {selectedItem?.status === 'sold' ? 'Tutup' : 'Batal'}
+                        </Button>
+                        {selectedItem?.status !== 'sold' && (
+                            <Button type="submit" form="update-warehouse-form" disabled={processing} className="gap-2">
+                                {processing && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                                Simpan
+                            </Button>
+                        )}
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Modal Jual Barang Tarikan */}
+            <Dialog open={isSellDialogOpen} onOpenChange={setIsSellDialogOpen}>
+                <DialogContent className="sm:max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Penjualan Barang Tarikan</DialogTitle>
+                    </DialogHeader>
+
+                    {selectedItem && (
+                        <div className="space-y-4 py-4">
+                            <div className="rounded-xl border bg-muted/30 p-4">
+                                <div className="font-semibold">{selectedItem.product.name}</div>
+                                <div className="text-sm text-muted-foreground mt-1">Jumlah: {selectedItem.quantity} Unit</div>
+                                <div className="text-xs text-muted-foreground mt-1">{selectedItem.notes}</div>
+                            </div>
+
+                            <form id="sell-form" onSubmit={handleSell} className="space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Pembeli (Customer)</label>
+                                    <select
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                        value={sellForm.data.buyer_id}
+                                        onChange={(e) => sellForm.setData('buyer_id', e.target.value)}
+                                        required
+                                    >
+                                        <option value="" disabled>Pilih pelanggan...</option>
+                                        {customers.map(c => (
+                                            <option key={c.id} value={c.id.toString()}>
+                                                {c.name} - {c.phone_number}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {sellForm.errors.buyer_id && <p className="text-xs text-red-500">{sellForm.errors.buyer_id}</p>}
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Skenario Penjualan</label>
+                                    <select
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                        value={sellForm.data.sale_type}
+                                        onChange={(e) => sellForm.setData('sale_type', e.target.value)}
+                                        required
+                                    >
+                                        <option value="cash">Jual Cash / Lunas (Nego)</option>
+                                        <option value="continue_credit">Lanjutkan Kredit Lama (Tanpa DP)</option>
+                                        <option value="new_credit">Buat Kredit Baru</option>
+                                    </select>
+                                </div>
+
+                                {sellForm.data.sale_type === 'cash' && (
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Harga Kesepakatan Lunas (Rp)</label>
+                                        <input
+                                            type="number"
+                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                            value={sellForm.data.agreed_price}
+                                            onChange={e => sellForm.setData('agreed_price', e.target.value)}
+                                            placeholder="Contoh: 1500000"
+                                            required
+                                        />
+                                    </div>
+                                )}
+
+                                {sellForm.data.sale_type === 'continue_credit' && (
+                                    <div className="rounded-lg border border-indigo-500/20 bg-indigo-500/5 p-3 flex gap-2">
+                                        <Info className="h-4 w-4 text-indigo-600 flex-shrink-0 mt-0.5" />
+                                        <p className="text-xs leading-relaxed text-indigo-700 dark:text-indigo-400">
+                                            Pelanggan baru akan otomatis melanjutkan cicilan dari kreditur lama (Sisa bulan dan tagihan per bulan disamakan persis).
+                                        </p>
+                                    </div>
+                                )}
+
+                                {sellForm.data.sale_type === 'new_credit' && (
+                                    <div className="space-y-4 rounded-xl border p-4 bg-muted/10">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium">Uang Muka (DP) (Rp)</label>
+                                            <input
+                                                type="number"
+                                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                                value={sellForm.data.down_payment}
+                                                onChange={e => sellForm.setData('down_payment', e.target.value)}
+                                                placeholder="Contoh: 500000"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium">Tenor (Bulan)</label>
+                                                <input
+                                                    type="number"
+                                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                                    value={sellForm.data.duration_months}
+                                                    onChange={e => sellForm.setData('duration_months', e.target.value)}
+                                                    placeholder="Contoh: 6"
+                                                    required
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium">Angsuran / Bln (Rp)</label>
+                                                <input
+                                                    type="number"
+                                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                                    value={sellForm.data.installment_amount}
+                                                    onChange={e => sellForm.setData('installment_amount', e.target.value)}
+                                                    placeholder="Contoh: 200000"
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </form>
+                        </div>
+                    )}
+
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={() => setIsSellDialogOpen(false)}>
                             Batal
                         </Button>
-                        <Button type="submit" form="update-warehouse-form" disabled={processing} className="gap-2">
-                            {processing && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                            Simpan
+                        <Button type="submit" form="sell-form" disabled={sellForm.processing} className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white">
+                            {sellForm.processing && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                            Proses Penjualan
                         </Button>
                     </DialogFooter>
                 </DialogContent>

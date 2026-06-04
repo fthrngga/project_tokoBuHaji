@@ -17,11 +17,15 @@ import { cn } from '@/lib/utils';
 interface Customer {
     id: number;
     // SYNC_FORM_ITEM_TYPE_START
-    user_id: string;
+    user_id: string | number;
     phone_number: string;
     address: string;
     city: string;
     province: string;
+    user?: {
+        name: string;
+        email: string;
+    };
     // SYNC_FORM_ITEM_TYPE_END
 }
 
@@ -39,14 +43,10 @@ export default function FormPage({ auth, item }: PageProps<{ item?: Customer }>)
     ];
 
     // SYNC_FORM_DATA_START
-    const { data, setData, post, put, processing, errors } = useForm<{
-    user_id: string;
-    phone_number: string;
-    address: string;
-    city: string;
-    province: string;
-    }>({
-        user_id: item?.user_id ?? '',
+    const { data, setData, post, put, processing, errors } = useForm({
+        name: item?.user?.name ?? '',
+        email: item?.user?.email ?? '',
+        password: '',
         phone_number: item?.phone_number ?? '',
         address: item?.address ?? '',
         city: item?.city ?? '',
@@ -75,30 +75,48 @@ export default function FormPage({ auth, item }: PageProps<{ item?: Customer }>)
                         </CardHeader>
                         <CardContent className="space-y-4">
                             {/* SYNC_FORM_FIELDS_START */}
-            <div className="space-y-2">
-                <Label htmlFor="user_id">User Id</Label>
-                <Input id="user_id" type="text" value={data.user_id} onChange={e => setData('user_id', e.target.value)} step="any" />
-                {errors.user_id && <p className="text-sm text-red-500 mt-1">{errors.user_id}</p>}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="name">Nama Lengkap <span className="text-red-500">*</span></Label>
+                    <Input id="name" type="text" value={data.name} onChange={e => setData('name', e.target.value)} required />
+                    {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name}</p>}
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="email">Alamat Email <span className="text-red-500">*</span></Label>
+                    <Input id="email" type="email" value={data.email} onChange={e => setData('email', e.target.value)} required />
+                    {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
+                </div>
             </div>
+            
             <div className="space-y-2">
-                <Label htmlFor="phone_number">Phone Number</Label>
-                <Input id="phone_number" type="text" value={data.phone_number} onChange={e => setData('phone_number', e.target.value)} step="any" />
+                <Label htmlFor="password">Password {item ? '(Kosongkan jika tidak ingin mengubah)' : <span className="text-red-500">*</span>}</Label>
+                <Input id="password" type="password" value={data.password} onChange={e => setData('password', e.target.value)} required={!item} />
+                {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password}</p>}
+            </div>
+
+            <div className="space-y-2 pt-4 border-t">
+                <Label htmlFor="phone_number">Nomor HP</Label>
+                <Input id="phone_number" type="text" value={data.phone_number} onChange={e => setData('phone_number', e.target.value)} />
                 {errors.phone_number && <p className="text-sm text-red-500 mt-1">{errors.phone_number}</p>}
             </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <Label htmlFor="address">Address</Label>
-                    <Textarea id="address" value={data.address} onChange={e => setData('address', e.target.value)} />
-                    {errors.address && <p className="text-sm text-red-500 mt-1">{errors.address}</p>}
+                    <Label htmlFor="province">Provinsi</Label>
+                    <Input id="province" type="text" value={data.province} onChange={e => setData('province', e.target.value)} />
+                    {errors.province && <p className="text-sm text-red-500 mt-1">{errors.province}</p>}
                 </div>
-            <div className="space-y-2">
-                <Label htmlFor="city">City</Label>
-                <Input id="city" type="text" value={data.city} onChange={e => setData('city', e.target.value)} step="any" />
-                {errors.city && <p className="text-sm text-red-500 mt-1">{errors.city}</p>}
+                <div className="space-y-2">
+                    <Label htmlFor="city">Kota/Kabupaten</Label>
+                    <Input id="city" type="text" value={data.city} onChange={e => setData('city', e.target.value)} />
+                    {errors.city && <p className="text-sm text-red-500 mt-1">{errors.city}</p>}
+                </div>
             </div>
+
             <div className="space-y-2">
-                <Label htmlFor="province">Province</Label>
-                <Input id="province" type="text" value={data.province} onChange={e => setData('province', e.target.value)} step="any" />
-                {errors.province && <p className="text-sm text-red-500 mt-1">{errors.province}</p>}
+                <Label htmlFor="address">Alamat Lengkap</Label>
+                <Textarea id="address" value={data.address} onChange={e => setData('address', e.target.value)} rows={3} />
+                {errors.address && <p className="text-sm text-red-500 mt-1">{errors.address}</p>}
             </div>
 {/* SYNC_FORM_FIELDS_END */}
                         </CardContent>
