@@ -2,6 +2,7 @@ import { wayfinder } from '@laravel/vite-plugin-wayfinder';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
+import path from 'node:path';              // ← TAMBAH INI
 import { defineConfig } from 'vite';
 
 export default defineConfig({
@@ -13,11 +14,17 @@ export default defineConfig({
         }),
         react(),
         tailwindcss(),
-        // Only run wayfinder if not on Railway, because wayfinder requires a database connection to boot Laravel
-        !process.env.RAILWAY_ENVIRONMENT_NAME && wayfinder({
+        // Disable wayfinder jika tidak di Railway DAN tidak di env KODAIDEV
+        !process.env.RAILWAY_ENVIRONMENT_NAME && !process.env.KODAIDEV_BUILD && wayfinder({
             formVariants: true,
         }),
     ],
+    resolve: {
+        alias: {
+            // Fix case-sensitivity: @/Layouts → @/layouts (Linux case-sensitive)
+            '@/Layouts': path.resolve(__dirname, 'resources/js/layouts'),
+        },
+    },
     esbuild: {
         jsx: 'automatic',
     },
