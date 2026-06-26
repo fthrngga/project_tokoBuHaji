@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Head, useForm, usePage, router } from '@inertiajs/react';
 import { SharedData } from '@/types';
 import Header from '@/pages/welcome/Partials/Header';
@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import InputError from '@/components/input-error';
 import { route } from 'ziggy-js';
@@ -85,6 +86,55 @@ export default function Profile({ mustVerifyEmail, status, customer, addresses =
         postal_code: '',
         is_primary: false,
     });
+
+    const [provinces, setProvinces] = useState<any[]>([]);
+    const [cities, setCities] = useState<any[]>([]);
+    const [districts, setDistricts] = useState<any[]>([]);
+    const [villages, setVillages] = useState<any[]>([]);
+    
+    useEffect(() => {
+        if (isAddressModalOpen && provinces.length === 0) {
+            fetch('https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json')
+                .then(res => res.json())
+                .then(data => setProvinces(data))
+                .catch(err => console.error("Failed to load provinces", err));
+        }
+    }, [isAddressModalOpen]);
+
+    const handleProvinceChange = (val: string) => {
+        const prov = JSON.parse(val);
+        setAddressData(prev => ({ ...prev, province: prov.name, city: '', district: '', village: '' }));
+        setCities([]); setDistricts([]); setVillages([]);
+        
+        fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${prov.id}.json`)
+            .then(res => res.json())
+            .then(data => setCities(data));
+    };
+
+    const handleCityChange = (val: string) => {
+        const city = JSON.parse(val);
+        setAddressData(prev => ({ ...prev, city: city.name, district: '', village: '' }));
+        setDistricts([]); setVillages([]);
+
+        fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/districts/${city.id}.json`)
+            .then(res => res.json())
+            .then(data => setDistricts(data));
+    };
+
+    const handleDistrictChange = (val: string) => {
+        const district = JSON.parse(val);
+        setAddressData(prev => ({ ...prev, district: district.name, village: '' }));
+        setVillages([]);
+
+        fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/villages/${district.id}.json`)
+            .then(res => res.json())
+            .then(data => setVillages(data));
+    };
+
+    const handleVillageChange = (val: string) => {
+        const village = JSON.parse(val);
+        setAddressData('village', village.name);
+    };
 
     const submitAddress = (e: React.FormEvent) => {
         e.preventDefault();
@@ -301,12 +351,34 @@ export default function Profile({ mustVerifyEmail, status, customer, addresses =
                                                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                                                             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                                                                 <Label style={{ color: "#BDD5EA" }}>Provinsi</Label>
-                                                                <Input value={addressData.province} onChange={e => setAddressData('province', e.target.value)} style={{ background: "rgba(8,15,26,0.6)", border: "1px solid rgba(87,115,153,0.3)", color: "white" }} />
+                                                                <Select onValueChange={handleProvinceChange}>
+                                                                    <SelectTrigger style={{ background: "rgba(8,15,26,0.6)", border: "1px solid rgba(87,115,153,0.3)", color: addressData.province ? "white" : "rgba(189,213,234,0.5)" }}>
+                                                                        <SelectValue placeholder="Pilih Provinsi" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent style={{ background: "#0d1f33", border: "1px solid rgba(87,115,153,0.3)", color: "white", maxHeight: "250px", overflowY: "auto" }}>
+                                                                        {provinces.map(p => (
+                                                                            <SelectItem key={p.id} value={JSON.stringify({ id: p.id, name: p.name })} className="hover:bg-slate-800 focus:bg-slate-800 focus:text-white cursor-pointer">
+                                                                                {p.name}
+                                                                            </SelectItem>
+                                                                        ))}
+                                                                    </SelectContent>
+                                                                </Select>
                                                                 <InputError message={addressErrors.province} />
                                                             </div>
                                                             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                                                                 <Label style={{ color: "#BDD5EA" }}>Kota/Kabupaten</Label>
-                                                                <Input value={addressData.city} onChange={e => setAddressData('city', e.target.value)} style={{ background: "rgba(8,15,26,0.6)", border: "1px solid rgba(87,115,153,0.3)", color: "white" }} />
+                                                                <Select onValueChange={handleCityChange} disabled={cities.length === 0}>
+                                                                    <SelectTrigger style={{ background: "rgba(8,15,26,0.6)", border: "1px solid rgba(87,115,153,0.3)", color: addressData.city ? "white" : "rgba(189,213,234,0.5)" }}>
+                                                                        <SelectValue placeholder="Pilih Kota" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent style={{ background: "#0d1f33", border: "1px solid rgba(87,115,153,0.3)", color: "white", maxHeight: "250px", overflowY: "auto" }}>
+                                                                        {cities.map(c => (
+                                                                            <SelectItem key={c.id} value={JSON.stringify({ id: c.id, name: c.name })} className="hover:bg-slate-800 focus:bg-slate-800 focus:text-white cursor-pointer">
+                                                                                {c.name}
+                                                                            </SelectItem>
+                                                                        ))}
+                                                                    </SelectContent>
+                                                                </Select>
                                                                 <InputError message={addressErrors.city} />
                                                             </div>
                                                         </div>
@@ -314,12 +386,34 @@ export default function Profile({ mustVerifyEmail, status, customer, addresses =
                                                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                                                             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                                                                 <Label style={{ color: "#BDD5EA" }}>Kecamatan</Label>
-                                                                <Input value={addressData.district} onChange={e => setAddressData('district', e.target.value)} style={{ background: "rgba(8,15,26,0.6)", border: "1px solid rgba(87,115,153,0.3)", color: "white" }} />
+                                                                <Select onValueChange={handleDistrictChange} disabled={districts.length === 0}>
+                                                                    <SelectTrigger style={{ background: "rgba(8,15,26,0.6)", border: "1px solid rgba(87,115,153,0.3)", color: addressData.district ? "white" : "rgba(189,213,234,0.5)" }}>
+                                                                        <SelectValue placeholder="Pilih Kecamatan" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent style={{ background: "#0d1f33", border: "1px solid rgba(87,115,153,0.3)", color: "white", maxHeight: "250px", overflowY: "auto" }}>
+                                                                        {districts.map(d => (
+                                                                            <SelectItem key={d.id} value={JSON.stringify({ id: d.id, name: d.name })} className="hover:bg-slate-800 focus:bg-slate-800 focus:text-white cursor-pointer">
+                                                                                {d.name}
+                                                                            </SelectItem>
+                                                                        ))}
+                                                                    </SelectContent>
+                                                                </Select>
                                                                 <InputError message={addressErrors.district} />
                                                             </div>
                                                             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                                                                 <Label style={{ color: "#BDD5EA" }}>Kelurahan/Desa</Label>
-                                                                <Input value={addressData.village} onChange={e => setAddressData('village', e.target.value)} style={{ background: "rgba(8,15,26,0.6)", border: "1px solid rgba(87,115,153,0.3)", color: "white" }} />
+                                                                <Select onValueChange={handleVillageChange} disabled={villages.length === 0}>
+                                                                    <SelectTrigger style={{ background: "rgba(8,15,26,0.6)", border: "1px solid rgba(87,115,153,0.3)", color: addressData.village ? "white" : "rgba(189,213,234,0.5)" }}>
+                                                                        <SelectValue placeholder="Pilih Kelurahan" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent style={{ background: "#0d1f33", border: "1px solid rgba(87,115,153,0.3)", color: "white", maxHeight: "250px", overflowY: "auto" }}>
+                                                                        {villages.map(v => (
+                                                                            <SelectItem key={v.id} value={JSON.stringify({ id: v.id, name: v.name })} className="hover:bg-slate-800 focus:bg-slate-800 focus:text-white cursor-pointer">
+                                                                                {v.name}
+                                                                            </SelectItem>
+                                                                        ))}
+                                                                    </SelectContent>
+                                                                </Select>
                                                                 <InputError message={addressErrors.village} />
                                                             </div>
                                                         </div>

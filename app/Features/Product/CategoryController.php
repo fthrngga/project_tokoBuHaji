@@ -25,7 +25,7 @@ class CategoryController extends Controller
         $products = Product::query()
             ->whereIn('category_id', $categoryIds)
             ->where('is_published', true)
-            ->with(['images', 'category'])
+            ->with(['images', 'category', 'variants'])
             ->latest()
             ->paginate(12)
             ->withQueryString();

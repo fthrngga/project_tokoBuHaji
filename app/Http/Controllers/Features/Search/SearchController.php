@@ -21,7 +21,7 @@ class SearchController extends Controller
 
         $products = [];
         if ($query) {
-            $products = \App\Features\Product\Product::with(['category', 'images'])
+            $products = \App\Features\Product\Product::with(['category', 'images', 'variants'])
                 ->where('name', 'like', "%{$query}%")
                 ->orWhere('description', 'like', "%{$query}%")
                 ->get();

@@ -20,7 +20,7 @@ class WelcomeController extends Controller
         $featuredProducts = Product::query()
             ->where('is_featured', true)
             ->where('is_published', true)
-            ->with(['images', 'category'])
+            ->with(['images', 'category', 'variants'])
             ->latest()
             ->take(4)
             ->get();
@@ -39,7 +39,7 @@ class WelcomeController extends Controller
                         $q->where('name', 'like', "%{$lastSearch->query}%")
                             ->orWhere('description', 'like', "%{$lastSearch->query}%");
                     })
-                    ->with('images', 'category')
+                    ->with('images', 'category', 'variants')
                     ->take(4)
                     ->get();
             }
@@ -49,7 +49,7 @@ class WelcomeController extends Controller
             $recommendedProducts = Product::query()
                 ->where('is_published', true)
                 ->inRandomOrder()
-                ->with('images', 'category')
+                ->with('images', 'category', 'variants')
                 ->take(4)
                 ->get();
         }

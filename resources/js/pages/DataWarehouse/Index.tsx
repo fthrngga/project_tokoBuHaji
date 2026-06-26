@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react';
-import AppLayout from '@/Layouts/app-layout';
+import AppLayout from '@/layouts/app-layout';
 import { useState } from 'react';
 import { TableauEmbed } from '@/components/TableauEmbed';
 
@@ -25,8 +25,8 @@ export default function DataWarehouseIndex() {
                             key={db.id}
                             onClick={() => setActiveTab(db.id)}
                             className={`px-4 py-2 text-sm font-medium rounded-t-lg whitespace-nowrap transition-colors ${activeTab === db.id
-                                    ? 'bg-primary text-primary-foreground'
-                                    : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted/50 text-muted-foreground hover:bg-muted'
                                 }`}
                         >
                             {db.name}

@@ -128,19 +128,19 @@ export default function Index({ cartItems, total }: Props) {
         <>
             <Head title="Keranjang Belanja - Haji Elektronik" />
             <Toaster richColors closeButton position="top-center" />
-            <div className="flex min-h-screen w-full flex-col bg-white dark:bg-gray-950 text-gray-800 dark:text-gray-200">
+            <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
                 <Header user={auth.user} />
 
                 <main className="flex-1 py-12 pb-32">
                     <div className="container mx-auto px-8 md:px-12 lg:px-24">
-                        <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">Keranjang</h1>
+                        <h1 className="text-3xl font-bold mb-8 text-foreground">Keranjang</h1>
 
                         {cartItems.length > 0 ? (
                             <div className="lg:grid lg:grid-cols-12 lg:gap-12 items-start">
                                 {/* List Keranjang */}
                                 <div className="lg:col-span-8">
                                     {/* Header Tabel (Desktop) */}
-                                    <div className="hidden md:grid grid-cols-12 gap-4 pb-4 border-b border-gray-200 dark:border-gray-800 text-sm font-semibold text-gray-500 dark:text-gray-400">
+                                    <div className="hidden md:grid grid-cols-12 gap-4 pb-4 border-b border-border text-sm font-semibold text-muted-foreground">
                                         <div className="col-span-1 text-center">
                                             <Checkbox
                                                 checked={isAllSelected}
@@ -155,7 +155,7 @@ export default function Index({ cartItems, total }: Props) {
 
                                     <div className="mt-4 space-y-6">
                                         {cartItems.map((item) => (
-                                            <div key={item.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center border-b border-gray-100 dark:border-gray-800 pb-6 last:border-0 last:pb-0">
+                                            <div key={item.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center border-b border-border pb-6 last:border-0 last:pb-0">
                                                 <div className="hidden md:block col-span-1 text-center">
                                                     <Checkbox
                                                         id={`check-${item.id}`}
@@ -165,7 +165,7 @@ export default function Index({ cartItems, total }: Props) {
                                                 </div>
 
                                                 <div className="col-span-1 md:col-span-5 flex gap-4">
-                                                    <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200 bg-slate-50 dark:bg-slate-900 dark:border-gray-700">
+                                                    <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-border bg-card">
                                                         <img
                                                             src={item.product.images.length > 0 ? `/storage/${item.product.images[0].image_path}` : 'https://placehold.co/100x100?text=No+Image'}
                                                             alt={item.product.name}
@@ -173,7 +173,7 @@ export default function Index({ cartItems, total }: Props) {
                                                         />
                                                     </div>
                                                     <div className="flex flex-col justify-center">
-                                                        <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                                                        <h3 className="text-base font-semibold text-foreground">
                                                             <Link href={route('products.show', item.product.slug)} className="hover:underline">
                                                                 {item.product.name}
                                                             </Link>
@@ -187,7 +187,7 @@ export default function Index({ cartItems, total }: Props) {
                                                                 ))}
                                                             </div>
                                                         )}
-                                                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                                        <p className="mt-1 text-sm text-muted-foreground">
                                                             {item.variant ? (
                                                                 item.variant.stock > 0 ? `Stok tersedia: ${item.variant.stock}` : <span className="text-amber-600 font-medium">Pre-order / Menunggu Stok</span>
                                                             ) : (
@@ -204,12 +204,12 @@ export default function Index({ cartItems, total }: Props) {
                                                 </div>
 
                                                 <div className="col-span-1 md:col-span-2 text-right font-medium md:font-normal">
-                                                    <span className="md:hidden text-gray-500 mr-2">Harga:</span>
+                                                    <span className="md:hidden text-muted-foreground mr-2">Harga:</span>
                                                     {formatCurrency(item.variant?.selling_price || item.product.selling_price)}
                                                 </div>
 
                                                 <div className="col-span-1 md:col-span-2 flex justify-start md:justify-center items-center gap-2">
-                                                    <span className="md:hidden text-gray-500 mr-2">Jumlah:</span>
+                                                    <span className="md:hidden text-muted-foreground mr-2">Jumlah:</span>
                                                     <Button
                                                         variant="outline"
                                                         size="icon"
@@ -232,9 +232,9 @@ export default function Index({ cartItems, total }: Props) {
                                                 </div>
 
                                                 <div className="col-span-1 md:col-span-2 flex justify-between md:justify-end items-center">
-                                                    <span className="md:hidden text-gray-500">Subtotal:</span>
+                                                    <span className="md:hidden text-muted-foreground">Subtotal:</span>
                                                     <div className="flex items-center gap-4">
-                                                        <span className="font-bold text-gray-900 dark:text-white">
+                                                        <span className="font-bold text-foreground">
                                                             {formatCurrency(item.quantity * (item.variant?.selling_price || item.product.selling_price))}
                                                         </span>
                                                         <button
@@ -253,17 +253,17 @@ export default function Index({ cartItems, total }: Props) {
 
                                 {/* Ringkasan Pesanan */}
                                 <div className="mt-12 lg:mt-0 lg:col-span-4">
-                                    <div className="rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-6 md:p-8">
-                                        <h2 className="text-lg font-medium text-gray-900 dark:text-white">Ringkasan Pesanan</h2>
+                                    <div className="rounded-lg bg-card border border-border p-6 md:p-8">
+                                        <h2 className="text-lg font-medium text-foreground">Ringkasan Pesanan</h2>
 
                                         <div className="mt-6 space-y-4">
-                                            <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 pb-4">
-                                                <dt className="text-base text-gray-600 dark:text-gray-400">Total Harga</dt>
-                                                <dd className="text-base font-medium text-gray-900 dark:text-white">{formatCurrency(checkedTotal)}</dd>
+                                            <div className="flex items-center justify-between border-b border-border pb-4">
+                                                <dt className="text-base text-muted-foreground">Total Harga</dt>
+                                                <dd className="text-base font-medium text-foreground">{formatCurrency(checkedTotal)}</dd>
                                             </div>
                                             <div className="pt-4 flex items-center justify-between">
-                                                <dt className="text-lg font-bold text-gray-900 dark:text-white">Total</dt>
-                                                <dd className="text-lg font-bold text-gray-900 dark:text-white">{formatCurrency(checkedTotal)}</dd>
+                                                <dt className="text-lg font-bold text-foreground">Total</dt>
+                                                <dd className="text-lg font-bold text-foreground">{formatCurrency(checkedTotal)}</dd>
                                             </div>
                                         </div>
 
@@ -275,7 +275,7 @@ export default function Index({ cartItems, total }: Props) {
                                             >
                                                 CHECKOUT <ArrowRight className="ml-2 h-4 w-4" />
                                             </Button>
-                                            <p className="mt-4 text-xs text-center text-gray-500">
+                                            <p className="mt-4 text-xs text-center text-muted-foreground">
                                                 Harga belum termasuk ongkos kirim.
                                             </p>
                                         </div>

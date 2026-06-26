@@ -245,7 +245,7 @@ class OrderController extends Controller
         $amount = 0;
         $paymentType = 'full_payment';
         $installmentNumber = null;
-        $monthsPaid = null;
+        $monthsPaid = 1;
 
         if (in_array($payment->payment_method, ['credit', 'cash_gantung'])) {
             $hasDp = $payment->down_payment && $payment->down_payment > 0;

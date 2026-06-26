@@ -124,7 +124,9 @@ export const ProductCard = ({ product }: { product: Product }) => {
                 </h3>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <p style={{ fontSize: "16px", fontWeight: 800, color: "white", letterSpacing: "-0.02em" }}>
-                        {fmt(product.price)}
+                        {fmt(product.variants && product.variants.length > 0 
+                            ? Math.min(...product.variants.map(v => v.selling_price || 0)) 
+                            : product.selling_price)}
                     </p>
                     <span style={{
                         fontSize: "10px",
