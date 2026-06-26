@@ -239,8 +239,8 @@ export default function Show({ product }: Props) {
                   </div>
                 )}
 
-                {/* Add to Cart */}
-                <div className="mt-8 space-y-4">
+                {/* Add to Cart - Desktop */}
+                <div className="hidden lg:block mt-8 space-y-4">
                   <div className="flex items-center gap-3">
                     {/* Quantity control */}
                     <div className="flex items-center rounded-xl border-2 border-white/15 bg-white/5">
@@ -276,6 +276,9 @@ export default function Show({ product }: Props) {
                     </button>
                   </div>
                 </div>
+
+                {/* Mobile Add to Cart Placeholder to prevent content hiding */}
+                <div className="lg:hidden h-24"></div>
 
                 {/* Benefits */}
                 {/* Benefits removed — no fake claims */}
@@ -330,6 +333,44 @@ export default function Show({ product }: Props) {
         </main>
 
         <Footer />
+
+        {/* Mobile Sticky Add to Cart */}
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0d1e2e]/95 backdrop-blur-md border-t border-white/10 p-4 lg:hidden shadow-[0_-8px_30px_rgba(0,0,0,0.3)]">
+          <div className="flex items-center gap-3 max-w-[1024px] mx-auto">
+            {/* Quantity control */}
+            <div className="flex items-center rounded-xl border-2 border-white/15 bg-white/5 shrink-0">
+              <button
+                onClick={handleDecrease}
+                disabled={quantity <= 1}
+                className="h-12 w-10 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 rounded-l-xl transition-colors disabled:opacity-30"
+              >
+                <Minus className="h-4 w-4" />
+              </button>
+              <span className="w-8 text-center font-bold text-white text-base">{quantity}</span>
+              <button
+                onClick={handleIncrease}
+                disabled={quantity >= currentStock}
+                className="h-12 w-10 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 rounded-r-xl transition-colors disabled:opacity-30"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Add to Cart Button */}
+            <button
+              onClick={addToCart}
+              disabled={!canAddToCart}
+              className="group relative flex-1 h-12 overflow-hidden rounded-xl font-semibold text-white shadow-lg transition-all hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ background: 'linear-gradient(135deg, #FE5F55, #e84a40)', boxShadow: '0 4px 15px rgba(254,95,85,0.4)' }}
+            >
+              <span className="absolute inset-0 -translate-x-full transition-transform duration-500 group-hover:translate-x-0" style={{ background: 'linear-gradient(135deg, #e84a40, #FE5F55)' }} />
+              <span className="relative flex items-center justify-center gap-2 text-sm sm:text-base">
+                <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
+                {buttonLabel}
+              </span>
+            </button>
+          </div>
+        </div>
       </div>
     </>
   );

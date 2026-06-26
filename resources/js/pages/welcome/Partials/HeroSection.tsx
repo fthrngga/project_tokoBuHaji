@@ -16,8 +16,7 @@ export default function HeroSection() {
     return (
         <>
             <section
-                className="relative w-full overflow-hidden"
-                style={{ minHeight: "100svh", background: "#080f1a" }}
+                className="relative w-full overflow-hidden min-h-[100svh] bg-[#080f1a]"
             >
                 {/* Fine grain noise texture */}
                 <div
@@ -37,14 +36,7 @@ export default function HeroSection() {
 
                 {/* ─── Content Grid ─── */}
                 <div
-                    className="relative z-10 mx-auto grid items-center"
-                    style={{
-                        maxWidth: "1440px",
-                        minHeight: "100svh",
-                        padding: "0 48px",
-                        gridTemplateColumns: "1fr 1fr",
-                        gap: "48px",
-                    }}
+                    className="relative z-10 mx-auto grid items-center grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 px-6 md:px-12 max-w-[1440px] min-h-[100svh] pt-24 md:pt-0"
                 >
                     {/* ── LEFT: Text ── */}
                     <div
@@ -56,40 +48,17 @@ export default function HeroSection() {
                         }}
                     >
                         {/* Eyebrow */}
-                        <div className="flex items-center gap-3 mb-8">
-                            <div style={{ width: 32, height: 1, background: "rgba(87,115,153,0.6)" }} />
-                            <span
-                                style={{
-                                    fontSize: "11px",
-                                    fontWeight: 600,
-                                    letterSpacing: "0.16em",
-                                    textTransform: "uppercase",
-                                    color: "#577399",
-                                }}
-                            >
+                        <div className="flex items-center gap-3 mb-6 md:mb-8">
+                            <div className="w-8 h-[1px] bg-[#577399]/60" />
+                            <span className="text-[11px] font-semibold tracking-widest uppercase text-[#577399]">
                                 Haji Elektronik
                             </span>
                         </div>
 
                         {/* Headline */}
-                        <h1
-                            style={{
-                                fontSize: "clamp(44px, 5.5vw, 88px)",
-                                fontWeight: 800,
-                                lineHeight: 1.02,
-                                letterSpacing: "-0.04em",
-                                color: "#ffffff",
-                                margin: 0,
-                            }}
-                        >
+                        <h1 className="text-4xl sm:text-5xl md:text-[clamp(44px,5.5vw,88px)] font-extrabold leading-[1.05] md:leading-[1.02] tracking-tight text-white m-0">
                             Elektronik{" "}
-                            <span
-                                style={{
-                                    background: "linear-gradient(135deg, #BDD5EA 0%, #8aacca 100%)",
-                                    WebkitBackgroundClip: "text",
-                                    WebkitTextFillColor: "transparent",
-                                }}
-                            >
+                            <span className="bg-gradient-to-br from-[#BDD5EA] to-[#8aacca] text-transparent bg-clip-text">
                                 &amp; Mebel
                             </span>
                             <br />
@@ -97,70 +66,27 @@ export default function HeroSection() {
                         </h1>
 
                         {/* Divider */}
-                        <div
-                            style={{
-                                width: 48,
-                                height: 2,
-                                background: "#FE5F55",
-                                borderRadius: 2,
-                                margin: "32px 0",
-                            }}
-                        />
+                        <div className="w-12 h-0.5 bg-[#FE5F55] rounded-sm my-6 md:my-8" />
 
                         {/* Subtext */}
-                        <p
-                            style={{
-                                fontSize: "16px",
-                                lineHeight: 1.7,
-                                color: "rgba(189,213,234,0.5)",
-                                maxWidth: "380px",
-                                margin: 0,
-                            }}
-                        >
+                        <p className="text-sm md:text-base leading-relaxed text-[#bdd5ea]/50 max-w-[380px] m-0">
                             Temukan produk elektronik dan perabotan berkualitas yang sesuai dengan kebutuhan dan gaya hidup Anda.
                         </p>
 
                         {/* CTA */}
-                        <div className="flex items-center gap-5 mt-10">
+                        <div className="flex items-center gap-5 mt-8 md:mt-10">
                             <Link
                                 href="/kategori/elektronik"
-                                className="group relative inline-flex items-center gap-3 font-semibold text-white rounded-full overflow-hidden"
-                                style={{
-                                    background: "#FE5F55",
-                                    padding: "15px 32px",
-                                    fontSize: "14px",
-                                    letterSpacing: "-0.01em",
-                                    transition: "transform 0.2s, box-shadow 0.2s",
-                                    boxShadow: "0 0 0 0 rgba(254,95,85,0)",
-                                }}
-                                onMouseEnter={e => {
-                                    const el = e.currentTarget as HTMLElement;
-                                    el.style.transform = "translateY(-2px)";
-                                    el.style.boxShadow = "0 12px 32px rgba(254,95,85,0.4)";
-                                }}
-                                onMouseLeave={e => {
-                                    const el = e.currentTarget as HTMLElement;
-                                    el.style.transform = "translateY(0)";
-                                    el.style.boxShadow = "0 0 0 0 rgba(254,95,85,0)";
-                                }}
+                                className="group relative inline-flex items-center gap-3 font-semibold text-white rounded-full overflow-hidden bg-[#FE5F55] px-6 md:px-8 py-3.5 md:py-[15px] text-sm tracking-tight transition-all duration-200 hover:-translate-y-[2px] hover:shadow-[0_12px_32px_rgba(254,95,85,0.4)]"
                             >
                                 Lihat Koleksi
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ transition: "transform 0.2s" }}
-                                    className="group-hover:translate-x-1">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="transition-transform duration-200 group-hover:translate-x-1">
                                     <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
                             </Link>
                             <Link
                                 href="/kategori"
-                                style={{
-                                    fontSize: "14px",
-                                    fontWeight: 500,
-                                    color: "rgba(189,213,234,0.5)",
-                                    transition: "color 0.2s",
-                                    letterSpacing: "-0.01em",
-                                }}
-                                onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "#BDD5EA")}
-                                onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "rgba(189,213,234,0.5)")}
+                                className="text-sm font-medium text-[#bdd5ea]/50 hover:text-[#BDD5EA] transition-colors tracking-tight"
                             >
                                 Semua Kategori →
                             </Link>
@@ -169,7 +95,7 @@ export default function HeroSection() {
 
                     {/* ── RIGHT: Image Composition ── */}
                     <div
-                        className="relative flex items-center justify-center"
+                        className="relative flex items-center justify-center pb-24 md:pb-0"
                         style={{
                             opacity: loaded ? 1 : 0,
                             transform: loaded ? "none" : "translateY(20px)",
@@ -177,117 +103,51 @@ export default function HeroSection() {
                         }}
                     >
                         {/* Main image card */}
-                        <div
-                            className="relative overflow-hidden"
-                            style={{
-                                width: "100%",
-                                aspectRatio: "4/5",
-                                maxWidth: 460,
-                                borderRadius: "24px",
-                                border: "1px solid rgba(87,115,153,0.15)",
-                            }}
-                        >
+                        <div className="relative overflow-hidden w-full aspect-[4/5] max-w-[460px] rounded-2xl md:rounded-[24px] border border-[#577399]/15">
                             <img
                                 src="https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?q=80&w=1200&auto=format&fit=crop"
                                 alt="Koleksi Produk"
-                                style={{
-                                    position: "absolute",
-                                    inset: 0,
-                                    width: "100%",
-                                    height: "100%",
-                                    objectFit: "cover",
-                                    filter: "saturate(0.75) brightness(0.85)",
-                                }}
+                                className="absolute inset-0 w-full h-full object-cover saturate-[0.75] brightness-[0.85]"
                             />
                             {/* Bottom fade */}
-                            <div
-                                style={{
-                                    position: "absolute",
-                                    inset: 0,
-                                    background: "linear-gradient(to top, rgba(8,15,26,0.7) 0%, transparent 50%)",
-                                }}
-                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#080f1a]/70 to-transparent to-50%" />
                         </div>
 
                         {/* Small floating card — bottom left */}
-                        <div
-                            style={{
-                                position: "absolute",
-                                bottom: "10%",
-                                left: "-12%",
-                                background: "rgba(8,15,26,0.9)",
-                                backdropFilter: "blur(20px)",
-                                border: "1px solid rgba(87,115,153,0.2)",
-                                borderRadius: "16px",
-                                padding: "16px 20px",
-                                minWidth: "160px",
-                            }}
-                        >
-                            <p style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "#577399", marginBottom: "4px" }}>Kategori</p>
-                            <p style={{ fontSize: "14px", fontWeight: 700, color: "white" }}>Elektronik</p>
+                        <div className="absolute bottom-16 md:bottom-[10%] left-0 md:left-[-12%] bg-[#080f1a]/90 backdrop-blur-xl border border-[#577399]/20 rounded-xl md:rounded-2xl p-3 md:p-4 min-w-[140px] md:min-w-[160px] shadow-lg">
+                            <p className="text-[9px] md:text-[10px] tracking-widest uppercase text-[#577399] mb-1">Kategori</p>
+                            <p className="text-xs md:text-sm font-bold text-white m-0">Elektronik</p>
                         </div>
 
                         {/* Small floating card — top right */}
-                        <div
-                            style={{
-                                position: "absolute",
-                                top: "8%",
-                                right: "-8%",
-                                background: "rgba(8,15,26,0.9)",
-                                backdropFilter: "blur(20px)",
-                                border: "1px solid rgba(254,95,85,0.2)",
-                                borderRadius: "16px",
-                                padding: "16px 20px",
-                                minWidth: "150px",
-                            }}
-                        >
-                            <p style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "#FE5F55", marginBottom: "4px" }}>Tersedia</p>
-                            <p style={{ fontSize: "14px", fontWeight: 700, color: "white" }}>Mebel & Furnitur</p>
+                        <div className="absolute top-4 md:top-[8%] right-0 md:right-[-8%] bg-[#080f1a]/90 backdrop-blur-xl border border-[#FE5F55]/20 rounded-xl md:rounded-2xl p-3 md:p-4 min-w-[130px] md:min-w-[150px] shadow-lg">
+                            <p className="text-[9px] md:text-[10px] tracking-widest uppercase text-[#FE5F55] mb-1">Tersedia</p>
+                            <p className="text-xs md:text-sm font-bold text-white m-0">Mebel & Furnitur</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Scroll indicator */}
                 <div
-                    className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+                    className="hidden md:flex absolute bottom-8 left-1/2 -translate-x-1/2 flex-col items-center gap-2"
                     style={{ opacity: loaded ? 0.4 : 0, transition: "opacity 1s 0.8s" }}
                 >
                     <div
-                        style={{
-                            width: 1,
-                            height: 40,
-                            background: "linear-gradient(to bottom, rgba(87,115,153,0), rgba(87,115,153,0.8))",
-                            animation: "scrollPulse 2s ease-in-out infinite",
-                        }}
+                        className="w-[1px] h-10 bg-gradient-to-b from-transparent to-[#577399]/80 animate-scrollPulse"
                     />
                 </div>
             </section>
 
             {/* ─── TICKER ─── */}
-            <div style={{ background: "#FE5F55", overflow: "hidden", padding: "12px 0" }}>
+            <div className="bg-[#FE5F55] overflow-hidden py-2 md:py-3">
                 <div
                     ref={tickerRef}
-                    style={{
-                        display: "flex",
-                        gap: "0",
-                        width: "max-content",
-                        animation: "ticker 18s linear infinite",
-                    }}
+                    className="flex gap-0 w-max animate-ticker"
                 >
                     {[...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
                         <span
                             key={i}
-                            style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                fontSize: "11px",
-                                fontWeight: 700,
-                                letterSpacing: "0.15em",
-                                textTransform: "uppercase",
-                                color: "rgba(255,255,255,0.9)",
-                                padding: "0 32px",
-                                borderRight: "1px solid rgba(255,255,255,0.25)",
-                            }}
+                            className="inline-flex items-center text-[10px] md:text-[11px] font-bold tracking-widest uppercase text-white/90 px-6 md:px-8 border-r border-white/25"
                         >
                             {item}
                         </span>
@@ -303,9 +163,6 @@ export default function HeroSection() {
                 @keyframes scrollPulse {
                     0%, 100% { opacity: 0.3; transform: scaleY(1); }
                     50% { opacity: 1; transform: scaleY(1.1); }
-                }
-                @media (max-width: 768px) {
-                    .hero-grid { grid-template-columns: 1fr !important; }
                 }
             `}</style>
         </>

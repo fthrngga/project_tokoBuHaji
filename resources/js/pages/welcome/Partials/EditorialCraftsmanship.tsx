@@ -4,111 +4,60 @@
 
 export default function EditorialCraftsmanship() {
     return (
-        <section style={{ background: "#080f1a", padding: "0 0 96px" }}>
-            <div style={{ maxWidth: "1440px", margin: "0 auto", padding: "0 48px" }}>
+        <section className="bg-[#080f1a] pb-16 md:pb-[96px]">
+            <div className="max-w-[1440px] mx-auto px-6 md:px-12">
                 <div
-                    style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
-                        gap: "0",
-                        overflow: "hidden",
-                        borderRadius: "24px",
-                        border: "1px solid rgba(87,115,153,0.12)",
-                        minHeight: "520px",
-                    }}
+                    className="flex flex-col md:grid md:grid-cols-2 gap-0 overflow-hidden rounded-[20px] md:rounded-[24px] border border-[#577399]/10 min-h-[400px] md:min-h-[520px]"
                 >
                     {/* Left: Content */}
                     <div
-                        style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            justifyContent: "center",
-                            padding: "64px 56px",
-                            background: "#0d1f33",
-                        }}
+                        className="flex flex-col justify-center px-6 py-10 sm:px-10 md:px-14 md:py-16 bg-[#0d1f33] z-10"
                     >
-                        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "32px" }}>
-                            <div style={{ width: "24px", height: "1px", background: "#FE5F55" }} />
-                            <p style={{
-                                fontSize: "11px",
-                                fontWeight: 600,
-                                letterSpacing: "0.16em",
-                                textTransform: "uppercase",
-                                color: "#577399",
-                                margin: 0,
-                            }}>
+                        <div className="flex items-center gap-3 mb-6 md:mb-8">
+                            <div className="w-6 h-[1px] bg-[#FE5F55]" />
+                            <p className="text-[10px] md:text-[11px] font-semibold tracking-widest uppercase text-[#577399] m-0">
                                 Tentang Kami
                             </p>
                         </div>
 
                         <h2
-                            style={{
-                                fontSize: "clamp(28px, 3.5vw, 48px)",
-                                fontWeight: 800,
-                                letterSpacing: "-0.04em",
-                                lineHeight: 1.1,
-                                color: "white",
-                                margin: "0 0 24px",
-                            }}
+                            className="text-3xl md:text-[clamp(28px,3.5vw,48px)] font-extrabold tracking-tight leading-[1.1] text-white m-0 mb-4 md:mb-6"
                         >
                             Melayani Kebutuhan Rumah Anda.
                         </h2>
 
                         <p
-                            style={{
-                                fontSize: "15px",
-                                lineHeight: 1.75,
-                                color: "rgba(189,213,234,0.5)",
-                                maxWidth: "380px",
-                                margin: 0,
-                            }}
+                            className="text-sm md:text-[15px] leading-relaxed text-[#bdd5ea]/50 max-w-[380px] m-0"
                         >
                             Toko Haji Elektronik hadir untuk memenuhi kebutuhan elektronik dan perabotan rumah tangga Anda. Kami menyediakan produk pilihan dengan pelayanan yang ramah dan profesional.
                         </p>
 
                         {/* Divider */}
                         <div
-                            style={{
-                                width: "100%",
-                                height: "1px",
-                                background: "rgba(87,115,153,0.15)",
-                                margin: "40px 0",
-                            }}
+                            className="w-full h-[1px] bg-[#577399]/15 my-8 md:my-10"
                         />
 
                         <p
-                            style={{
-                                fontSize: "13px",
-                                fontWeight: 500,
-                                color: "rgba(189,213,234,0.35)",
-                                fontStyle: "italic",
-                            }}
+                            className="text-xs md:text-[13px] font-medium text-[#bdd5ea]/35 italic m-0"
                         >
                             "Kunjungi toko kami dan temukan produk yang tepat untuk Anda."
                         </p>
                     </div>
 
                     {/* Right: Image */}
-                    <div style={{ position: "relative", overflow: "hidden" }}>
+                    <div className="relative overflow-hidden min-h-[250px] md:min-h-0">
                         <img
                             src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=1200&auto=format&fit=crop"
                             alt="Koleksi Mebel"
-                            style={{
-                                position: "absolute",
-                                inset: 0,
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover",
-                                filter: "saturate(0.6) brightness(0.75)",
-                            }}
+                            className="absolute inset-0 w-full h-full object-cover saturate-[0.6] brightness-75"
                         />
-                        {/* Left edge fade */}
+                        {/* Left edge fade - desktop only */}
                         <div
-                            style={{
-                                position: "absolute",
-                                inset: 0,
-                                background: "linear-gradient(to right, #0d1f33 0%, transparent 40%)",
-                            }}
+                            className="hidden md:block absolute inset-0 bg-gradient-to-r from-[#0d1f33] to-transparent to-40%"
+                        />
+                        {/* Top edge fade - mobile only */}
+                        <div
+                            className="md:hidden absolute inset-0 bg-gradient-to-b from-[#0d1f33] to-transparent to-40%"
                         />
                     </div>
                 </div>

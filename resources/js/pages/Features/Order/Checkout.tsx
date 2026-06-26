@@ -194,66 +194,59 @@ export default function Checkout({ cartItems, total, addresses }: Props) {
                         <form onSubmit={handleSubmit} className="lg:grid lg:grid-cols-12 lg:gap-12 items-start">
                             {/* Kolom Kiri: Form Alamat */}
                             <div className="lg:col-span-7 space-y-8">
-                            <div className="overflow-hidden rounded-2xl" style={{ border: '1px solid rgba(87,115,153,0.2)', background: '#1a2d42' }}>
-                                <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid rgba(87,115,153,0.15)' }}>
-                                    <h2 className="font-semibold text-white">Alamat Pengiriman</h2>
-                                    <Link href={route('profile', { tab: 'addresses' })} className="text-sm font-medium transition-colors" style={{ color: '#BDD5EA' }}
-                                        onMouseEnter={e => (e.currentTarget.style.color = '#FE5F55')}
-                                        onMouseLeave={e => (e.currentTarget.style.color = '#BDD5EA')}
-                                    >
-                                        Kelola Alamat
-                                    </Link>
-                                </div>
-                                <div className="p-5 space-y-3">
-                                        {addresses.length > 0 ? (
-                                            <div className="grid gap-3">
-                                                {addresses.map((addr) => (
-                                                    <div
-                                                        key={addr.id}
-                                                        onClick={() => setSelectedAddressId(addr.id)}
-                                                        className={`p-4 rounded-xl border-2 cursor-pointer transition-all`}
-                                                        style={selectedAddressId === addr.id
-                                                            ? { borderColor: '#577399', background: 'rgba(87,115,153,0.15)' }
-                                                            : { borderColor: 'rgba(87,115,153,0.12)', background: 'rgba(87,115,153,0.05)' }
-                                                        }
-                                                    >
-                                                        <div className="flex justify-between items-start gap-3">
-                                                            <div className="flex-1">
-                                                                <div className="flex items-center gap-2">
-                                                                    <p className="font-bold text-sm text-white">{addr.recipient_name}</p>
-                                                                    <span className="rounded-full border border-white/20 px-2 py-0.5 text-[10px] text-slate-400">{addr.label}</span>
-                                                                    {addr.is_primary && <span className="rounded-full bg-orange-500/20 border border-orange-500/30 px-2 py-0.5 text-[10px] font-semibold text-orange-400">Utama</span>}
-                                                                </div>
-                                                                <p className="text-xs text-slate-500 mt-1">{addr.phone_number}</p>
-                                                                <p className="text-sm text-slate-400 mt-2 leading-relaxed line-clamp-2">{addr.address_detail}, {addr.city}, {addr.province}</p>
-                                                            </div>
-                                                            {selectedAddressId === addr.id && (
-                                                                    <div className="flex-shrink-0 flex h-6 w-6 items-center justify-center rounded-full" style={{ background: '#577399' }}>
-                                                                        <Check className="w-3.5 h-3.5 text-white" />
+                                <div className="overflow-hidden rounded-2xl bg-[#1a2d42] border border-[#577399]/20">
+                                    <div className="flex items-center justify-between px-6 py-4 border-b border-[#577399]/15">
+                                        <h2 className="font-semibold text-white">Alamat Pengiriman</h2>
+                                        <Link href={route('profile', { tab: 'addresses' })} className="text-sm font-medium text-[#BDD5EA] hover:text-[#FE5F55] transition-colors">
+                                            Kelola Alamat
+                                        </Link>
+                                    </div>
+                                    <div className="p-5 space-y-3">
+                                            {addresses.length > 0 ? (
+                                                <div className="grid gap-3">
+                                                    {addresses.map((addr) => (
+                                                        <div
+                                                            key={addr.id}
+                                                            onClick={() => setSelectedAddressId(addr.id)}
+                                                            className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedAddressId === addr.id ? 'border-[#577399] bg-[#577399]/15' : 'border-[#577399]/10 bg-[#577399]/5'}`}
+                                                        >
+                                                            <div className="flex justify-between items-start gap-3">
+                                                                <div className="flex-1">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <p className="font-bold text-sm text-white">{addr.recipient_name}</p>
+                                                                        <span className="rounded-full border border-white/20 px-2 py-0.5 text-[10px] text-slate-400">{addr.label}</span>
+                                                                        {addr.is_primary && <span className="rounded-full bg-orange-500/20 border border-orange-500/30 px-2 py-0.5 text-[10px] font-semibold text-orange-400">Utama</span>}
                                                                     </div>
-                                                            )}
+                                                                    <p className="text-xs text-slate-500 mt-1">{addr.phone_number}</p>
+                                                                    <p className="text-sm text-slate-400 mt-2 leading-relaxed line-clamp-2">{addr.address_detail}, {addr.city}, {addr.province}</p>
+                                                                </div>
+                                                                {selectedAddressId === addr.id && (
+                                                                        <div className="flex-shrink-0 flex h-6 w-6 items-center justify-center rounded-full bg-[#577399]">
+                                                                            <Check className="w-3.5 h-3.5 text-white" />
+                                                                        </div>
+                                                                )}
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <div className="text-center py-8">
-                                                <p className="text-sm text-slate-400 mb-4">Anda belum memiliki alamat tersimpan.</p>
-                                                <Link
-                                                    href={route('profile', { tab: 'addresses' })}
-                                                    className="inline-flex items-center gap-2 rounded-xl border border-orange-500/40 bg-orange-500/10 px-5 py-2.5 text-sm font-medium text-orange-400 hover:bg-orange-500/20 transition-all"
-                                                >
-                                                    Tambah Alamat Baru
-                                                </Link>
-                                            </div>
-                                        )}
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className="text-center py-8">
+                                                    <p className="text-sm text-slate-400 mb-4">Anda belum memiliki alamat tersimpan.</p>
+                                                    <Link
+                                                        href={route('profile', { tab: 'addresses' })}
+                                                        className="inline-flex items-center gap-2 rounded-xl border border-orange-500/40 bg-orange-500/10 px-5 py-2.5 text-sm font-medium text-orange-400 hover:bg-orange-500/20 transition-all"
+                                                    >
+                                                        Tambah Alamat Baru
+                                                    </Link>
+                                                </div>
+                                            )}
+                                    </div>
                                 </div>
-                            </div>
                             </div>
 
                             {/* Kolom Kanan: Ringkasan Order */}
                             <div className="lg:col-span-5 mt-8 lg:mt-0 space-y-6">
-                                <div className="overflow-hidden rounded-2xl" style={{ border: '1px solid rgba(87,115,153,0.2)', background: '#1a2d42' }}>
+                                <div className="overflow-hidden rounded-2xl bg-[#1a2d42] border border-[#577399]/20">
                                     <div className="border-b border-white/10 px-6 py-4">
                                         <h2 className="font-semibold text-white">Rincian Pesanan</h2>
                                         <p className="text-xs text-slate-500 mt-0.5">{cartItems.length} item</p>

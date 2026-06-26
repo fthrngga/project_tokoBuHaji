@@ -189,7 +189,7 @@ update.patch = (args: { defective_product: string | number } | [defective_produc
  * @see app/Http/Controllers/Admin/DefectiveProductController.php:57
  * @route '/admin/defective-products/{defectiveProduct}/sell'
  */
-export const sell = (args: { defectiveProduct: number | { id: number } } | [defectiveProduct: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const sell = (args: { defectiveProduct: string | number | { id: string | number } } | [defectiveProduct: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: sell.url(args, options),
     method: 'post',
 })
@@ -204,7 +204,7 @@ sell.definition = {
  * @see app/Http/Controllers/Admin/DefectiveProductController.php:57
  * @route '/admin/defective-products/{defectiveProduct}/sell'
  */
-sell.url = (args: { defectiveProduct: number | { id: number } } | [defectiveProduct: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+sell.url = (args: { defectiveProduct: string | number | { id: string | number } } | [defectiveProduct: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { defectiveProduct: args }
     }
@@ -237,7 +237,7 @@ sell.url = (args: { defectiveProduct: number | { id: number } } | [defectiveProd
  * @see app/Http/Controllers/Admin/DefectiveProductController.php:57
  * @route '/admin/defective-products/{defectiveProduct}/sell'
  */
-sell.post = (args: { defectiveProduct: number | { id: number } } | [defectiveProduct: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+sell.post = (args: { defectiveProduct: string | number | { id: string | number } } | [defectiveProduct: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: sell.url(args, options),
     method: 'post',
 })
@@ -247,7 +247,7 @@ sell.post = (args: { defectiveProduct: number | { id: number } } | [defectivePro
  * @see app/Http/Controllers/Admin/DefectiveProductController.php:57
  * @route '/admin/defective-products/{defectiveProduct}/sell'
  */
-    const sellForm = (args: { defectiveProduct: number | { id: number } } | [defectiveProduct: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const sellForm = (args: { defectiveProduct: string | number | { id: string | number } } | [defectiveProduct: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: sell.url(args, options),
         method: 'post',
     })
@@ -257,7 +257,7 @@ sell.post = (args: { defectiveProduct: number | { id: number } } | [defectivePro
  * @see app/Http/Controllers/Admin/DefectiveProductController.php:57
  * @route '/admin/defective-products/{defectiveProduct}/sell'
  */
-        sellForm.post = (args: { defectiveProduct: number | { id: number } } | [defectiveProduct: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        sellForm.post = (args: { defectiveProduct: string | number | { id: string | number } } | [defectiveProduct: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: sell.url(args, options),
             method: 'post',
         })

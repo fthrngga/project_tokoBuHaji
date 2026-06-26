@@ -255,8 +255,8 @@ export default function InstallmentIndex({ auth, installments }: { auth: any, in
                         </div>
 
                         {installments.length === 0 && (
-                            <div className="text-center py-12 bg-white rounded-lg border">
-                                <p className="text-muted-foreground">Anda belum memiliki tagihan angsuran aktif.</p>
+                            <div className="text-center py-12 bg-[#0d1e2e]/50 backdrop-blur-sm rounded-xl border border-[#577399]/20">
+                                <p className="text-[#bdd5ea]/80">Anda belum memiliki tagihan angsuran aktif.</p>
                             </div>
                         )}
 

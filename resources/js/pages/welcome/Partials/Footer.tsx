@@ -1,4 +1,5 @@
 import { Link } from "@inertiajs/react";
+import AppLogoIcon from '@/components/app-logo-icon';
 
 export default function Footer() {
     const year = new Date().getFullYear();
@@ -17,74 +18,29 @@ export default function Footer() {
     };
 
     return (
-        <footer style={{ background: "#060d18", borderTop: "1px solid rgba(87,115,153,0.1)" }}>
+        <footer className="bg-[#060d18] border-t border-[#577399]/10">
             {/* CTA Band */}
-            <div style={{ background: "#080f1a", padding: "80px 0", borderBottom: "1px solid rgba(87,115,153,0.08)" }}>
-                <div style={{ maxWidth: "1440px", margin: "0 auto", padding: "0 48px" }}>
-                    <div
-                        style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "flex-start",
-                            gap: "40px",
-                        }}
-                    >
-                        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                            <div style={{ width: "24px", height: "1px", background: "#FE5F55" }} />
-                            <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: "#577399", margin: 0 }}>
+            <div className="bg-[#080f1a] py-12 md:py-20 border-b border-[#577399]/10">
+                <div className="max-w-[1440px] mx-auto px-6 md:px-12">
+                    <div className="flex flex-col items-start gap-6 md:gap-10">
+                        <div className="flex items-center gap-3">
+                            <div className="w-6 h-[1px] bg-[#FE5F55]" />
+                            <p className="text-[11px] font-semibold tracking-widest uppercase text-[#577399] m-0">
                                 Mulai Sekarang
                             </p>
                         </div>
 
-                        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", width: "100%", flexWrap: "wrap", gap: "32px" }}>
-                            <h2
-                                style={{
-                                    fontSize: "clamp(40px, 6vw, 96px)",
-                                    fontWeight: 800,
-                                    letterSpacing: "-0.05em",
-                                    lineHeight: 0.95,
-                                    color: "white",
-                                    margin: 0,
-                                }}
-                            >
+                        <div className="flex flex-col md:flex-row items-start md:items-end justify-between w-full gap-6 md:gap-8">
+                            <h2 className="text-4xl md:text-[clamp(40px,6vw,96px)] font-extrabold tracking-tight leading-[1] text-white m-0">
                                 Temukan Produk<br />
-                                <span style={{
-                                    background: "linear-gradient(135deg, #BDD5EA 0%, #8aacca 100%)",
-                                    WebkitBackgroundClip: "text",
-                                    WebkitTextFillColor: "transparent",
-                                }}>
+                                <span className="bg-gradient-to-br from-[#BDD5EA] to-[#8aacca] text-transparent bg-clip-text">
                                     yang Tepat.
                                 </span>
                             </h2>
 
                             <Link
                                 href="/kategori/elektronik"
-                                className="group"
-                                style={{
-                                    display: "inline-flex",
-                                    alignItems: "center",
-                                    gap: "12px",
-                                    background: "#FE5F55",
-                                    color: "white",
-                                    fontWeight: 700,
-                                    fontSize: "15px",
-                                    padding: "18px 40px",
-                                    borderRadius: "100px",
-                                    transition: "transform 0.2s, box-shadow 0.2s",
-                                    flexShrink: 0,
-                                    alignSelf: "flex-end",
-                                    letterSpacing: "-0.01em",
-                                }}
-                                onMouseEnter={e => {
-                                    const el = e.currentTarget as HTMLElement;
-                                    el.style.transform = "translateY(-3px)";
-                                    el.style.boxShadow = "0 16px 40px rgba(254,95,85,0.4)";
-                                }}
-                                onMouseLeave={e => {
-                                    const el = e.currentTarget as HTMLElement;
-                                    el.style.transform = "translateY(0)";
-                                    el.style.boxShadow = "none";
-                                }}
+                                className="group inline-flex items-center justify-center gap-3 bg-[#FE5F55] text-white font-bold text-[15px] px-8 py-4 rounded-full transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(254,95,85,0.4)] flex-shrink-0 w-full md:w-auto"
                             >
                                 Lihat Koleksi
                                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -97,32 +53,19 @@ export default function Footer() {
             </div>
 
             {/* Footer body */}
-            <div style={{ maxWidth: "1440px", margin: "0 auto", padding: "64px 48px" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: "48px" }}>
+            <div className="max-w-[1440px] mx-auto py-12 md:py-16 px-6 md:px-12">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 md:gap-12">
                     {/* Brand */}
-                    <div>
-                        <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
-                            <div
-                                style={{
-                                    width: "32px",
-                                    height: "32px",
-                                    borderRadius: "8px",
-                                    background: "linear-gradient(135deg, #577399, #3d5a80)",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    fontSize: "11px",
-                                    fontWeight: 900,
-                                    color: "white",
-                                }}
-                            >
-                                HE
+                    <div className="md:col-span-2">
+                        <Link href="/" className="inline-flex items-center gap-2.5 mb-5">
+                            <div className="w-8 h-8 rounded-md bg-gradient-to-br from-[#577399] to-[#3d5a80] flex items-center justify-center text-white">
+                                <AppLogoIcon className="w-5 h-5 fill-current" />
                             </div>
-                            <span style={{ fontSize: "16px", fontWeight: 800, color: "white", letterSpacing: "-0.02em" }}>
+                            <span className="text-base font-extrabold text-white tracking-tight">
                                 Haji Elektronik
                             </span>
                         </Link>
-                        <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgba(189,213,234,0.35)", maxWidth: "280px", margin: 0 }}>
+                        <p className="text-sm leading-relaxed text-[#bdd5ea]/35 max-w-[280px] m-0">
                             Toko elektronik dan mebel terpercaya. Siap membantu Anda menemukan produk yang tepat.
                         </p>
                     </div>
@@ -130,17 +73,15 @@ export default function Footer() {
                     {/* Nav */}
                     {Object.entries(nav).map(([section, links]) => (
                         <div key={section}>
-                            <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#577399", marginBottom: "20px" }}>
+                            <p className="text-[11px] font-bold tracking-widest uppercase text-[#577399] mb-5">
                                 {section}
                             </p>
-                            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "12px" }}>
+                            <ul className="list-none p-0 m-0 flex flex-col gap-3">
                                 {links.map(({ label, href }) => (
                                     <li key={label}>
                                         <Link
                                             href={href}
-                                            style={{ fontSize: "14px", color: "rgba(189,213,234,0.35)", transition: "color 0.2s" }}
-                                            onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "#BDD5EA")}
-                                            onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "rgba(189,213,234,0.35)")}
+                                            className="text-sm text-[#bdd5ea]/35 hover:text-[#BDD5EA] transition-colors"
                                         >
                                             {label}
                                         </Link>
@@ -153,19 +94,17 @@ export default function Footer() {
             </div>
 
             {/* Bottom bar */}
-            <div style={{ borderTop: "1px solid rgba(87,115,153,0.08)", padding: "20px 48px" }}>
-                <div style={{ maxWidth: "1440px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <p style={{ fontSize: "12px", color: "rgba(87,115,153,0.4)", margin: 0 }}>
+            <div className="border-t border-[#577399]/10 py-5 px-6 md:px-12">
+                <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+                    <p className="text-xs text-[#577399]/40 m-0">
                         © {year} Haji Elektronik. All rights reserved.
                     </p>
-                    <div style={{ display: "flex", gap: "24px" }}>
+                    <div className="flex items-center gap-6">
                         {["Syarat & Ketentuan", "Kebijakan Privasi"].map(item => (
                             <Link
                                 key={item}
                                 href="#"
-                                style={{ fontSize: "12px", color: "rgba(87,115,153,0.4)", transition: "color 0.2s" }}
-                                onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "#577399")}
-                                onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "rgba(87,115,153,0.4)")}
+                                className="text-xs text-[#577399]/40 hover:text-[#577399] transition-colors"
                             >
                                 {item}
                             </Link>

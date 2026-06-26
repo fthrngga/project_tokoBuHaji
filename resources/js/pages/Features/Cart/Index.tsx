@@ -153,10 +153,11 @@ export default function Index({ cartItems, total }: Props) {
                                         <div className="col-span-2 text-right">Subtotal</div>
                                     </div>
 
-                                    <div className="mt-4 space-y-6">
+                                    <div className="mt-4 space-y-4 md:space-y-6">
                                         {cartItems.map((item) => (
-                                            <div key={item.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center border-b border-border pb-6 last:border-0 last:pb-0">
-                                                <div className="hidden md:block col-span-1 text-center">
+                                            <div key={item.id} className="flex flex-row gap-3 md:grid md:grid-cols-12 md:gap-4 items-start md:items-center border-b border-border pb-6 last:border-0 last:pb-0">
+                                                {/* Checkbox (Mobile + Desktop) */}
+                                                <div className="col-span-1 pt-2 md:pt-0 flex items-center justify-center">
                                                     <Checkbox
                                                         id={`check-${item.id}`}
                                                         checked={selectedItems.has(item.id)}
@@ -164,16 +165,17 @@ export default function Index({ cartItems, total }: Props) {
                                                     />
                                                 </div>
 
-                                                <div className="col-span-1 md:col-span-5 flex gap-4">
-                                                    <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-border bg-card">
+                                                {/* Image and Title */}
+                                                <div className="col-span-1 md:col-span-5 flex flex-1 gap-3 md:gap-4">
+                                                    <div className="h-20 w-20 md:h-24 md:w-24 flex-shrink-0 overflow-hidden rounded-md border border-border bg-card">
                                                         <img
                                                             src={item.product.images.length > 0 ? `/storage/${item.product.images[0].image_path}` : 'https://placehold.co/100x100?text=No+Image'}
                                                             alt={item.product.name}
                                                             className="h-full w-full object-contain p-2"
                                                         />
                                                     </div>
-                                                    <div className="flex flex-col justify-center">
-                                                        <h3 className="text-base font-semibold text-foreground">
+                                                    <div className="flex flex-col justify-start flex-1">
+                                                        <h3 className="text-sm md:text-base font-semibold text-foreground line-clamp-2 md:line-clamp-none">
                                                             <Link href={route('products.show', item.product.slug)} className="hover:underline">
                                                                 {item.product.name}
                                                             </Link>
@@ -181,35 +183,66 @@ export default function Index({ cartItems, total }: Props) {
                                                         {item.variant && (
                                                             <div className="mt-1 flex flex-wrap gap-1">
                                                                 {Object.entries(item.variant.options).map(([k, v]) => (
-                                                                    <span key={k} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                                                    <span key={k} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] md:text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
                                                                         {k}: {v}
                                                                     </span>
                                                                 ))}
                                                             </div>
                                                         )}
-                                                        <p className="mt-1 text-sm text-muted-foreground">
+                                                        <p className="mt-1 text-xs md:text-sm text-muted-foreground">
                                                             {item.variant ? (
                                                                 item.variant.stock > 0 ? `Stok tersedia: ${item.variant.stock}` : <span className="text-amber-600 font-medium">Pre-order / Menunggu Stok</span>
                                                             ) : (
                                                                 item.product.stock > 0 ? `Stok tersedia: ${item.product.stock}` : <span className="text-red-500 font-medium">Stok Habis</span>
                                                             )}
                                                         </p>
-                                                        <button
-                                                            onClick={() => confirmDelete(item.id)}
-                                                            className="mt-2 text-sm text-red-500 hover:text-red-700 flex items-center md:hidden"
-                                                        >
-                                                            <Trash2 className="h-4 w-4 mr-1" /> Hapus
-                                                        </button>
+
+                                                        {/* Mobile Price */}
+                                                        <div className="mt-2 font-bold text-sm md:hidden text-foreground">
+                                                            {formatCurrency(item.variant?.selling_price || item.product.selling_price)}
+                                                        </div>
+
+                                                        {/* Mobile Quantity & Delete */}
+                                                        <div className="mt-3 flex items-center justify-between md:hidden w-full">
+                                                            <div className="flex items-center gap-2">
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="icon"
+                                                                    className="h-7 w-7 rounded-full"
+                                                                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                                    disabled={item.quantity <= 1}
+                                                                >
+                                                                    <Minus className="h-3 w-3" />
+                                                                </Button>
+                                                                <span className="w-6 text-center text-xs font-bold">{item.quantity}</span>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="icon"
+                                                                    className="h-7 w-7 rounded-full"
+                                                                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                                    disabled={item.variant ? (item.variant.stock > 0 && item.quantity >= item.variant.stock) : (item.quantity >= item.product.stock)}
+                                                                >
+                                                                    <Plus className="h-3 w-3" />
+                                                                </Button>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => confirmDelete(item.id)}
+                                                                className="text-gray-400 hover:text-red-500"
+                                                                title="Hapus item"
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
 
-                                                <div className="col-span-1 md:col-span-2 text-right font-medium md:font-normal">
-                                                    <span className="md:hidden text-muted-foreground mr-2">Harga:</span>
+                                                {/* Desktop Price */}
+                                                <div className="hidden md:block col-span-2 text-right font-normal">
                                                     {formatCurrency(item.variant?.selling_price || item.product.selling_price)}
                                                 </div>
 
-                                                <div className="col-span-1 md:col-span-2 flex justify-start md:justify-center items-center gap-2">
-                                                    <span className="md:hidden text-muted-foreground mr-2">Jumlah:</span>
+                                                {/* Desktop Quantity */}
+                                                <div className="hidden md:flex col-span-2 justify-center items-center gap-2">
                                                     <Button
                                                         variant="outline"
                                                         size="icon"
@@ -231,15 +264,15 @@ export default function Index({ cartItems, total }: Props) {
                                                     </Button>
                                                 </div>
 
-                                                <div className="col-span-1 md:col-span-2 flex justify-between md:justify-end items-center">
-                                                    <span className="md:hidden text-muted-foreground">Subtotal:</span>
+                                                {/* Desktop Subtotal & Delete */}
+                                                <div className="hidden md:flex col-span-2 justify-end items-center">
                                                     <div className="flex items-center gap-4">
                                                         <span className="font-bold text-foreground">
                                                             {formatCurrency(item.quantity * (item.variant?.selling_price || item.product.selling_price))}
                                                         </span>
                                                         <button
                                                             onClick={() => confirmDelete(item.id)}
-                                                            className="text-gray-400 hover:text-red-500 hidden md:block"
+                                                            className="text-gray-400 hover:text-red-500"
                                                             title="Hapus item"
                                                         >
                                                             <Trash2 className="h-5 w-5" />
@@ -251,9 +284,9 @@ export default function Index({ cartItems, total }: Props) {
                                     </div>
                                 </div>
 
-                                {/* Ringkasan Pesanan */}
-                                <div className="mt-12 lg:mt-0 lg:col-span-4">
-                                    <div className="rounded-lg bg-card border border-border p-6 md:p-8">
+                                {/* Ringkasan Pesanan - Desktop Only */}
+                                <div className="hidden lg:block lg:col-span-4">
+                                    <div className="rounded-lg bg-card border border-border p-6 md:p-8 sticky top-24">
                                         <h2 className="text-lg font-medium text-foreground">Ringkasan Pesanan</h2>
 
                                         <div className="mt-6 space-y-4">
@@ -302,6 +335,25 @@ export default function Index({ cartItems, total }: Props) {
                 </main>
 
                 <Footer />
+
+                {/* Mobile Sticky Checkout Bar */}
+                {cartItems.length > 0 && (
+                    <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0d1e2e]/95 backdrop-blur-md border-t border-white/10 p-4 lg:hidden shadow-[0_-8px_30px_rgba(0,0,0,0.3)] text-white">
+                        <div className="flex items-center justify-between gap-4 max-w-[1024px] mx-auto">
+                            <div className="flex flex-col">
+                                <span className="text-xs text-slate-400">Total Harga</span>
+                                <span className="text-lg font-bold text-white">{formatCurrency(checkedTotal)}</span>
+                            </div>
+                            <Button
+                                className="h-12 px-6 rounded-xl font-bold bg-[#FE5F55] hover:bg-[#e84a40] text-white shadow-[0_4px_15px_rgba(254,95,85,0.4)]"
+                                onClick={handleCheckout}
+                                disabled={selectedItems.size === 0}
+                            >
+                                Checkout ({selectedItems.size})
+                            </Button>
+                        </div>
+                    </div>
+                )}
 
                 <AlertDialog open={itemToDelete !== null} onOpenChange={(open) => !open && setItemToDelete(null)}>
                     <AlertDialogContent>

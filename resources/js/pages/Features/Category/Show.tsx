@@ -32,34 +32,34 @@ export default function Show({ category, products, siblings = [] }: Props) {
     return (
         <>
             <Head title={`Kategori: ${category.name} - Haji Elektronik`} />
-            <div className="flex min-h-screen w-full flex-col bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans antialiased">
+            <div className="flex min-h-screen w-full flex-col bg-[#080f1a] text-white font-sans antialiased">
                 <Header user={auth.user} />
 
                 <main className="flex-1 pb-32">
                     {/* Header Kategori Premium */}
-                    <div className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+                    <div className="bg-[#0d1e2e]/50 border-b border-[#577399]/20">
                         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
                             {/* Breadcrumb */}
-                            <nav className="flex items-center space-x-2 text-sm text-slate-500 mb-6 font-medium">
-                                <Link href="/" className="hover:text-slate-900 dark:hover:text-white transition-colors">Beranda</Link>
+                            <nav className="flex items-center space-x-2 text-sm text-[#bdd5ea]/60 mb-6 font-medium">
+                                <Link href="/" className="hover:text-[#FE5F55] transition-colors">Beranda</Link>
                                 <span>/</span>
                                 {isChild && category.parent && (
                                     <>
-                                        <Link href={`/kategori/${category.parent.slug}`} className="hover:text-slate-900 dark:hover:text-white transition-colors">
+                                        <Link href={`/kategori/${category.parent.slug}`} className="hover:text-[#FE5F55] transition-colors">
                                             {category.parent.name}
                                         </Link>
                                         <span>/</span>
                                     </>
                                 )}
-                                <span className="text-slate-900 dark:text-white">{category.name}</span>
+                                <span className="text-white">{category.name}</span>
                             </nav>
 
                             <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
                                 <div className="max-w-2xl">
-                                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-slate-900 dark:text-white leading-[1.1]">
+                                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-white leading-[1.1]">
                                         {category.name}
                                     </h1>
-                                    <p className="mt-6 text-lg text-slate-500 leading-relaxed">
+                                    <p className="mt-6 text-lg text-[#bdd5ea]/80 leading-relaxed">
                                         Eksplorasi koleksi {category.name.toLowerCase()} pilihan kami. Didesain dengan perhatian terhadap detail untuk menyempurnakan ruang dan gaya hidup Anda.
                                     </p>
                                 </div>
@@ -76,8 +76,8 @@ export default function Show({ category, products, siblings = [] }: Props) {
                                         href={`/kategori/${parentSlug}`}
                                         className={`shrink-0 px-6 py-2.5 rounded-full text-sm font-medium border transition-all ${
                                             !isChild 
-                                            ? 'bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900 dark:border-white shadow-md' 
-                                            : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:border-slate-600'
+                                            ? 'bg-[#FE5F55] text-white border-[#FE5F55] shadow-[0_4px_15px_rgba(254,95,85,0.4)]' 
+                                            : 'bg-[#0d1e2e] text-[#bdd5ea] border-[#577399]/30 hover:border-[#FE5F55]/50'
                                         }`}
                                     >
                                         Semua
@@ -89,8 +89,8 @@ export default function Show({ category, products, siblings = [] }: Props) {
                                             href={`/kategori/${sub.slug}`}
                                             className={`shrink-0 px-6 py-2.5 rounded-full text-sm font-medium border transition-all ${
                                                 category.id === sub.id 
-                                                ? 'bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900 dark:border-white shadow-md' 
-                                                : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:border-slate-600'
+                                                ? 'bg-[#FE5F55] text-white border-[#FE5F55] shadow-[0_4px_15px_rgba(254,95,85,0.4)]' 
+                                                : 'bg-[#0d1e2e] text-[#bdd5ea] border-[#577399]/30 hover:border-[#FE5F55]/50'
                                             }`}
                                         >
                                             {sub.name}
@@ -110,14 +110,15 @@ export default function Show({ category, products, siblings = [] }: Props) {
                                 ))}
                             </div>
                         ) : (
-                            <div className="text-center py-32 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 mt-8">
-                                <h3 className="text-2xl font-medium text-slate-900 dark:text-white mb-3">Koleksi Belum Tersedia</h3>
-                                <p className="text-slate-500 max-w-md mx-auto mb-8">
+                            <div className="text-center py-32 bg-[#0d1e2e]/50 backdrop-blur-sm rounded-3xl border border-[#577399]/20 mt-8">
+                                <h3 className="text-2xl font-medium text-white mb-3">Koleksi Belum Tersedia</h3>
+                                <p className="text-[#bdd5ea]/80 max-w-md mx-auto mb-8">
                                     Kami sedang mempersiapkan produk-produk terbaik untuk kategori ini. Silakan kembali lagi nanti.
                                 </p>
                                 <Link
                                     href="/"
-                                    className="inline-flex items-center justify-center px-8 py-3 rounded-full bg-slate-900 text-white font-medium hover:bg-slate-800 transition-colors"
+                                    className="inline-flex items-center justify-center px-8 py-3 rounded-full font-medium text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+                                    style={{ background: 'linear-gradient(135deg, #FE5F55, #e84a40)', boxShadow: '0 4px 15px rgba(254,95,85,0.4)' }}
                                 >
                                     Kembali ke Beranda
                                 </Link>
@@ -134,15 +135,15 @@ export default function Show({ category, products, siblings = [] }: Props) {
                                                 key={i}
                                                 href={link.url}
                                                 className={`flex items-center justify-center min-w-[40px] h-10 px-3 text-sm font-medium rounded-full transition-colors ${link.active
-                                                    ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-md"
-                                                    : "text-slate-600 bg-white border border-slate-200 hover:border-slate-300 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-800 dark:hover:border-slate-700"
+                                                    ? "bg-[#FE5F55] text-white shadow-[0_4px_15px_rgba(254,95,85,0.4)]"
+                                                    : "text-[#bdd5ea] bg-[#0d1e2e]/50 border border-[#577399]/30 hover:border-[#FE5F55]/50"
                                                     }`}
                                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                             />
                                         ) : (
                                             <span
                                                 key={i}
-                                                className="flex items-center justify-center min-w-[40px] h-10 px-3 text-sm font-medium text-slate-400 bg-transparent"
+                                                className="flex items-center justify-center min-w-[40px] h-10 px-3 text-sm font-medium text-[#577399] bg-transparent"
                                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                             />
                                         )

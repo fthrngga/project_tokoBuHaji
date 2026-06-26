@@ -167,14 +167,14 @@ export default function Profile({ mustVerifyEmail, status, customer, addresses =
         <>
             <Head title="Profil Saya - Haji Elektronik" />
             
-            <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "#080f1a", color: "#F7F7FF", fontFamily: "Inter, system-ui, sans-serif" }}>
+            <div className="min-h-screen flex flex-col bg-[#080f1a] text-[#F7F7FF] font-sans">
                 <Header user={auth.user} />
 
-                <main style={{ flex: 1, padding: "48px 0" }}>
-                    <div style={{ maxWidth: "1024px", margin: "0 auto", padding: "0 24px", display: "flex", gap: "32px", flexDirection: window.innerWidth < 1024 ? "column" : "row" }}>
+                <main className="flex-1 py-12">
+                    <div className="max-w-[1024px] mx-auto px-4 md:px-6 flex flex-col lg:flex-row gap-6 md:gap-8">
                         
                         {/* Sidebar Menu */}
-                        <aside style={{ width: "100%", maxWidth: "250px", flexShrink: 0 }}>
+                        <aside className="w-full lg:max-w-[250px] shrink-0">
                             <div style={{ background: "#0d1f33", padding: "16px", borderRadius: "12px", border: "1px solid rgba(87,115,153,0.2)", position: "sticky", top: "100px", display: "flex", flexDirection: "column", gap: "8px" }}>
                                 <div style={{ padding: "12px", marginBottom: "8px", display: "flex", alignItems: "center", gap: "12px", borderBottom: "1px solid rgba(87,115,153,0.15)" }}>
                                     <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "linear-gradient(135deg, #577399, #3d5a80)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: "bold", fontSize: "16px" }}>
@@ -208,18 +208,18 @@ export default function Profile({ mustVerifyEmail, status, customer, addresses =
                         </aside>
 
                         {/* Main Content Area */}
-                        <div style={{ flex: 1, minWidth: 0 }}>
+                        <div className="flex-1 min-w-0">
                             
                             {/* TAB: PROFIL */}
                             {activeTab === 'profile' && (
-                                <div style={{ background: "#0d1f33", padding: "32px", borderRadius: "16px", border: "1px solid rgba(87,115,153,0.2)" }}>
+                                <div className="bg-[#0d1f33] p-6 md:p-8 rounded-2xl border border-[#577399]/20">
                                     <div style={{ marginBottom: "32px" }}>
                                         <h1 style={{ fontSize: "24px", fontWeight: "bold", margin: "0 0 8px 0", color: "white" }}>Biodata Diri</h1>
                                         <p style={{ color: "rgba(189,213,234,0.6)", margin: 0, fontSize: "14px" }}>Kelola informasi data diri dan alamat penagihan utama Anda.</p>
                                     </div>
                                     
-                                    <form onSubmit={submitProfile} style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-                                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+                                    <form onSubmit={submitProfile} className="flex flex-col gap-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                                                 <Label htmlFor="name" style={{ color: "#BDD5EA" }}>Nama Lengkap</Label>
                                                 <Input
@@ -257,7 +257,7 @@ export default function Profile({ mustVerifyEmail, status, customer, addresses =
                                             <InputError message={profileErrors.phone_number} />
                                         </div>
 
-                                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                                                 <Label htmlFor="province" style={{ color: "#BDD5EA" }}>Provinsi</Label>
                                                 <Input
@@ -308,11 +308,11 @@ export default function Profile({ mustVerifyEmail, status, customer, addresses =
 
                             {/* TAB: BUKU ALAMAT */}
                             {activeTab === 'addresses' && (
-                                <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-                                    <div style={{ background: "#0d1f33", padding: "24px", borderRadius: "16px", border: "1px solid rgba(87,115,153,0.2)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <div className="flex flex-col gap-6">
+                                    <div className="bg-[#0d1f33] p-5 md:p-6 rounded-2xl border border-[#577399]/20 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                         <div>
-                                            <h1 style={{ fontSize: "24px", fontWeight: "bold", margin: "0 0 8px 0", color: "white" }}>Buku Alamat</h1>
-                                            <p style={{ color: "rgba(189,213,234,0.6)", margin: 0, fontSize: "14px" }}>Kelola alamat pengiriman untuk memudahkan proses checkout Anda.</p>
+                                            <h1 className="text-xl md:text-2xl font-bold m-0 mb-2 text-white">Buku Alamat</h1>
+                                            <p className="text-[#bdd5ea]/60 m-0 text-xs md:text-sm">Kelola alamat pengiriman untuk memudahkan proses checkout Anda.</p>
                                         </div>
                                         
                                         <Dialog open={isAddressModalOpen} onOpenChange={setIsAddressModalOpen}>
@@ -328,8 +328,8 @@ export default function Profile({ mustVerifyEmail, status, customer, addresses =
                                                         <DialogDescription style={{ color: "rgba(189,213,234,0.6)" }}>Masukkan detail alamat pengiriman Anda dengan lengkap.</DialogDescription>
                                                     </DialogHeader>
                                                     
-                                                    <div style={{ display: "flex", flexDirection: "column", gap: "16px", padding: "16px 0" }}>
-                                                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                                                    <div className="flex flex-col gap-4 py-4">
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                                                                 <Label htmlFor="label" style={{ color: "#BDD5EA" }}>Label Alamat</Label>
                                                                 <Input id="label" value={addressData.label} onChange={e => setAddressData('label', e.target.value)} placeholder="Rumah / Kantor" style={{ background: "rgba(8,15,26,0.6)", border: "1px solid rgba(87,115,153,0.3)", color: "white" }} />
@@ -348,7 +348,7 @@ export default function Profile({ mustVerifyEmail, status, customer, addresses =
                                                             <InputError message={addressErrors.phone_number} />
                                                         </div>
 
-                                                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                                                                 <Label style={{ color: "#BDD5EA" }}>Provinsi</Label>
                                                                 <Select onValueChange={handleProvinceChange}>
@@ -383,7 +383,7 @@ export default function Profile({ mustVerifyEmail, status, customer, addresses =
                                                             </div>
                                                         </div>
 
-                                                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                                                                 <Label style={{ color: "#BDD5EA" }}>Kecamatan</Label>
                                                                 <Select onValueChange={handleDistrictChange} disabled={districts.length === 0}>
@@ -424,7 +424,7 @@ export default function Profile({ mustVerifyEmail, status, customer, addresses =
                                                             <InputError message={addressErrors.address_detail} />
                                                         </div>
 
-                                                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                                                                 <Label style={{ color: "#BDD5EA" }}>Kode Pos</Label>
                                                                 <Input value={addressData.postal_code} onChange={e => setAddressData('postal_code', e.target.value)} style={{ background: "rgba(8,15,26,0.6)", border: "1px solid rgba(87,115,153,0.3)", color: "white" }} />
@@ -450,40 +450,40 @@ export default function Profile({ mustVerifyEmail, status, customer, addresses =
                                         </Dialog>
                                     </div>
 
-                                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                                    <div className="flex flex-col gap-4">
                                         {addresses.length === 0 ? (
-                                            <div style={{ background: "transparent", border: "2px dashed rgba(87,115,153,0.3)", padding: "48px 24px", borderRadius: "16px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", gap: "12px" }}>
-                                                <div style={{ width: "64px", height: "64px", background: "rgba(87,115,153,0.1)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                            <div className="bg-transparent border-2 border-dashed border-[#577399]/30 py-12 px-6 rounded-2xl flex flex-col items-center justify-center text-center gap-3">
+                                                <div className="w-16 h-16 bg-[#577399]/10 rounded-full flex items-center justify-center">
                                                     <MapPin size={32} color="rgba(189,213,234,0.5)" />
                                                 </div>
-                                                <p style={{ color: "rgba(189,213,234,0.8)", fontWeight: 500, margin: 0 }}>Anda belum memiliki daftar alamat.</p>
-                                                <p style={{ color: "rgba(189,213,234,0.5)", fontSize: "14px", margin: 0 }}>Tambahkan alamat untuk mempermudah pengiriman pesanan Anda.</p>
+                                                <p className="text-[#bdd5ea]/80 font-medium m-0">Anda belum memiliki daftar alamat.</p>
+                                                <p className="text-[#bdd5ea]/50 text-sm m-0">Tambahkan alamat untuk mempermudah pengiriman pesanan Anda.</p>
                                             </div>
                                         ) : (
                                             addresses.map((address) => (
-                                                <div key={address.id} style={{ background: "#0d1f33", border: address.is_primary ? "1px solid #FE5F55" : "1px solid rgba(87,115,153,0.2)", borderRadius: "12px", padding: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
-                                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                                                        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                                                            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                                                                <span style={{ fontSize: "12px", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "1px", color: "rgba(189,213,234,0.6)" }}>{address.label}</span>
-                                                                {address.is_primary && <span style={{ background: "rgba(254,95,85,0.1)", color: "#FE5F55", padding: "2px 8px", borderRadius: "100px", fontSize: "10px", fontWeight: "bold" }}>Utama</span>}
+                                                <div key={address.id} className={`bg-[#0d1f33] rounded-xl p-5 flex flex-col gap-3 ${address.is_primary ? 'border border-[#FE5F55]' : 'border border-[#577399]/20'}`}>
+                                                    <div className="flex justify-between items-start">
+                                                        <div className="flex flex-col gap-1">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-xs font-bold uppercase tracking-widest text-[#bdd5ea]/60">{address.label}</span>
+                                                                {address.is_primary && <span className="bg-[#FE5F55]/10 text-[#FE5F55] px-2 py-0.5 rounded-full text-[10px] font-bold">Utama</span>}
                                                             </div>
-                                                            <h3 style={{ fontSize: "18px", fontWeight: "bold", color: "white", margin: 0 }}>{address.recipient_name}</h3>
+                                                            <h3 className="text-lg font-bold text-white m-0">{address.recipient_name}</h3>
                                                         </div>
-                                                        <div style={{ display: "flex", gap: "8px" }}>
+                                                        <div className="flex gap-2">
                                                             {!address.is_primary && (
-                                                                <Button variant="outline" size="sm" onClick={() => setPrimaryAddress(address.id)} style={{ borderColor: "rgba(87,115,153,0.3)", color: "#BDD5EA" }}>Set Utama</Button>
+                                                                <Button variant="outline" size="sm" onClick={() => setPrimaryAddress(address.id)} className="border-[#577399]/30 text-[#BDD5EA] hover:bg-[#577399]/20">Set Utama</Button>
                                                             )}
-                                                            <Button variant="ghost" size="icon" onClick={() => deleteAddress(address.id)} style={{ color: "#FE5F55" }}>
+                                                            <Button variant="ghost" size="icon" onClick={() => deleteAddress(address.id)} className="text-[#FE5F55] hover:bg-[#FE5F55]/10 hover:text-[#FE5F55]">
                                                                 <Trash2 size={16} />
                                                             </Button>
                                                         </div>
                                                     </div>
-                                                    <div style={{ display: "flex", flexDirection: "column", gap: "12px", fontSize: "14px" }}>
-                                                        <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#BDD5EA", fontWeight: 500 }}>
-                                                            <Phone size={16} color="rgba(189,213,234,0.6)" /> {address.phone_number}
+                                                    <div className="flex flex-col gap-3 text-sm">
+                                                        <div className="flex items-center gap-2 text-[#BDD5EA] font-medium">
+                                                            <Phone size={16} className="text-[#bdd5ea]/60" /> {address.phone_number}
                                                         </div>
-                                                        <div style={{ background: "rgba(8,15,26,0.4)", padding: "12px", borderRadius: "8px", color: "rgba(189,213,234,0.8)", lineHeight: 1.6 }}>
+                                                        <div className="bg-[#080f1a]/40 p-3 rounded-lg text-[#bdd5ea]/80 leading-relaxed">
                                                             {address.address_detail}<br/>
                                                             {address.village}, {address.district}<br/>
                                                             {address.city}, {address.province} {address.postal_code}
@@ -498,13 +498,13 @@ export default function Profile({ mustVerifyEmail, status, customer, addresses =
 
                             {/* TAB: KEAMANAN & PASSWORD */}
                             {activeTab === 'password' && (
-                                <div style={{ background: "#0d1f33", padding: "32px", borderRadius: "16px", border: "1px solid rgba(87,115,153,0.2)" }}>
-                                    <div style={{ marginBottom: "32px" }}>
-                                        <h1 style={{ fontSize: "24px", fontWeight: "bold", margin: "0 0 8px 0", color: "white" }}>Ubah Password</h1>
-                                        <p style={{ color: "rgba(189,213,234,0.6)", margin: 0, fontSize: "14px" }}>Pastikan akun Anda menggunakan password yang panjang dan acak agar tetap aman.</p>
+                                <div className="bg-[#0d1f33] p-6 md:p-8 rounded-2xl border border-[#577399]/20">
+                                    <div className="mb-8">
+                                        <h1 className="text-xl md:text-2xl font-bold m-0 mb-2 text-white">Ubah Password</h1>
+                                        <p className="text-[#bdd5ea]/60 m-0 text-xs md:text-sm">Pastikan akun Anda menggunakan password yang panjang dan acak agar tetap aman.</p>
                                     </div>
                                     
-                                    <form onSubmit={submitPassword} style={{ display: "flex", flexDirection: "column", gap: "24px", maxWidth: "400px" }}>
+                                    <form onSubmit={submitPassword} className="flex flex-col gap-6 max-w-[400px]">
                                         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                                             <Label htmlFor="current_password" style={{ color: "#BDD5EA" }}>Password Saat Ini</Label>
                                             <Input
