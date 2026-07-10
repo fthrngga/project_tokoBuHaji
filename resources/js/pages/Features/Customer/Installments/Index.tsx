@@ -421,9 +421,11 @@ export default function InstallmentIndex({ auth, installments }: { auth: any, in
                                                                         </Badge>
                                                                     </TableCell>
                                                                     <TableCell className="text-right pr-6">
-                                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500">
-                                                                            <Download className="h-4 w-4" />
-                                                                        </Button>
+                                                                        <a href={route('customer.installments.receipt', hist.id)}>
+                                                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-blue-600">
+                                                                                <Download className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </a>
                                                                     </TableCell>
                                                                 </TableRow>
                                                             ))}

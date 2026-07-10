@@ -51,23 +51,20 @@ class Order extends Model
             // Pastikan kita hanya mengeksekusi jika statusnya benar-benar berubah
             if ($originalStatus !== $newStatus) {
                 
-                // 1. PENGURANGAN STOK
-                // Jika status naik dari 'awaiting_payment' ke 'processing' atau 'completed'
-                if ($originalStatus === 'awaiting_payment' && in_array($newStatus, ['processing', 'completed'])) {
-                    foreach ($order->items as $item) {
-                        $product = Product::find($item->product_id);
-                        if ($product) {
-                            $product->decrement('stock', $item->quantity);
-                        }
-                    }
-                }
-                // 2. PENGEMBALIAN STOK (RESTORE)
-                // Jika pesanan dibatalkan, TAPI stoknya sebelumnya sudah telanjur dikurangi
-                if (in_array($originalStatus, ['processing', 'completed']) && $newStatus === 'cancelled') {
-                    foreach ($order->items as $item) {
-                        $product = Product::find($item->product_id);
-                        if ($product) {
-                            $product->increment('stock', $item->quantity);
+                // 1. PENGEMBALIAN STOK (RESTORE)
+                // Karena stok sudah dikurangi sejak awal checkout (di CheckoutController),
+                // maka jika pesanan dibatalkan di tahap mana pun (selain yang sudah cancelled), stok harus dikembalikan.
+                if ($originalStatus !== 'cancelled' && $newStatus === 'cancelled') {
+                    // CEK: Apakah ini ditarik (Repossessed) karena nunggak?
+                    // Jika iya, barang masuk ke Gudang Isolasi, BUKAN kembali ke etalase toko.
+                    $isRepossessed = $order->payment && $order->payment->status === 'repossessed';
+                    
+                    if (!$isRepossessed) {
+                        foreach ($order->items as $item) {
+                            $product = Product::find($item->product_id);
+                            if ($product) {
+                                $product->increment('stock', $item->quantity);
+                            }
                         }
                     }
                 }

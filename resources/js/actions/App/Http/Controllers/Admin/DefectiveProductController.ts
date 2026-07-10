@@ -189,7 +189,7 @@ update.patch = (args: { defective_product: string | number } | [defective_produc
  * @see app/Http/Controllers/Admin/DefectiveProductController.php:57
  * @route '/admin/defective-products/{defectiveProduct}/sell'
  */
-export const sellRepossessed = (args: { defectiveProduct: string | number | { id: string | number } } | [defectiveProduct: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const sellRepossessed = (args: { defectiveProduct: number | { id: number } } | [defectiveProduct: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: sellRepossessed.url(args, options),
     method: 'post',
 })
@@ -204,7 +204,7 @@ sellRepossessed.definition = {
  * @see app/Http/Controllers/Admin/DefectiveProductController.php:57
  * @route '/admin/defective-products/{defectiveProduct}/sell'
  */
-sellRepossessed.url = (args: { defectiveProduct: string | number | { id: string | number } } | [defectiveProduct: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+sellRepossessed.url = (args: { defectiveProduct: number | { id: number } } | [defectiveProduct: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { defectiveProduct: args }
     }
@@ -237,7 +237,7 @@ sellRepossessed.url = (args: { defectiveProduct: string | number | { id: string 
  * @see app/Http/Controllers/Admin/DefectiveProductController.php:57
  * @route '/admin/defective-products/{defectiveProduct}/sell'
  */
-sellRepossessed.post = (args: { defectiveProduct: string | number | { id: string | number } } | [defectiveProduct: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+sellRepossessed.post = (args: { defectiveProduct: number | { id: number } } | [defectiveProduct: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: sellRepossessed.url(args, options),
     method: 'post',
 })
@@ -247,7 +247,7 @@ sellRepossessed.post = (args: { defectiveProduct: string | number | { id: string
  * @see app/Http/Controllers/Admin/DefectiveProductController.php:57
  * @route '/admin/defective-products/{defectiveProduct}/sell'
  */
-    const sellRepossessedForm = (args: { defectiveProduct: string | number | { id: string | number } } | [defectiveProduct: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const sellRepossessedForm = (args: { defectiveProduct: number | { id: number } } | [defectiveProduct: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: sellRepossessed.url(args, options),
         method: 'post',
     })
@@ -257,7 +257,7 @@ sellRepossessed.post = (args: { defectiveProduct: string | number | { id: string
  * @see app/Http/Controllers/Admin/DefectiveProductController.php:57
  * @route '/admin/defective-products/{defectiveProduct}/sell'
  */
-        sellRepossessedForm.post = (args: { defectiveProduct: string | number | { id: string | number } } | [defectiveProduct: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        sellRepossessedForm.post = (args: { defectiveProduct: number | { id: number } } | [defectiveProduct: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: sellRepossessed.url(args, options),
             method: 'post',
         })

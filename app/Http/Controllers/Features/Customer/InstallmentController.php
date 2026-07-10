@@ -19,6 +19,13 @@ class InstallmentController extends Controller
             ]);
         }
 
+        // Otomatis hapus transaksi Midtrans yang nyangkut (kadaluwarsa > 24 jam)
+        \App\Models\PaymentLog::where('status', 'pending')
+            ->whereNull('proof_path')
+            ->whereNotNull('snap_token')
+            ->where('created_at', '<', now()->subDay())
+            ->delete();
+
         $installments = \App\Models\Payment::with(['order.items.product', 'paymentLogs'])
             ->where('customer_id', $customer->id)
             ->whereIn('payment_method', ['credit', 'cash_gantung'])
@@ -147,5 +154,33 @@ class InstallmentController extends Controller
         return \Inertia\Inertia::render('Features/Customer/Installments/Index', [
             'installments' => $installments
         ]);
+    }
+
+    public function downloadReceipt(Request $request, $id)
+    {
+        $user = auth()->user();
+        
+        $paymentLog = \App\Models\PaymentLog::with(['payment.order.items.product', 'payment.customer.user'])
+            ->where('status', 'verified')
+            ->findOrFail($id);
+
+        // Security check: ensure this payment belongs to the logged-in user
+        if ($paymentLog->payment->customer->user_id !== $user->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $data = [
+            'log' => $paymentLog,
+            'payment' => $paymentLog->payment,
+            'customer' => $paymentLog->payment->customer,
+            'order' => $paymentLog->payment->order,
+            'product' => $paymentLog->payment->order->items->first()->product ?? null,
+        ];
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.receipt', $data);
+        
+        $filename = 'Kuitansi_Pembayaran_' . $paymentLog->id . '_' . date('Ymd', strtotime($paymentLog->paid_at)) . '.pdf';
+        
+        return $pdf->download($filename);
     }
 }

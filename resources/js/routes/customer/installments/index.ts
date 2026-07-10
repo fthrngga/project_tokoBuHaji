@@ -1,4 +1,4 @@
-import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../wayfinder'
 /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::index
  * @see app/Http/Controllers/Features/Customer/InstallmentController.php:10
@@ -77,8 +77,106 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
         })
     
     index.form = indexForm
+/**
+* @see \App\Http\Controllers\Features\Customer\InstallmentController::receipt
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:159
+ * @route '/installments/receipt/{id}'
+ */
+export const receipt = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: receipt.url(args, options),
+    method: 'get',
+})
+
+receipt.definition = {
+    methods: ["get","head"],
+    url: '/installments/receipt/{id}',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\Features\Customer\InstallmentController::receipt
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:159
+ * @route '/installments/receipt/{id}'
+ */
+receipt.url = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { id: args }
+    }
+
+    
+    if (Array.isArray(args)) {
+        args = {
+                    id: args[0],
+                }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+                        id: args.id,
+                }
+
+    return receipt.definition.url
+            .replace('{id}', parsedArgs.id.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\Features\Customer\InstallmentController::receipt
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:159
+ * @route '/installments/receipt/{id}'
+ */
+receipt.get = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: receipt.url(args, options),
+    method: 'get',
+})
+/**
+* @see \App\Http\Controllers\Features\Customer\InstallmentController::receipt
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:159
+ * @route '/installments/receipt/{id}'
+ */
+receipt.head = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: receipt.url(args, options),
+    method: 'head',
+})
+
+    /**
+* @see \App\Http\Controllers\Features\Customer\InstallmentController::receipt
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:159
+ * @route '/installments/receipt/{id}'
+ */
+    const receiptForm = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        action: receipt.url(args, options),
+        method: 'get',
+    })
+
+            /**
+* @see \App\Http\Controllers\Features\Customer\InstallmentController::receipt
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:159
+ * @route '/installments/receipt/{id}'
+ */
+        receiptForm.get = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: receipt.url(args, options),
+            method: 'get',
+        })
+            /**
+* @see \App\Http\Controllers\Features\Customer\InstallmentController::receipt
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:159
+ * @route '/installments/receipt/{id}'
+ */
+        receiptForm.head = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: receipt.url(args, {
+                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                            _method: 'HEAD',
+                            ...(options?.query ?? options?.mergeQuery ?? {}),
+                        }
+                    }),
+            method: 'get',
+        })
+    
+    receipt.form = receiptForm
 const installments = {
     index,
+receipt,
 }
 
 export default installments
