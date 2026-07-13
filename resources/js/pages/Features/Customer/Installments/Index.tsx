@@ -215,6 +215,19 @@ interface Installment {
 
 export default function InstallmentIndex({ auth, installments }: { auth: any, installments: Installment[] }) {
     const [selectedPaymentItem, setSelectedPaymentItem] = useState<Installment | null>(null);
+    const [selectedReceipts, setSelectedReceipts] = useState<number[]>([]);
+
+    const toggleReceipt = (id: number) => {
+        setSelectedReceipts(prev => 
+            prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]
+        );
+    };
+
+    const handleBulkDownload = () => {
+        if (selectedReceipts.length === 0) return;
+        const queryParams = selectedReceipts.map(id => `log_ids[]=${id}`).join('&');
+        window.open(route('customer.installments.receipt.bulk') + '?' + queryParams, '_blank');
+    };
 
     // Calculate total active payments across all installments
     const totalActivePaymentsCount = installments.reduce((acc, curr) => acc + (curr.activePayments?.length || 0), 0);
@@ -393,11 +406,24 @@ export default function InstallmentIndex({ auth, installments }: { auth: any, in
                                                 <span className="font-medium text-foreground">Lihat Riwayat Pembayaran ({item.history.length})</span>
                                             </AccordionTrigger>
                                             <AccordionContent>
+                                                <div className="flex justify-end mb-4 px-6">
+                                                    <Button 
+                                                        variant="outline" 
+                                                        size="sm" 
+                                                        onClick={handleBulkDownload}
+                                                        disabled={selectedReceipts.length === 0}
+                                                        className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                                                    >
+                                                        <Download className="h-4 w-4 mr-2" />
+                                                        Unduh Kuitansi Terpilih ({selectedReceipts.length})
+                                                    </Button>
+                                                </div>
                                                 <div className="overflow-x-auto">
                                                     <Table>
                                                         <TableHeader className="bg-muted/30">
                                                             <TableRow>
-                                                                <TableHead className="w-[100px] pl-6">Angsuran Ke</TableHead>
+                                                                <TableHead className="w-[50px] pl-6"></TableHead>
+                                                                <TableHead className="w-[100px]">Angsuran Ke</TableHead>
                                                                 <TableHead>Tanggal Bayar</TableHead>
                                                                 <TableHead>Metode</TableHead>
                                                                 <TableHead>Jumlah</TableHead>
@@ -408,7 +434,17 @@ export default function InstallmentIndex({ auth, installments }: { auth: any, in
                                                         <TableBody>
                                                             {item.history.map((hist) => (
                                                                 <TableRow key={hist.id}>
-                                                                    <TableCell className="pl-6 font-medium">{hist.installmentKe}</TableCell>
+                                                                    <TableCell className="pl-6">
+                                                                        {hist.status === 'Verified' && (
+                                                                            <input 
+                                                                                type="checkbox" 
+                                                                                className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 w-4 h-4"
+                                                                                checked={selectedReceipts.includes(hist.id)}
+                                                                                onChange={() => toggleReceipt(hist.id)}
+                                                                            />
+                                                                        )}
+                                                                    </TableCell>
+                                                                    <TableCell className="font-medium">{hist.installmentKe}</TableCell>
                                                                     <TableCell>{hist.date}</TableCell>
                                                                     <TableCell>{hist.method}</TableCell>
                                                                     <TableCell>
@@ -437,12 +473,25 @@ export default function InstallmentIndex({ auth, installments }: { auth: any, in
                                     </Accordion>
                                 </CardContent>
 
-                                {item.status !== 'paid_off' && (
+                                {item.status !== 'paid_off' ? (
                                     <CardFooter className="bg-blue-50/50 dark:bg-blue-900/10 p-4 flex justify-between items-center">
                                         <p className="text-sm text-blue-700 dark:text-blue-300">
                                             Ingin membayar angsuran bulan ini?
                                         </p>
                                         <Button size="sm" onClick={() => setSelectedPaymentItem(item)}>Bayar Sekarang</Button>
+                                    </CardFooter>
+                                ) : (
+                                    <CardFooter className="bg-green-50/50 dark:bg-green-900/10 p-4 flex justify-between items-center border-t border-green-100 dark:border-green-800">
+                                        <p className="text-sm font-semibold text-green-700 dark:text-green-300 flex items-center gap-2">
+                                            <CheckCircle2 className="w-5 h-5" />
+                                            Kontrak ini sudah Lunas 100%
+                                        </p>
+                                        <a href={route('customer.installments.certificate', item.id)} target="_blank" rel="noreferrer">
+                                            <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white shadow">
+                                                <Download className="w-4 h-4 mr-2" />
+                                                Unduh Surat Lunas
+                                            </Button>
+                                        </a>
                                     </CardFooter>
                                 )}
                             </Card>

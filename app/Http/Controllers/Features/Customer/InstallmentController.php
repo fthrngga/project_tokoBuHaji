@@ -183,4 +183,71 @@ class InstallmentController extends Controller
         
         return $pdf->download($filename);
     }
+    public function downloadBulkReceipts(Request $request)
+    {
+        $request->validate([
+            'log_ids' => 'required|array',
+            'log_ids.*' => 'exists:payment_logs,id'
+        ]);
+
+        $user = auth()->user();
+        
+        $paymentLogs = \App\Models\PaymentLog::with(['payment.order.items.product', 'payment.customer.user'])
+            ->whereIn('id', $request->log_ids)
+            ->where('status', 'verified')
+            ->orderBy('installment_number', 'asc')
+            ->get();
+
+        if ($paymentLogs->isEmpty()) {
+            return back()->withErrors(['message' => 'Tidak ada kuitansi valid yang dipilih.']);
+        }
+
+        // Security check
+        foreach ($paymentLogs as $log) {
+            if ($log->payment->customer->user_id !== $user->id) {
+                abort(403, 'Unauthorized action.');
+            }
+        }
+
+        $data = [
+            'logs' => $paymentLogs
+        ];
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.receipt_bulk', $data);
+        
+        $filename = 'Kuitansi_Massal_CTR_' . $paymentLogs->first()->payment_id . '_' . date('YmdHis') . '.pdf';
+        
+        return $pdf->download($filename);
+    }
+
+    public function downloadCertificate(Request $request, $id)
+    {
+        $user = auth()->user();
+        
+        $payment = \App\Models\Payment::with(['order.items.product', 'customer.user'])
+            ->findOrFail($id);
+
+        if ($payment->customer->user_id !== $user->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if ($payment->status !== 'paid_off') {
+            abort(400, 'Kontrak belum lunas.');
+        }
+
+        $data = [
+            'payment' => $payment,
+            'customer' => $payment->customer,
+            'order' => $payment->order,
+            'product' => $payment->order->items->first()->product ?? null,
+        ];
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.certificate', $data);
+        // Set paper to landscape A4 for certificate
+        $pdf->setPaper('a4', 'landscape');
+        
+        $filename = 'Surat_Keterangan_Lunas_CTR_' . $payment->id . '.pdf';
+        
+        return $pdf->download($filename);
+    }
 }

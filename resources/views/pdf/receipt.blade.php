@@ -100,6 +100,44 @@
             transform: rotate(-15deg);
             z-index: -1;
         }
+        .signature-box {
+            float: right;
+            width: 250px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .signature-box .signature-title {
+            margin-bottom: 70px;
+            font-weight: bold;
+        }
+        .signature-box .signature-name {
+            font-weight: bold;
+            text-decoration: underline;
+        }
+        /* Mengatur posisi gambar cap dan ttd agar menumpuk secara realistis */
+        .signature-wrapper {
+            position: relative;
+            height: 100px;
+            margin-bottom: 10px;
+        }
+        .img-stamp {
+            position: absolute;
+            top: -40px;
+            left: 20px;
+            width: 140px;
+            opacity: 0.85; /* Sedikit transparan agar terlihat seperti cap asli */
+            z-index: 1;
+        }
+        .img-signature {
+            position: absolute;
+            top: -10px;
+            left: 50px;
+            width: 120px;
+            z-index: 2; /* TTD di atas cap */
+        }
+        .clear {
+            clear: both;
+        }
     </style>
 </head>
 <body>
@@ -108,8 +146,8 @@
 
     <div class="header">
         <h1>TOKO PAK HAJI ELEKTRONIK</h1>
-        <p>Jl. Sudirman No. 123, Kota Pekanbaru, Riau</p>
-        <p>Telp: (0761) 123456 | Email: info@tokobuhaji.com</p>
+        <p>Jl. Jend. Sudirman, Koto Raja, Kec. Siak Kecil, Kabupaten Bengkalis, Riau 28771</p>
+        <p>Telp: 082321671759 | Email: tokohajielektronik@gmail.com</p>
     </div>
 
     <div class="invoice-title">KUITANSI PEMBAYARAN</div>
@@ -167,9 +205,31 @@
         <p>Total Dibayar: Rp {{ number_format($log->amount, 0, ',', '.') }}</p>
     </div>
 
+    <!-- Tanda Tangan & Cap Toko -->
+    <div class="signature-box">
+        <div class="signature-title">Hormat Kami,</div>
+        
+        <div class="signature-wrapper">
+            <!-- Cap Toko -->
+            @if(file_exists(public_path('image/stamp.png')))
+                <img src="{{ public_path('image/stamp.png') }}" class="img-stamp" alt="Cap Toko">
+            @endif
+
+            <!-- Tanda Tangan -->
+            @if(file_exists(public_path('image/signature.png')))
+                <img src="{{ public_path('image/signature.png') }}" class="img-signature" alt="Tanda Tangan">
+            @endif
+        </div>
+
+        <div class="signature-name">Ernawati (Buk Haji)</div>
+        <div>Pemilik Toko</div>
+    </div>
+    
+    <div class="clear"></div>
+
     <div class="footer">
         <p>Terima kasih atas pembayaran Anda. Harap simpan kuitansi ini sebagai bukti pembayaran yang sah.</p>
-        <p>Dokumen ini dicetak secara otomatis oleh sistem Toko Pak Haji Elektronik dan sah tanpa tanda tangan basah.</p>
+        <p>Dokumen ini dicetak secara otomatis oleh sistem Toko Pak Haji Elektronik.</p>
     </div>
 
 </body>

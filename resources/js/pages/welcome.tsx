@@ -6,6 +6,7 @@ import Footer from './welcome/Partials/Footer';
 import CategoryBento from './welcome/Partials/CategoryBento';
 import HorizontalProductScroll from './welcome/Partials/HorizontalProductScroll';
 import EditorialCraftsmanship from './welcome/Partials/EditorialCraftsmanship';
+import ContactSection from './welcome/Partials/ContactSection';
 
 export default function Welcome() {
     const { auth, featuredProducts, recommendedProducts } = usePage<{
@@ -32,6 +33,7 @@ export default function Welcome() {
                         products={recommendedProducts}
                         title={auth.user ? "Untuk Anda" : "Produk Pilihan"}
                     />
+                    <ContactSection />
                 </main>
 
                 <Footer />

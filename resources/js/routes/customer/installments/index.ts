@@ -1,4 +1,5 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../wayfinder'
+import receipt from './receipt'
 /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::index
  * @see app/Http/Controllers/Features/Customer/InstallmentController.php:10
@@ -174,9 +175,107 @@ receipt.head = (args: { id: string | number } | [id: string | number ] | string 
         })
     
     receipt.form = receiptForm
+/**
+* @see \App\Http\Controllers\Features\Customer\InstallmentController::certificate
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:223
+ * @route '/installments/certificate/{id}'
+ */
+export const certificate = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: certificate.url(args, options),
+    method: 'get',
+})
+
+certificate.definition = {
+    methods: ["get","head"],
+    url: '/installments/certificate/{id}',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\Features\Customer\InstallmentController::certificate
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:223
+ * @route '/installments/certificate/{id}'
+ */
+certificate.url = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { id: args }
+    }
+
+    
+    if (Array.isArray(args)) {
+        args = {
+                    id: args[0],
+                }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+                        id: args.id,
+                }
+
+    return certificate.definition.url
+            .replace('{id}', parsedArgs.id.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\Features\Customer\InstallmentController::certificate
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:223
+ * @route '/installments/certificate/{id}'
+ */
+certificate.get = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: certificate.url(args, options),
+    method: 'get',
+})
+/**
+* @see \App\Http\Controllers\Features\Customer\InstallmentController::certificate
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:223
+ * @route '/installments/certificate/{id}'
+ */
+certificate.head = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: certificate.url(args, options),
+    method: 'head',
+})
+
+    /**
+* @see \App\Http\Controllers\Features\Customer\InstallmentController::certificate
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:223
+ * @route '/installments/certificate/{id}'
+ */
+    const certificateForm = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        action: certificate.url(args, options),
+        method: 'get',
+    })
+
+            /**
+* @see \App\Http\Controllers\Features\Customer\InstallmentController::certificate
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:223
+ * @route '/installments/certificate/{id}'
+ */
+        certificateForm.get = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: certificate.url(args, options),
+            method: 'get',
+        })
+            /**
+* @see \App\Http\Controllers\Features\Customer\InstallmentController::certificate
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:223
+ * @route '/installments/certificate/{id}'
+ */
+        certificateForm.head = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: certificate.url(args, {
+                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                            _method: 'HEAD',
+                            ...(options?.query ?? options?.mergeQuery ?? {}),
+                        }
+                    }),
+            method: 'get',
+        })
+    
+    certificate.form = certificateForm
 const installments = {
     index,
 receipt,
+certificate,
 }
 
 export default installments
