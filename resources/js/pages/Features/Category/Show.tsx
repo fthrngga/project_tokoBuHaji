@@ -37,8 +37,12 @@ export default function Show({ category, products, siblings = [] }: Props) {
 
                 <main className="flex-1 pb-32">
                     {/* Header Kategori Premium */}
-                    <div className="bg-[#0d1e2e]/50 border-b border-[#577399]/20">
-                        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+                    <div className="bg-[#0d1e2e]/50 border-b border-[#577399]/20 relative overflow-hidden">
+                        {/* Decorative Background Elements */}
+                        <div className="absolute top-0 right-0 -mr-32 -mt-32 w-96 h-96 rounded-full bg-[#FE5F55]/10 blur-3xl pointer-events-none" />
+                        <div className="absolute bottom-0 left-0 -ml-32 -mb-32 w-96 h-96 rounded-full bg-[#577399]/10 blur-3xl pointer-events-none" />
+
+                        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 relative z-10">
                             {/* Breadcrumb */}
                             <nav className="flex items-center space-x-2 text-sm text-[#bdd5ea]/60 mb-6 font-medium">
                                 <Link href="/" className="hover:text-[#FE5F55] transition-colors">Beranda</Link>
@@ -56,10 +60,10 @@ export default function Show({ category, products, siblings = [] }: Props) {
 
                             <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
                                 <div className="max-w-2xl">
-                                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-white leading-[1.1]">
+                                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-white leading-[1.1] animate-in fade-in slide-in-from-bottom-4 duration-700">
                                         {category.name}
                                     </h1>
-                                    <p className="mt-6 text-lg text-[#bdd5ea]/80 leading-relaxed">
+                                    <p className="mt-6 text-lg text-[#bdd5ea]/80 leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
                                         Eksplorasi koleksi {category.name.toLowerCase()} pilihan kami. Didesain dengan perhatian terhadap detail untuk menyempurnakan ruang dan gaya hidup Anda.
                                     </p>
                                 </div>
@@ -67,17 +71,17 @@ export default function Show({ category, products, siblings = [] }: Props) {
 
                             {/* Subcategory Filter Chips */}
                             {(subcategories && subcategories.length > 0) && (
-                                <div className="mt-12 flex items-center gap-3 overflow-x-auto pb-4 hide-scrollbar">
+                                <div className="mt-12 flex items-center gap-3 overflow-x-auto pb-4 hide-scrollbar animate-in fade-in duration-700 delay-300">
                                     <style>{`
                                         .hide-scrollbar::-webkit-scrollbar { display: none; }
                                     `}</style>
                                     
                                     <Link 
-                                        href={`/kategori/${parentSlug}`}
+                                        href={`/kategori`}
                                         className={`shrink-0 px-6 py-2.5 rounded-full text-sm font-medium border transition-all ${
                                             !isChild 
-                                            ? 'bg-[#FE5F55] text-white border-[#FE5F55] shadow-[0_4px_15px_rgba(254,95,85,0.4)]' 
-                                            : 'bg-[#0d1e2e] text-[#bdd5ea] border-[#577399]/30 hover:border-[#FE5F55]/50'
+                                            ? 'bg-[#FE5F55] text-white border-[#FE5F55] shadow-[0_4px_15px_rgba(254,95,85,0.4)] hover:scale-105' 
+                                            : 'bg-[#0d1e2e] text-[#bdd5ea] border-[#577399]/30 hover:border-[#FE5F55]/50 hover:bg-[#577399]/10 hover:text-white'
                                         }`}
                                     >
                                         Semua
@@ -89,8 +93,8 @@ export default function Show({ category, products, siblings = [] }: Props) {
                                             href={`/kategori/${sub.slug}`}
                                             className={`shrink-0 px-6 py-2.5 rounded-full text-sm font-medium border transition-all ${
                                                 category.id === sub.id 
-                                                ? 'bg-[#FE5F55] text-white border-[#FE5F55] shadow-[0_4px_15px_rgba(254,95,85,0.4)]' 
-                                                : 'bg-[#0d1e2e] text-[#bdd5ea] border-[#577399]/30 hover:border-[#FE5F55]/50'
+                                                ? 'bg-[#FE5F55] text-white border-[#FE5F55] shadow-[0_4px_15px_rgba(254,95,85,0.4)] hover:scale-105' 
+                                                : 'bg-[#0d1e2e] text-[#bdd5ea] border-[#577399]/30 hover:border-[#FE5F55]/50 hover:bg-[#577399]/10 hover:text-white'
                                             }`}
                                         >
                                             {sub.name}

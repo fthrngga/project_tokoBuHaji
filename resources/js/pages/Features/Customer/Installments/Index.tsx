@@ -32,34 +32,39 @@ function MidtransButton({ orderId, installmentAmount = 0, tunggakan = 0, tunggak
 
             if (window.snap) {
                 if (onPayStart) onPayStart();
-                window.snap.pay(snapToken, {
-                    onSuccess: async function (result: any) {
-                        await axios.post('/api/midtrans/callback', {
-                            transaction_status: result.transaction_status || 'settlement',
-                            payment_type: result.payment_type,
-                            order_id: result.order_id,
-                            fraud_status: result.fraud_status || 'accept'
-                        });
-                        if (onSuccess) onSuccess();
-                        window.location.reload();
-                    },
-                    onPending: async function (result: any) {
-                        await axios.post('/api/midtrans/callback', {
-                            transaction_status: result.transaction_status || 'pending',
-                            payment_type: result.payment_type,
-                            order_id: result.order_id,
-                            fraud_status: result.fraud_status || 'accept'
-                        });
-                        if (onSuccess) onSuccess();
-                        window.location.reload();
-                    },
-                    onError: function (result: any) {
-                        alert("Pembayaran gagal!");
-                    },
-                    onClose: function () {
-                        setLoading(false);
-                    }
-                });
+                try {
+                    window.snap.pay(snapToken, {
+                        onSuccess: async function (result: any) {
+                            await axios.post('/api/midtrans/callback', {
+                                transaction_status: result.transaction_status || 'settlement',
+                                payment_type: result.payment_type,
+                                order_id: result.order_id,
+                                fraud_status: result.fraud_status || 'accept'
+                            });
+                            if (onSuccess) onSuccess();
+                            window.location.reload();
+                        },
+                        onPending: async function (result: any) {
+                            await axios.post('/api/midtrans/callback', {
+                                transaction_status: result.transaction_status || 'pending',
+                                payment_type: result.payment_type,
+                                order_id: result.order_id,
+                                fraud_status: result.fraud_status || 'accept'
+                            });
+                            if (onSuccess) onSuccess();
+                            window.location.reload();
+                        },
+                        onError: function (result: any) {
+                            alert("Pembayaran gagal!");
+                        },
+                        onClose: function () {
+                            setLoading(false);
+                        }
+                    });
+                } catch (e) {
+                    console.error("Midtrans snap error:", e);
+                    window.location.reload();
+                }
             } else {
                 alert("Midtrans script not loaded.");
                 setLoading(false);
@@ -291,26 +296,31 @@ export default function InstallmentIndex({ auth, installments }: { auth: any, in
                                                     className="bg-amber-500 hover:bg-amber-600 text-white font-semibold shadow-sm transition-all hover:shadow"
                                                     onClick={() => {
                                                         if (payment.snap_token && window.snap) {
-                                                            window.snap.pay(payment.snap_token, {
-                                                                onSuccess: async function (result: any) {
-                                                                    await axios.post('/api/midtrans/callback', {
-                                                                        transaction_status: result.transaction_status || 'settlement',
-                                                                        payment_type: result.payment_type,
-                                                                        order_id: result.order_id,
-                                                                        fraud_status: result.fraud_status || 'accept'
-                                                                    });
-                                                                    window.location.reload();
-                                                                },
-                                                                onPending: async function (result: any) {
-                                                                    await axios.post('/api/midtrans/callback', {
-                                                                        transaction_status: result.transaction_status || 'pending',
-                                                                        payment_type: result.payment_type,
-                                                                        order_id: result.order_id,
-                                                                        fraud_status: result.fraud_status || 'accept'
-                                                                    });
-                                                                    window.location.reload();
-                                                                }
-                                                            });
+                                                            try {
+                                                                window.snap.pay(payment.snap_token, {
+                                                                    onSuccess: async function (result: any) {
+                                                                        await axios.post('/api/midtrans/callback', {
+                                                                            transaction_status: result.transaction_status || 'settlement',
+                                                                            payment_type: result.payment_type,
+                                                                            order_id: result.order_id,
+                                                                            fraud_status: result.fraud_status || 'accept'
+                                                                        });
+                                                                        window.location.reload();
+                                                                    },
+                                                                    onPending: async function (result: any) {
+                                                                        await axios.post('/api/midtrans/callback', {
+                                                                            transaction_status: result.transaction_status || 'pending',
+                                                                            payment_type: result.payment_type,
+                                                                            order_id: result.order_id,
+                                                                            fraud_status: result.fraud_status || 'accept'
+                                                                        });
+                                                                        window.location.reload();
+                                                                    }
+                                                                });
+                                                            } catch (e) {
+                                                                console.error("Midtrans snap error:", e);
+                                                                window.location.reload(); // Force reload to clear snap internal state
+                                                            }
                                                         } else {
                                                             alert('Mohon maaf, sesi pembayaran ini sudah kadaluarsa. Silakan klik "Bayar Sekarang" pada angsuran terkait untuk membuat tagihan baru.');
                                                         }

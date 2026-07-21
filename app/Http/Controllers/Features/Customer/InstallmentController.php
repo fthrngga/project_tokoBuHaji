@@ -49,8 +49,12 @@ class InstallmentController extends Controller
                     $remainingDebt = max(0, $totalGantung - ($payment->down_payment ?? 0) - $actualVerifiedAmount);
                     $totalBillThisMonth = $remainingDebt;
                 } else {
-                    // Kalkulasi Tunggakan Waktu Nyata berdasarkan umur kredit (Bulan)
-                    $monthsElapsed = min($payment->duration_months, (int) floor($payment->created_at->diffInMonths(now())));
+                    $isZeroDp = ($payment->down_payment == 0);
+                    $monthsElapsed = (int) floor($payment->created_at->diffInMonths(now()));
+                    if ($isZeroDp) {
+                        $monthsElapsed += 1; // Jika tanpa DP, cicilan 1 harus dibayar di bulan ke-0
+                    }
+                    $monthsElapsed = min($payment->duration_months, $monthsElapsed);
                     $expectedTotal = $monthsElapsed * $payment->installment_amount;
                     
                     $tunggakan = max(0, $expectedTotal - $actualVerifiedAmount);
@@ -95,7 +99,9 @@ class InstallmentController extends Controller
                         $dueStatus = 'safe';
                     }
                 } else if ($remainingMonths > 0) {
-                    $nextDueDateCarbon = $payment->created_at->copy()->addMonths($monthsPaidFully + 1);
+                    $isZeroDp = ($payment->down_payment == 0);
+                    $monthsToAdd = $isZeroDp ? $monthsPaidFully : ($monthsPaidFully + 1);
+                    $nextDueDateCarbon = $payment->created_at->copy()->addMonths($monthsToAdd);
                     $daysUntilDue = (int) now()->startOfDay()->diffInDays($nextDueDateCarbon->startOfDay(), false);
 
                     if ($daysUntilDue < 0) {

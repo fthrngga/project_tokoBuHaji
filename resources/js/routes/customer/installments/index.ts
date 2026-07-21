@@ -80,7 +80,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     index.form = indexForm
 /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::receipt
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:159
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:165
  * @route '/installments/receipt/{id}'
  */
 export const receipt = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -95,7 +95,7 @@ receipt.definition = {
 
 /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::receipt
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:159
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:165
  * @route '/installments/receipt/{id}'
  */
 receipt.url = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -123,7 +123,7 @@ receipt.url = (args: { id: string | number } | [id: string | number ] | string |
 
 /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::receipt
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:159
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:165
  * @route '/installments/receipt/{id}'
  */
 receipt.get = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -132,7 +132,7 @@ receipt.get = (args: { id: string | number } | [id: string | number ] | string |
 })
 /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::receipt
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:159
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:165
  * @route '/installments/receipt/{id}'
  */
 receipt.head = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -142,7 +142,7 @@ receipt.head = (args: { id: string | number } | [id: string | number ] | string 
 
     /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::receipt
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:159
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:165
  * @route '/installments/receipt/{id}'
  */
     const receiptForm = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -152,7 +152,7 @@ receipt.head = (args: { id: string | number } | [id: string | number ] | string 
 
             /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::receipt
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:159
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:165
  * @route '/installments/receipt/{id}'
  */
         receiptForm.get = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -161,7 +161,7 @@ receipt.head = (args: { id: string | number } | [id: string | number ] | string 
         })
             /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::receipt
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:159
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:165
  * @route '/installments/receipt/{id}'
  */
         receiptForm.head = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -177,7 +177,7 @@ receipt.head = (args: { id: string | number } | [id: string | number ] | string 
     receipt.form = receiptForm
 /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::certificate
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:223
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:229
  * @route '/installments/certificate/{id}'
  */
 export const certificate = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -192,7 +192,7 @@ certificate.definition = {
 
 /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::certificate
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:223
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:229
  * @route '/installments/certificate/{id}'
  */
 certificate.url = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -220,7 +220,7 @@ certificate.url = (args: { id: string | number } | [id: string | number ] | stri
 
 /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::certificate
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:223
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:229
  * @route '/installments/certificate/{id}'
  */
 certificate.get = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -229,7 +229,7 @@ certificate.get = (args: { id: string | number } | [id: string | number ] | stri
 })
 /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::certificate
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:223
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:229
  * @route '/installments/certificate/{id}'
  */
 certificate.head = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -239,7 +239,7 @@ certificate.head = (args: { id: string | number } | [id: string | number ] | str
 
     /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::certificate
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:223
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:229
  * @route '/installments/certificate/{id}'
  */
     const certificateForm = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -249,7 +249,7 @@ certificate.head = (args: { id: string | number } | [id: string | number ] | str
 
             /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::certificate
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:223
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:229
  * @route '/installments/certificate/{id}'
  */
         certificateForm.get = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -258,7 +258,7 @@ certificate.head = (args: { id: string | number } | [id: string | number ] | str
         })
             /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::certificate
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:223
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:229
  * @route '/installments/certificate/{id}'
  */
         certificateForm.head = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({

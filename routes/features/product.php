@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Features\Product\ProductController;
 
 Route::get('/produk/{slug}', [ProductController::class, 'show'])->name('products.show');
+Route::get('/kategori', [\App\Features\Product\CategoryController::class, 'index'])->name('categories.index');
 Route::get('/kategori/{slug}', [\App\Features\Product\CategoryController::class, 'show'])->name('categories.show');
 
 Route::resource('products', ProductController::class)

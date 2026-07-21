@@ -29,7 +29,16 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 
 Route::middleware(['auth', 'verified', 'role:customer'])->group(function () {
     Route::get('/profil-saya', function () {
-        return Inertia::render('Customer/Profile');
+        $user = auth()->user();
+        $customer = \App\Features\Customer\Customer::where('user_id', $user->id)->first();
+        $addresses = \App\Models\Address::where('user_id', $user->id)->get();
+        
+        return Inertia::render('Customer/Profile', [
+            'customer' => $customer,
+            'addresses' => $addresses,
+            'mustVerifyEmail' => $user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail(),
+            'status' => session('status'),
+        ]);
     })->name('profile');
 
 

@@ -141,16 +141,16 @@ export default function Index({ cartItems, total }: Props) {
                                 <div className="lg:col-span-8">
                                     {/* Header Tabel (Desktop) */}
                                     <div className="hidden md:grid grid-cols-12 gap-4 pb-4 border-b border-border text-sm font-semibold text-muted-foreground">
-                                        <div className="col-span-1 text-center">
+                                        <div className="col-span-1 text-center flex items-center justify-center">
                                             <Checkbox
                                                 checked={isAllSelected}
                                                 onCheckedChange={(checked) => toggleAll(checked === true)}
                                             />
                                         </div>
-                                        <div className="col-span-5">Produk</div>
-                                        <div className="col-span-2 text-right">Harga</div>
+                                        <div className="col-span-4">Produk</div>
+                                        <div className="col-span-2 text-center">Harga</div>
                                         <div className="col-span-2 text-center">Jumlah</div>
-                                        <div className="col-span-2 text-right">Subtotal</div>
+                                        <div className="col-span-3 text-right pr-4">Subtotal</div>
                                     </div>
 
                                     <div className="mt-4 space-y-4 md:space-y-6">
@@ -166,7 +166,7 @@ export default function Index({ cartItems, total }: Props) {
                                                 </div>
 
                                                 {/* Image and Title */}
-                                                <div className="col-span-1 md:col-span-5 flex flex-1 gap-3 md:gap-4">
+                                                <div className="col-span-1 md:col-span-4 flex gap-3 md:gap-4 overflow-hidden">
                                                     <div className="h-20 w-20 md:h-24 md:w-24 flex-shrink-0 overflow-hidden rounded-md border border-border bg-card">
                                                         <img
                                                             src={item.product.images.length > 0 ? `/storage/${item.product.images[0].image_path}` : 'https://placehold.co/100x100?text=No+Image'}
@@ -237,7 +237,7 @@ export default function Index({ cartItems, total }: Props) {
                                                 </div>
 
                                                 {/* Desktop Price */}
-                                                <div className="hidden md:block col-span-2 text-right font-normal">
+                                                <div className="hidden md:block col-span-2 text-center font-normal whitespace-nowrap">
                                                     {formatCurrency(item.variant?.selling_price || item.product.selling_price)}
                                                 </div>
 
@@ -265,14 +265,14 @@ export default function Index({ cartItems, total }: Props) {
                                                 </div>
 
                                                 {/* Desktop Subtotal & Delete */}
-                                                <div className="hidden md:flex col-span-2 justify-end items-center">
-                                                    <div className="flex items-center gap-4">
-                                                        <span className="font-bold text-foreground">
+                                                <div className="hidden md:flex col-span-3 justify-end items-center pr-2">
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="font-bold text-foreground whitespace-nowrap text-[15px]">
                                                             {formatCurrency(item.quantity * (item.variant?.selling_price || item.product.selling_price))}
                                                         </span>
                                                         <button
                                                             onClick={() => confirmDelete(item.id)}
-                                                            className="text-gray-400 hover:text-red-500"
+                                                            className="text-gray-400 hover:text-red-500 flex-shrink-0"
                                                             title="Hapus item"
                                                         >
                                                             <Trash2 className="h-5 w-5" />

@@ -79,7 +79,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     index.form = indexForm
 /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::downloadReceipt
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:159
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:165
  * @route '/installments/receipt/{id}'
  */
 export const downloadReceipt = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -94,7 +94,7 @@ downloadReceipt.definition = {
 
 /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::downloadReceipt
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:159
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:165
  * @route '/installments/receipt/{id}'
  */
 downloadReceipt.url = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -122,7 +122,7 @@ downloadReceipt.url = (args: { id: string | number } | [id: string | number ] | 
 
 /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::downloadReceipt
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:159
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:165
  * @route '/installments/receipt/{id}'
  */
 downloadReceipt.get = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -131,7 +131,7 @@ downloadReceipt.get = (args: { id: string | number } | [id: string | number ] | 
 })
 /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::downloadReceipt
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:159
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:165
  * @route '/installments/receipt/{id}'
  */
 downloadReceipt.head = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -141,7 +141,7 @@ downloadReceipt.head = (args: { id: string | number } | [id: string | number ] |
 
     /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::downloadReceipt
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:159
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:165
  * @route '/installments/receipt/{id}'
  */
     const downloadReceiptForm = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -151,7 +151,7 @@ downloadReceipt.head = (args: { id: string | number } | [id: string | number ] |
 
             /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::downloadReceipt
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:159
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:165
  * @route '/installments/receipt/{id}'
  */
         downloadReceiptForm.get = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -160,7 +160,7 @@ downloadReceipt.head = (args: { id: string | number } | [id: string | number ] |
         })
             /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::downloadReceipt
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:159
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:165
  * @route '/installments/receipt/{id}'
  */
         downloadReceiptForm.head = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -176,7 +176,7 @@ downloadReceipt.head = (args: { id: string | number } | [id: string | number ] |
     downloadReceipt.form = downloadReceiptForm
 /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::downloadBulkReceipts
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:186
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:192
  * @route '/installments/receipts/bulk'
  */
 export const downloadBulkReceipts = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -191,7 +191,7 @@ downloadBulkReceipts.definition = {
 
 /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::downloadBulkReceipts
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:186
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:192
  * @route '/installments/receipts/bulk'
  */
 downloadBulkReceipts.url = (options?: RouteQueryOptions) => {
@@ -200,7 +200,7 @@ downloadBulkReceipts.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::downloadBulkReceipts
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:186
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:192
  * @route '/installments/receipts/bulk'
  */
 downloadBulkReceipts.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -209,7 +209,7 @@ downloadBulkReceipts.get = (options?: RouteQueryOptions): RouteDefinition<'get'>
 })
 /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::downloadBulkReceipts
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:186
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:192
  * @route '/installments/receipts/bulk'
  */
 downloadBulkReceipts.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -219,7 +219,7 @@ downloadBulkReceipts.head = (options?: RouteQueryOptions): RouteDefinition<'head
 
     /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::downloadBulkReceipts
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:186
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:192
  * @route '/installments/receipts/bulk'
  */
     const downloadBulkReceiptsForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -229,7 +229,7 @@ downloadBulkReceipts.head = (options?: RouteQueryOptions): RouteDefinition<'head
 
             /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::downloadBulkReceipts
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:186
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:192
  * @route '/installments/receipts/bulk'
  */
         downloadBulkReceiptsForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -238,7 +238,7 @@ downloadBulkReceipts.head = (options?: RouteQueryOptions): RouteDefinition<'head
         })
             /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::downloadBulkReceipts
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:186
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:192
  * @route '/installments/receipts/bulk'
  */
         downloadBulkReceiptsForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -254,7 +254,7 @@ downloadBulkReceipts.head = (options?: RouteQueryOptions): RouteDefinition<'head
     downloadBulkReceipts.form = downloadBulkReceiptsForm
 /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::downloadCertificate
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:223
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:229
  * @route '/installments/certificate/{id}'
  */
 export const downloadCertificate = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -269,7 +269,7 @@ downloadCertificate.definition = {
 
 /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::downloadCertificate
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:223
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:229
  * @route '/installments/certificate/{id}'
  */
 downloadCertificate.url = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -297,7 +297,7 @@ downloadCertificate.url = (args: { id: string | number } | [id: string | number 
 
 /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::downloadCertificate
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:223
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:229
  * @route '/installments/certificate/{id}'
  */
 downloadCertificate.get = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -306,7 +306,7 @@ downloadCertificate.get = (args: { id: string | number } | [id: string | number 
 })
 /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::downloadCertificate
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:223
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:229
  * @route '/installments/certificate/{id}'
  */
 downloadCertificate.head = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -316,7 +316,7 @@ downloadCertificate.head = (args: { id: string | number } | [id: string | number
 
     /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::downloadCertificate
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:223
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:229
  * @route '/installments/certificate/{id}'
  */
     const downloadCertificateForm = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -326,7 +326,7 @@ downloadCertificate.head = (args: { id: string | number } | [id: string | number
 
             /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::downloadCertificate
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:223
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:229
  * @route '/installments/certificate/{id}'
  */
         downloadCertificateForm.get = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -335,7 +335,7 @@ downloadCertificate.head = (args: { id: string | number } | [id: string | number
         })
             /**
 * @see \App\Http\Controllers\Features\Customer\InstallmentController::downloadCertificate
- * @see app/Http/Controllers/Features/Customer/InstallmentController.php:223
+ * @see app/Http/Controllers/Features/Customer/InstallmentController.php:229
  * @route '/installments/certificate/{id}'
  */
         downloadCertificateForm.head = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({

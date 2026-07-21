@@ -119,6 +119,25 @@ export default function FormPage({ auth, item, categories = [] }: PageProps<{ it
         setImagePreviews(newPreviews);
     };
 
+    const handlePaste = (e: React.ClipboardEvent) => {
+        if (!e.clipboardData) return;
+        const items = e.clipboardData.items;
+        const pastedFiles: File[] = [];
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf('image') !== -1) {
+                const file = items[i].getAsFile();
+                if (file) pastedFiles.push(file);
+            }
+        }
+        
+        if (pastedFiles.length > 0) {
+            setData('images', [...data.images, ...pastedFiles]);
+            const newPreviews = pastedFiles.map(file => URL.createObjectURL(file));
+            setImagePreviews(prev => [...prev, ...newPreviews]);
+            toast.success(`${pastedFiles.length} gambar berhasil ditempel dari clipboard!`);
+        }
+    };
+
     useEffect(() => {
         return () => {
             imagePreviews.forEach(url => URL.revokeObjectURL(url));
@@ -156,7 +175,7 @@ export default function FormPage({ auth, item, categories = [] }: PageProps<{ it
                 <Head title={(item ? 'Edit' : 'Create') + ' Product'} />
                 <Toaster richColors closeButton position="top-center" />
                 <div className="p-4 sm:p-6 lg:p-8">
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit} onPaste={handlePaste}>
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             <div className="lg:col-span-2 space-y-6">
                                 <Card>
@@ -181,10 +200,10 @@ export default function FormPage({ auth, item, categories = [] }: PageProps<{ it
                                             <div className="space-y-2">
                                                 <Label htmlFor="price">Harga Modal {hasVariants && "(Diambil dari Varian)"}</Label>
                                                 {!hasVariants && <div className="text-[10px] text-muted-foreground leading-tight">Sistem akan +10% untuk Harga Jual.</div>}
-                                                <Input id="price" type="number" value={data.price} disabled={hasVariants} onChange={e => setData('price', parseInt(e.target.value))} />
+                                                <Input id="price" type="number" value={data.price} disabled={hasVariants} onChange={e => setData('price', e.target.value ? parseInt(e.target.value) : '')} />
                                             </div>
-                                            <div className="space-y-2"><Label htmlFor="stock">Stok {hasVariants && "(Diambil dari Varian)"}</Label><Input id="stock" type="number" value={data.stock} disabled={hasVariants} onChange={e => setData('stock', parseInt(e.target.value))} /></div>
-                                            <div className="space-y-2"><Label htmlFor="weight">Berat (gram) {hasVariants && "(Diambil dari Varian)"}</Label><Input id="weight" type="number" value={data.weight} disabled={hasVariants} onChange={e => setData('weight', parseInt(e.target.value))} /></div>
+                                            <div className="space-y-2"><Label htmlFor="stock">Stok {hasVariants && "(Diambil dari Varian)"}</Label><Input id="stock" type="number" value={data.stock} disabled={hasVariants} onChange={e => setData('stock', e.target.value ? parseInt(e.target.value) : '')} /></div>
+                                            <div className="space-y-2"><Label htmlFor="weight">Berat (gram) {hasVariants && "(Diambil dari Varian)"}</Label><Input id="weight" type="number" value={data.weight} disabled={hasVariants} onChange={e => setData('weight', e.target.value ? parseInt(e.target.value) : '')} /></div>
                                         </div>
                                         
                                         <div className="space-y-2"><Label>Spesifikasi</Label><div className="space-y-3 rounded-md border border-border bg-secondary/20 p-4">{specItems.map((spec, index) => (<div key={index} className="flex items-center gap-2"><Input placeholder="Key (e.g., Dimensi)" value={spec.key} onChange={(e) => handleSpecChange(index, 'key', e.target.value)} className="flex-1 bg-background" /><Input placeholder="Value (e.g., 120cm x 60cm)" value={spec.value} onChange={(e) => handleSpecChange(index, 'value', e.target.value)} className="flex-1 bg-background" /><Button type="button" variant="ghost" size="icon" onClick={() => removeSpecItem(index)} className="text-muted-foreground hover:bg-red-500/20 hover:text-red-500"><X className="h-4 w-4" /></Button></div>))}<Button type="button" variant="outline" size="sm" onClick={addSpecItem} className="mt-2 border-dashed"><PlusCircle className="mr-2 h-4 w-4" /> Tambah Spesifikasi</Button></div></div>
@@ -305,14 +324,14 @@ export default function FormPage({ auth, item, categories = [] }: PageProps<{ it
                                                             <div className="col-span-2">
                                                                 <Input type="number" value={variant.stock} onChange={e => {
                                                                     const newV = [...data.variants];
-                                                                    newV[i].stock = parseInt(e.target.value) || 0;
+                                                                    newV[i].stock = e.target.value ? parseInt(e.target.value) : '';
                                                                     setData('variants', newV);
                                                                 }} min={0} />
                                                             </div>
                                                             <div className="col-span-2">
                                                                 <Input type="number" value={variant.weight || 0} onChange={e => {
                                                                     const newV = [...data.variants];
-                                                                    newV[i].weight = parseInt(e.target.value) || 0;
+                                                                    newV[i].weight = e.target.value ? parseInt(e.target.value) : '';
                                                                     setData('variants', newV);
                                                                 }} min={0} />
                                                             </div>

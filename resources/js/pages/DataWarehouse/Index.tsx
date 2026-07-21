@@ -4,11 +4,8 @@ import { useState } from 'react';
 import { TableauEmbed } from '@/components/TableauEmbed';
 
 const dashboards = [
-    { id: 'dashboard-1', name: 'Dashboard 1: Penjualan', embedUrl: 'https://public.tableau.com/views/Visualisasi_PA_Vina/Dashboard1PenjualanJum' },
-    { id: 'dashboard-2', name: 'Dashboard 2: Transaksi', embedUrl: 'https://public.tableau.com/views/Visualisasi_PA_Vina/Dashboard2TransaksiJum' },
-    { id: 'dashboard-3', name: 'Dashboard 3: Persentase Profit', embedUrl: 'https://public.tableau.com/views/Visualisasi_PA_Vina/Dashboard3-PersentaseProfit' },
-    { id: 'dashboard-4', name: 'Dashboard 4: Analisis Penjualan', embedUrl: 'https://public.tableau.com/views/Visualisasi_PA_Vina/Dashboard4-AnalisisPenjualanGrain4' },
-    { id: 'dashboard-5', name: 'Dashboard 5: Margin Profit', embedUrl: 'https://public.tableau.com/views/Visualisasi_PA_Vina/Dashboard5_Margin_Profit' },
+    { id: 'dashboard-1', name: 'Sales Performance', embedUrl: 'https://public.tableau.com/views/Visualisasi_PA_Vina_17834448439860/SalesPerformance' },
+    { id: 'dashboard-2', name: 'Profitability', embedUrl: 'https://public.tableau.com/views/Visualisasi_PA_Vina_17834448439860/ProfitabilityProfitabilitas' },
 ];
 
 export default function DataWarehouseIndex() {
@@ -37,7 +34,10 @@ export default function DataWarehouseIndex() {
                 {/* Tabs Content */}
                 <div className="min-h-[85vh] flex-1 rounded-xl bg-muted/10 border border-muted/50 p-0 overflow-hidden relative">
                     {dashboards.map((db) => (
-                        <div key={db.id} className={activeTab === db.id ? 'block w-full h-full' : 'hidden'}>
+                        <div 
+                            key={db.id} 
+                            className={`absolute inset-0 w-full h-full transition-opacity duration-300 ${activeTab === db.id ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'}`}
+                        >
                             {db.embedUrl ? (
                                 <TableauEmbed url={db.embedUrl} />
                             ) : (

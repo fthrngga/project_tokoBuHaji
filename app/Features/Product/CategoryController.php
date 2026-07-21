@@ -10,6 +10,26 @@ use Inertia\Inertia;
 class CategoryController extends Controller
 {
     /**
+     * Menampilkan semua produk (Semua Kategori)
+     */
+    public function index()
+    {
+        $products = Product::query()
+            ->where('is_published', true)
+            ->with(['images', 'category', 'variants'])
+            ->latest()
+            ->paginate(16)
+            ->withQueryString();
+
+        $parentCategories = Category::whereNull('parent_id')->get();
+
+        return Inertia::render('Features/Category/Index', [
+            'products' => $products,
+            'parentCategories' => $parentCategories,
+        ]);
+    }
+
+    /**
      * Menampilkan halaman produk berdasarkan kategori.
      */
     public function show(string $slug)

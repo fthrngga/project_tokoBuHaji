@@ -157,20 +157,26 @@ class WelcomeController extends Controller
 
         // Statistik Sales
         $salesData = [
-            'totalOrders' => Order::count(),
-            'pendingOrders' => Order::where('status', 'awaiting_payment')->count(),
-            'processingOrders' => Order::where('status', 'processing')->count(),
-            'completedOrders' => Order::where('status', 'completed')->count(),
+            'totalOrders' => Order::whereBetween('created_at', [$startDate, $endDate])->count(),
+            'pendingOrders' => Order::whereBetween('created_at', [$startDate, $endDate])->where('status', 'awaiting_payment')->count(),
+            'processingOrders' => Order::whereBetween('created_at', [$startDate, $endDate])->where('status', 'processing')->count(),
+            'completedOrders' => Order::whereBetween('created_at', [$startDate, $endDate])->where('status', 'completed')->count(),
             
-            'totalUnitsSold' => \App\Models\Features\Order\OrderItem::whereHas('order', function($q) {
-                $q->where('status', 'completed');
+            'totalUnitsSold' => \App\Models\Features\Order\OrderItem::whereHas('order', function($q) use ($startDate, $endDate) {
+                $q->where('status', 'completed')->whereBetween('created_at', [$startDate, $endDate]);
             })->sum('quantity'),
             
             'totalCustomers' => \App\Models\User::where('role', 'customer')->count(),
             
-            'cashOrdersCount' => \App\Models\Payment::where('payment_method', 'cash')->count(),
-            'creditOrdersCount' => \App\Models\Payment::where('payment_method', 'credit')->count(),
-            'cashGantungOrdersCount' => \App\Models\Payment::where('payment_method', 'cash_gantung')->count(),
+            'cashOrdersCount' => \App\Models\Payment::whereHas('order', function($q) use ($startDate, $endDate) {
+                $q->whereBetween('created_at', [$startDate, $endDate]);
+            })->where('payment_method', 'cash')->count(),
+            'creditOrdersCount' => \App\Models\Payment::whereHas('order', function($q) use ($startDate, $endDate) {
+                $q->whereBetween('created_at', [$startDate, $endDate]);
+            })->where('payment_method', 'credit')->count(),
+            'cashGantungOrdersCount' => \App\Models\Payment::whereHas('order', function($q) use ($startDate, $endDate) {
+                $q->whereBetween('created_at', [$startDate, $endDate]);
+            })->where('payment_method', 'cash_gantung')->count(),
 
             'recentOrders' => Order::with(['user', 'payment'])->latest()->take(5)->get()->map(function($order) {
                 return [
@@ -201,10 +207,10 @@ class WelcomeController extends Controller
             'dailyOrders' => $dailyOrders, // DARI FILTER
             
             'orderStatusChart' => [
-                Order::where('status', 'awaiting_payment')->count(),
-                Order::where('status', 'processing')->count(),
-                Order::where('status', 'completed')->count(),
-                Order::where('status', 'cancelled')->count()
+                Order::whereBetween('created_at', [$startDate, $endDate])->where('status', 'awaiting_payment')->count(),
+                Order::whereBetween('created_at', [$startDate, $endDate])->where('status', 'processing')->count(),
+                Order::whereBetween('created_at', [$startDate, $endDate])->where('status', 'completed')->count(),
+                Order::whereBetween('created_at', [$startDate, $endDate])->where('status', 'cancelled')->count()
             ],
         ];
 
@@ -271,8 +277,8 @@ class WelcomeController extends Controller
         }
 
         // Statistik Finance Asli
-        $totalIncome = \App\Models\FinancialTransaction::where('type', 'income')->sum('amount');
-        $totalExpense = \App\Models\FinancialTransaction::where('type', 'expense')->sum('amount');
+        $totalIncome = \App\Models\FinancialTransaction::whereBetween('transaction_date', [$startDate, $endDate])->where('type', 'income')->sum('amount');
+        $totalExpense = \App\Models\FinancialTransaction::whereBetween('transaction_date', [$startDate, $endDate])->where('type', 'expense')->sum('amount');
         $saldoKas = $totalIncome - $totalExpense;
 
         $activeCredits = \App\Models\Payment::with(['order.user', 'customer.user', 'paymentLogs'])
@@ -300,9 +306,11 @@ class WelcomeController extends Controller
         usort($arrearsList, function($a, $b) { return $b['amount'] <=> $a['amount']; });
         $topArrears = array_slice($arrearsList, 0, 5);
 
-        $cashIncome = \App\Models\FinancialTransaction::where('type', 'income')->where('category', 'cash_sale')->sum('amount');
+        $cashIncome = \App\Models\FinancialTransaction::whereBetween('transaction_date', [$startDate, $endDate])
+            ->where('type', 'income')->where('category', 'cash_sale')->sum('amount');
         
-        $creditIncome = \App\Models\FinancialTransaction::where('type', 'income')
+        $creditIncome = \App\Models\FinancialTransaction::whereBetween('transaction_date', [$startDate, $endDate])
+            ->where('type', 'income')
             ->whereIn('category', ['down_payment', 'installment', 'full_payment'])
             ->whereHasMorph('related', [\App\Models\PaymentLog::class], function($q) {
                 $q->whereHas('payment', function($p) {
@@ -310,7 +318,8 @@ class WelcomeController extends Controller
                 });
             })->sum('amount');
 
-        $cashGantungIncome = \App\Models\FinancialTransaction::where('type', 'income')
+        $cashGantungIncome = \App\Models\FinancialTransaction::whereBetween('transaction_date', [$startDate, $endDate])
+            ->where('type', 'income')
             ->whereIn('category', ['down_payment', 'installment', 'full_payment'])
             ->whereHasMorph('related', [\App\Models\PaymentLog::class], function($q) {
                 $q->whereHas('payment', function($p) {
