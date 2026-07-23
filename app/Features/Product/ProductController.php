@@ -32,9 +32,10 @@ class ProductController extends Controller
         $sortDir = $request->input('sort_dir', 'desc');
         $query->orderBy($sortBy, $sortDir);
 
+        $perPage = $request->input('per_page', 10);
         return Inertia::render('Features/Product/Index', [
-            'products' => $query->paginate(10)->withQueryString(),
-            'filters' => $request->only(['search', 'sort_by', 'sort_dir']),
+            'products' => $query->paginate($perPage)->withQueryString(),
+            'filters' => $request->only(['search', 'sort_by', 'sort_dir', 'per_page']),
         ]);
     }
 

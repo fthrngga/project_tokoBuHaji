@@ -12,7 +12,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Search, PlusCircle, MoreHorizontal, Pencil, Trash2, AlertTriangle, Package } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Search, PlusCircle, MoreHorizontal, Pencil, Trash2, AlertTriangle, Package, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Product {
@@ -47,7 +48,23 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Index({ products }: ProductIndexProps) {
+export default function Index({ products, filters }: ProductIndexProps) {
+    const [searchQuery, setSearchQuery] = useState(filters?.search || '');
+    const [perPage, setPerPage] = useState(filters?.per_page || '10');
+
+    // Filter processing
+    React.useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            router.get(
+                route('products.index'),
+                { search: searchQuery, per_page: perPage },
+                { preserveState: true, preserveScroll: true, replace: true }
+            );
+        }, 300);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchQuery, perPage]);
+
     const [isRestockOpen, setIsRestockOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
@@ -132,7 +149,23 @@ export default function Index({ products }: ProductIndexProps) {
                                 type="search"
                                 placeholder="Search products..."
                                 className="w-full appearance-none bg-background pl-8 shadow-none md:w-64"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
                             />
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <span className="text-sm text-muted-foreground">Per Halaman:</span>
+                            <Select value={perPage.toString()} onValueChange={setPerPage}>
+                                <SelectTrigger className="w-[80px]">
+                                    <SelectValue placeholder="10" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="10">10</SelectItem>
+                                    <SelectItem value="25">25</SelectItem>
+                                    <SelectItem value="50">50</SelectItem>
+                                    <SelectItem value="100">100</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
                     <Button asChild className="gap-2 bg-black text-white hover:bg-gray-800">
@@ -151,8 +184,9 @@ export default function Index({ products }: ProductIndexProps) {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <Table>
-                            <TableHeader>
+                        <div className="rounded-md border h-[500px] overflow-auto relative">
+                            <Table>
+                            <TableHeader className="sticky top-0 bg-card z-10 shadow-sm">
                                 <TableRow>
                                     <TableHead>SKU</TableHead>
                                     <TableHead>Nama Produk</TableHead>
@@ -242,6 +276,36 @@ export default function Index({ products }: ProductIndexProps) {
                                 )}
                             </TableBody>
                         </Table>
+                        </div>
+                        
+                        {/* Pagination Component */}
+                        {!Array.isArray(products) && products.links && products.links.length > 3 && (
+                            <div className="flex items-center justify-between mt-4">
+                                <div className="text-sm text-muted-foreground hidden sm:block">
+                                    Menampilkan {products.data.length} dari total {products.total} data
+                                </div>
+                                <div className="flex items-center space-x-1">
+                                    {products.links.map((link, idx) => {
+                                        if (link.url === null) {
+                                            return (
+                                                <Button key={idx} variant="outline" size="sm" disabled className="opacity-50" dangerouslySetInnerHTML={{ __html: link.label }} />
+                                            );
+                                        }
+                                        return (
+                                            <Button
+                                                key={idx}
+                                                variant={link.active ? "default" : "outline"}
+                                                size="sm"
+                                                asChild
+                                                className={link.active ? "bg-black text-white" : ""}
+                                            >
+                                                <Link href={link.url} dangerouslySetInnerHTML={{ __html: link.label }} preserveScroll preserveState />
+                                            </Button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             </div>

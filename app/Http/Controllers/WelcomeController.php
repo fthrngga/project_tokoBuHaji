@@ -166,7 +166,7 @@ class WelcomeController extends Controller
                 $q->where('status', 'completed')->whereBetween('created_at', [$startDate, $endDate]);
             })->sum('quantity'),
             
-            'totalCustomers' => \App\Models\User::where('role', 'customer')->count(),
+            'totalCustomers' => \App\Models\User::where('role', 'customer')->whereBetween('created_at', [$startDate, $endDate])->count(),
             
             'cashOrdersCount' => \App\Models\Payment::whereHas('order', function($q) use ($startDate, $endDate) {
                 $q->whereBetween('created_at', [$startDate, $endDate]);

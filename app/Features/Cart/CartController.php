@@ -80,11 +80,15 @@ class CartController extends Controller
             $cartItem->update(['quantity' => $newQuantity]);
         } else {
             // Jika belum ada, buat item baru
-            $cart->items()->create([
+            $cartItem = $cart->items()->create([
                 'product_id' => $product->id,
                 'product_variant_id' => $request->product_variant_id,
                 'quantity' => $request->quantity,
             ]);
+        }
+
+        if ($request->boolean('buy_now')) {
+            return redirect()->route('checkout.index', ['items' => $cartItem->id]);
         }
 
         return redirect()->back()->with('message', 'Produk berhasil ditambahkan ke keranjang.');

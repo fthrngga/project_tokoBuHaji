@@ -66,14 +66,41 @@ export default function Show({ product }: Props) {
     });
   };
 
+  const buyNow = () => {
+    if (!auth.user) {
+      toast.error("Silahkan login terlebih dahulu untuk berbelanja.");
+      return;
+    }
+    if (product.custom_options && product.custom_options.length > 0 && !selectedVariant) {
+      toast.error("Silakan pilih varian yang tersedia terlebih dahulu.");
+      return;
+    }
+    router.post(route('cart.store'), {
+      product_id: product.id,
+      product_variant_id: selectedVariant?.id,
+      quantity: quantity,
+      buy_now: true
+    }, {
+      preserveScroll: true,
+      onError: (errors) => {
+        if (errors.quantity) toast.error(errors.quantity);
+        else toast.error("Gagal memproses.");
+      }
+    });
+  };
+
   const canAddToCart = !(
     (product.custom_options && product.custom_options.length > 0 && !selectedVariant) ||
     (!product.custom_options?.length && product.stock <= 0)
   );
 
-  const buttonLabel = product.custom_options && product.custom_options.length > 0
-    ? (!selectedVariant ? "Pilih Varian Dulu" : (selectedVariant.stock > 0 ? "Tambahkan ke Keranjang" : "Pre-order Sekarang"))
-    : (product.stock > 0 ? "Tambahkan ke Keranjang" : "Stok Habis");
+  const cartLabel = product.custom_options && product.custom_options.length > 0
+    ? (!selectedVariant ? "Pilih Varian" : (selectedVariant.stock > 0 ? "+ Keranjang" : "Pre-order"))
+    : (product.stock > 0 ? "+ Keranjang" : "Stok Habis");
+
+  const buyNowLabel = product.custom_options && product.custom_options.length > 0
+    ? (!selectedVariant ? "Pilih Varian" : (selectedVariant.stock > 0 ? "Beli Sekarang" : "Pre-order Langsung"))
+    : (product.stock > 0 ? "Beli Sekarang" : "Stok Habis");
 
   const activePrice = selectedVariant && selectedVariant.selling_price ? selectedVariant.selling_price : product.selling_price;
   const installmentEstimate = Math.ceil(activePrice * 1.5 / 10);
@@ -266,12 +293,26 @@ export default function Show({ product }: Props) {
                       onClick={addToCart}
                       disabled={!canAddToCart}
                       className="group relative flex-1 h-12 overflow-hidden rounded-xl font-semibold text-white shadow-lg transition-all hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{ background: 'rgba(87,115,153,0.15)', border: '1px solid rgba(87,115,153,0.3)' }}
+                    >
+                      <span className="absolute inset-0 bg-white/5 opacity-0 transition-opacity group-hover:opacity-100" />
+                      <span className="relative flex items-center justify-center gap-2 text-[#BDD5EA] text-sm lg:text-base">
+                        <ShoppingCart className="h-4 w-4 lg:h-5 lg:w-5" />
+                        {cartLabel}
+                      </span>
+                    </button>
+
+                    {/* Buy Now Button */}
+                    <button
+                      onClick={buyNow}
+                      disabled={!canAddToCart}
+                      className="group relative flex-1 h-12 overflow-hidden rounded-xl font-semibold text-white shadow-lg transition-all hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{ background: 'linear-gradient(135deg, #FE5F55, #e84a40)', boxShadow: '0 8px 24px rgba(254,95,85,0.3)' }}
                     >
                       <span className="absolute inset-0 -translate-x-full transition-transform duration-500 group-hover:translate-x-0" style={{ background: 'linear-gradient(135deg, #e84a40, #FE5F55)' }} />
-                      <span className="relative flex items-center justify-center gap-2">
-                        <ShoppingCart className="h-5 w-5" />
-                        {buttonLabel}
+                      <span className="relative flex items-center justify-center gap-2 text-sm lg:text-base">
+                        <CreditCard className="h-4 w-4 lg:h-5 lg:w-5" />
+                        {buyNowLabel}
                       </span>
                     </button>
                   </div>
@@ -361,12 +402,28 @@ export default function Show({ product }: Props) {
               onClick={addToCart}
               disabled={!canAddToCart}
               className="group relative flex-1 h-12 overflow-hidden rounded-xl font-semibold text-white shadow-lg transition-all hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ background: 'rgba(87,115,153,0.15)', border: '1px solid rgba(87,115,153,0.3)' }}
+            >
+              <span className="absolute inset-0 bg-white/5 opacity-0 transition-opacity group-hover:opacity-100" />
+              <span className="relative flex items-center justify-center gap-1.5 text-[#BDD5EA] text-xs sm:text-sm">
+                <ShoppingCart className="h-4 w-4" />
+                <span className="hidden sm:inline">{cartLabel}</span>
+                <span className="sm:hidden">+ Troli</span>
+              </span>
+            </button>
+
+            {/* Buy Now Button */}
+            <button
+              onClick={buyNow}
+              disabled={!canAddToCart}
+              className="group relative flex-[1.2] h-12 overflow-hidden rounded-xl font-semibold text-white shadow-lg transition-all hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ background: 'linear-gradient(135deg, #FE5F55, #e84a40)', boxShadow: '0 4px 15px rgba(254,95,85,0.4)' }}
             >
               <span className="absolute inset-0 -translate-x-full transition-transform duration-500 group-hover:translate-x-0" style={{ background: 'linear-gradient(135deg, #e84a40, #FE5F55)' }} />
-              <span className="relative flex items-center justify-center gap-2 text-sm sm:text-base">
-                <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
-                {buttonLabel}
+              <span className="relative flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+                <CreditCard className="h-4 w-4" />
+                <span className="hidden sm:inline">{buyNowLabel}</span>
+                <span className="sm:hidden">Beli</span>
               </span>
             </button>
           </div>

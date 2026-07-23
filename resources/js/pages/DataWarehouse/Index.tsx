@@ -34,8 +34,8 @@ export default function DataWarehouseIndex() {
                 {/* Tabs Content */}
                 <div className="min-h-[85vh] flex-1 rounded-xl bg-muted/10 border border-muted/50 p-0 overflow-hidden relative">
                     {dashboards.map((db) => (
-                        <div 
-                            key={db.id} 
+                        <div
+                            key={db.id}
                             className={`absolute inset-0 w-full h-full transition-opacity duration-300 ${activeTab === db.id ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'}`}
                         >
                             {db.embedUrl ? (
