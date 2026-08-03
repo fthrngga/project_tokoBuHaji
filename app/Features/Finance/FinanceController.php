@@ -311,8 +311,8 @@ class FinanceController extends Controller
         // Filter Date (Default Today)
         $date = $request->input('date', now()->format('Y-m-d'));
 
-        $activeCredits = \App\Models\Payment::with(['customer.user', 'order', 'paymentLogs'])
-            ->where('payment_method', 'credit')
+        $activeCredits = \App\Models\Payment::with(['customer.user', 'order.items.product', 'paymentLogs'])
+            ->whereIn('payment_method', ['credit', 'cash_gantung'])
             ->whereIn('status', ['ongoing', 'pending_approval']) 
             ->get()
             ->map(function ($credit) {
@@ -342,10 +342,18 @@ class FinanceController extends Controller
                     $effectiveInstallmentAmount = $credit->installment_amount;
                 }
 
+                $productNames = $credit->order && $credit->order->items ? $credit->order->items->map(function ($item) {
+                    return $item->product->name ?? '';
+                })->filter()->implode(', ') : '';
+                if (empty($productNames)) {
+                    $productNames = 'Barang Pesanan';
+                }
+
                 return [
                     'id' => $credit->id, // Payment ID
                     'customer_name' => $credit->customer->user->name,
                     'customer_address' => $credit->order->address_detail ?? 'Alamat tidak tersedia',
+                    'product_name' => $productNames,
                     'total_installments' => $credit->duration_months,
                     'current_installment' => min($credit->duration_months, $monthsPaidFully + 1),
                     'remaining_months' => max(0, $credit->duration_months - $monthsPaidFully),

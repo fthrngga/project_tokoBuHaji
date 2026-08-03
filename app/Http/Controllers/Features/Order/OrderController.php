@@ -45,6 +45,7 @@ class OrderController extends Controller
             'payment_method' => 'required|in:cash,credit,cash_gantung',
             'cash_type' => 'nullable|required_if:payment_method,cash|in:transfer,direct',
             'down_payment' => 'nullable|numeric|min:0',
+            'duration_months' => 'nullable|integer|in:1,2,3,10',
         ]);
 
         if (in_array($validated['payment_method'], ['credit', 'cash_gantung']) && $order->total_amount < 1000000) {
@@ -53,26 +54,35 @@ class OrderController extends Controller
             ]);
         }
 
-        // Auto Calculate Credit Terms
+        // Auto Calculate Credit / Cash Gantung Terms
         $status = 'ongoing';
         $durationMonths = null;
         $installmentAmount = null;
+        $actualPaymentMethod = $validated['payment_method'];
 
-        if ($validated['payment_method'] === 'credit') {
-            $durationMonths = 10;
-            $dp = $validated['down_payment'] ?? 0;
-            $totalCredit = $order->total_amount * 1.5;
-            $installmentAmount = ($totalCredit - $dp) / $durationMonths;
-        } elseif ($validated['payment_method'] === 'cash_gantung') {
-            $durationMonths = 10;
-            $dp = $validated['down_payment'] ?? 0;
-            $installmentAmount = ($order->total_amount - $dp) / $durationMonths;
+        if (in_array($validated['payment_method'], ['credit', 'cash_gantung'])) {
+            $selectedDuration = (int) ($request->duration_months ?? 10);
+            $dp = (float) ($validated['down_payment'] ?? 0);
+
+            if ($selectedDuration <= 3) {
+                // Cash Gantung (Margin 15%, Tenor 1, 2, atau 3 Bulan)
+                $actualPaymentMethod = 'cash_gantung';
+                $durationMonths = max(1, $selectedDuration);
+                $totalGantung = $order->total_amount * 1.15;
+                $installmentAmount = max(0, ($totalGantung - $dp) / $durationMonths);
+            } else {
+                // Kredit Reguler (Margin Standar 50%, Tenor 10 Bulan)
+                $actualPaymentMethod = 'credit';
+                $durationMonths = 10;
+                $totalCredit = $order->total_amount * 1.5;
+                $installmentAmount = max(0, ($totalCredit - $dp) / $durationMonths);
+            }
         }
 
         $payment = \App\Models\Payment::create([
             'order_id' => $order->id,
             'customer_id' => auth()->user()->customer->id,
-            'payment_method' => $validated['payment_method'],
+            'payment_method' => $actualPaymentMethod,
             'cash_type' => $validated['cash_type'] ?? null,
             'down_payment' => $validated['down_payment'] ?? 0,
             'duration_months' => $durationMonths,
@@ -100,7 +110,7 @@ class OrderController extends Controller
         ]);
 
         $isDpUpload = false;
-        if ($order->payment && $order->payment->payment_method === 'credit') {
+        if ($order->payment && in_array($order->payment->payment_method, ['credit', 'cash_gantung'])) {
             $hasDp = $order->payment->down_payment && $order->payment->down_payment > 0;
             $dpVerifiedOrPending = $order->payment->paymentLogs()
                 ->where('type', 'down_payment')
@@ -114,13 +124,12 @@ class OrderController extends Controller
         if ($order->payment && $order->payment->payment_method === 'credit' && $request->has('amount') && !$isDpUpload) {
             $minAmount = $order->payment->installment_amount / 2;
             if ($request->amount < $minAmount && !$request->has('dp_override')) {
-                return back()->withErrors(['amount' => 'Minimal pembayaran adalah Rp ' . number_format($minAmount, 0, ',', '.')]);
+                return back()->withErrors(['amount' => 'Nominal pembayaran minimal adalah Rp ' . number_format($minAmount, 0, ',', '.') . ' (setengah dari angsuran bulanan).']);
             }
         }
 
+        $path = null;
         if ($request->hasFile('proof_of_payment')) {
-            \Illuminate\Support\Facades\Log::info('File present.');
-            
             try {
                 $path = $request->file('proof_of_payment')->store('payment-proofs', 'public');
                 \Illuminate\Support\Facades\Log::info('File stored at: ' . $path);
@@ -132,8 +141,8 @@ class OrderController extends Controller
             if ($order->payment) {
                 \Illuminate\Support\Facades\Log::info('Payment found. ID: ' . $order->payment->id);
                 // Determine type: DP or Installment
-                // If payment method is Credit
-                if ($order->payment->payment_method === 'credit') {
+                // If payment method is Credit or Cash Gantung
+                if (in_array($order->payment->payment_method, ['credit', 'cash_gantung'])) {
                     $hasDp = $order->payment->down_payment && $order->payment->down_payment > 0;
                     
                     // Check if DP is already verified or pending

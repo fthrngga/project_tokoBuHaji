@@ -322,7 +322,7 @@ manual.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     manual.form = manualForm
 /**
 * @see \App\Features\Finance\FinanceController::storeInstallment
- * @see app/Features/Finance/FinanceController.php:389
+ * @see app/Features/Finance/FinanceController.php:397
  * @route '/admin/finance/installments'
  */
 export const storeInstallment = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -337,7 +337,7 @@ storeInstallment.definition = {
 
 /**
 * @see \App\Features\Finance\FinanceController::storeInstallment
- * @see app/Features/Finance/FinanceController.php:389
+ * @see app/Features/Finance/FinanceController.php:397
  * @route '/admin/finance/installments'
  */
 storeInstallment.url = (options?: RouteQueryOptions) => {
@@ -346,7 +346,7 @@ storeInstallment.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Features\Finance\FinanceController::storeInstallment
- * @see app/Features/Finance/FinanceController.php:389
+ * @see app/Features/Finance/FinanceController.php:397
  * @route '/admin/finance/installments'
  */
 storeInstallment.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -356,7 +356,7 @@ storeInstallment.post = (options?: RouteQueryOptions): RouteDefinition<'post'> =
 
     /**
 * @see \App\Features\Finance\FinanceController::storeInstallment
- * @see app/Features/Finance/FinanceController.php:389
+ * @see app/Features/Finance/FinanceController.php:397
  * @route '/admin/finance/installments'
  */
     const storeInstallmentForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -366,7 +366,7 @@ storeInstallment.post = (options?: RouteQueryOptions): RouteDefinition<'post'> =
 
             /**
 * @see \App\Features\Finance\FinanceController::storeInstallment
- * @see app/Features/Finance/FinanceController.php:389
+ * @see app/Features/Finance/FinanceController.php:397
  * @route '/admin/finance/installments'
  */
         storeInstallmentForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

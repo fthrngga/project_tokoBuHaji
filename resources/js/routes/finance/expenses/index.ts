@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../../wayfinder'
 /**
 * @see \App\Features\Finance\FinanceController::store
- * @see app/Features/Finance/FinanceController.php:496
+ * @see app/Features/Finance/FinanceController.php:504
  * @route '/admin/finance/expenses'
  */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -16,7 +16,7 @@ store.definition = {
 
 /**
 * @see \App\Features\Finance\FinanceController::store
- * @see app/Features/Finance/FinanceController.php:496
+ * @see app/Features/Finance/FinanceController.php:504
  * @route '/admin/finance/expenses'
  */
 store.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Features\Finance\FinanceController::store
- * @see app/Features/Finance/FinanceController.php:496
+ * @see app/Features/Finance/FinanceController.php:504
  * @route '/admin/finance/expenses'
  */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -35,7 +35,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
     /**
 * @see \App\Features\Finance\FinanceController::store
- * @see app/Features/Finance/FinanceController.php:496
+ * @see app/Features/Finance/FinanceController.php:504
  * @route '/admin/finance/expenses'
  */
     const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -45,7 +45,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
             /**
 * @see \App\Features\Finance\FinanceController::store
- * @see app/Features/Finance/FinanceController.php:496
+ * @see app/Features/Finance/FinanceController.php:504
  * @route '/admin/finance/expenses'
  */
         storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

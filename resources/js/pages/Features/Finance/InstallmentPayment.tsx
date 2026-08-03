@@ -155,13 +155,13 @@ export default function InstallmentPayment({ customers, history = [], filters = 
                                         <SelectTrigger className="w-full">
                                             <SelectValue placeholder="Cari pelanggan..." />
                                         </SelectTrigger>
-                                        <SelectContent>
+                                        <SelectContent className="max-h-[300px] overflow-y-auto">
                                             {customers.length === 0 ? (
                                                 <SelectItem value="empty" disabled>Tidak ada kredit aktif</SelectItem>
                                             ) : (
                                                 customers.map((c) => (
                                                     <SelectItem key={c.id} value={c.id.toString()}>
-                                                        {c.customer_name} {c.customer_address ? `(${c.customer_address})` : ''}
+                                                        {c.customer_name} — {c.product_name || 'Barang Pesanan'} — Rp {new Intl.NumberFormat('id-ID').format(c.installment_amount)}
                                                     </SelectItem>
                                                 ))
                                             )}
@@ -242,9 +242,12 @@ export default function InstallmentPayment({ customers, history = [], filters = 
                                 </CardHeader>
                                 <CardContent className="space-y-4 text-foreground">
                                     <div>
-                                        <p className="text-xs text-primary uppercase font-semibold">Nama Pelanggan</p>
+                                        <p className="text-xs text-primary uppercase font-semibold">Nama Pelanggan & Barang</p>
                                         <p className="text-lg font-medium">{selectedCustomer.customer_name}</p>
-                                        <p className="text-sm opacity-80">{selectedCustomer.customer_address}</p>
+                                        {selectedCustomer.product_name && (
+                                            <p className="text-sm font-semibold text-emerald-400 mt-0.5">📦 {selectedCustomer.product_name}</p>
+                                        )}
+                                        <p className="text-xs opacity-80 mt-1">{selectedCustomer.customer_address}</p>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>

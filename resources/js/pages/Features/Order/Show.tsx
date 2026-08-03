@@ -134,6 +134,7 @@ export default function Show({ order }: Props) {
         cash_type: '',
         down_payment: '',
         with_down_payment: false,
+        duration_months: '10',
     });
 
     const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
@@ -417,9 +418,6 @@ export default function Show({ order }: Props) {
                                                                         <SelectItem value="credit" disabled={order.total_amount < 1000000}>
                                                                             Kredit / Cicilan {order.total_amount < 1000000 && "(Min. Rp 1.000.000)"}
                                                                         </SelectItem>
-                                                                        <SelectItem value="cash_gantung" disabled={order.total_amount < 1000000}>
-                                                                            Cash Gantung {order.total_amount < 1000000 && "(Min. Rp 1.000.000)"}
-                                                                        </SelectItem>
                                                                     </SelectContent>
                                                                 </Select>
                                                             </div>
@@ -445,6 +443,25 @@ export default function Show({ order }: Props) {
 
                                                             {['credit', 'cash_gantung'].includes(paymentData.payment_method) && (
                                                                 <div className="space-y-4 border rounded-md p-4">
+                                                                    <div className="space-y-2">
+                                                                        <Label>Pilih Tenor / Jangka Waktu</Label>
+                                                                        <Select
+                                                                            value={paymentData.duration_months}
+                                                                            onValueChange={(val) => setPaymentData('duration_months', val)}
+                                                                        >
+                                                                            <SelectTrigger>
+                                                                                <SelectValue placeholder="Pilih tenor" />
+                                                                            </SelectTrigger>
+                                                                            <SelectContent>
+                                                                                <SelectItem value="1">1 Bulan (Cash Gantung - Margin 15%)</SelectItem>
+                                                                                <SelectItem value="2">2 Bulan (Cash Gantung - Margin 15%)</SelectItem>
+                                                                                <SelectItem value="3">3 Bulan (Cash Gantung - Margin 15%)</SelectItem>
+                                                                                <SelectItem value="10">10 Bulan (Kredit Reguler)</SelectItem>
+                                                                            </SelectContent>
+                                                                        </Select>
+                                                                        {paymentErrors.duration_months && <p className="text-red-500 text-xs">{paymentErrors.duration_months}</p>}
+                                                                    </div>
+
                                                                     <div className="flex items-center space-x-2">
                                                                         <Checkbox
                                                                             id="with_down_payment"
@@ -468,24 +485,40 @@ export default function Show({ order }: Props) {
                                                                         </div>
                                                                     )}
                                                                     {/* Simulasi Kredit/Cash Gantung Otomatis */}
-                                                                    <div className="bg-secondary/20 border border-border rounded p-3 mt-4">
-                                                                        <h4 className="text-xs font-semibold text-primary uppercase mb-2">Simulasi Angsuran (10 Bulan)</h4>
-                                                                        <div className="grid grid-cols-2 gap-1 text-xs">
-                                                                            <div className="text-muted-foreground">Sisa Dicicil:</div>
-                                                                            <div className="text-right font-medium">
-                                                                                {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(
-                                                                                    Math.max(0, (paymentData.payment_method === 'credit' ? order.total_amount * 1.5 : order.total_amount) - (paymentData.with_down_payment ? (parseFloat(paymentData.down_payment) || 0) : 0))
-                                                                                )}
+                                                                    {(() => {
+                                                                        const isCashGantungSim = ['1', '2', '3'].includes(String(paymentData.duration_months));
+                                                                        const simDuration = parseInt(String(paymentData.duration_months)) || 10;
+                                                                        const simTotal = isCashGantungSim ? order.total_amount * 1.15 : order.total_amount * 1.5;
+                                                                        const simDp = paymentData.with_down_payment ? (parseFloat(paymentData.down_payment) || 0) : 0;
+                                                                        const simRemaining = Math.max(0, simTotal - simDp);
+                                                                        const simInstallmentPerMonth = simRemaining / simDuration;
+                                                                        return (
+                                                                            <div className="bg-secondary/20 border border-border rounded p-3 mt-4">
+                                                                                <h4 className="text-xs font-semibold text-primary uppercase mb-2">
+                                                                                    {isCashGantungSim ? `Simulasi Cash Gantung (${simDuration} Bulan)` : 'Simulasi Kredit Reguler (10 Bulan)'}
+                                                                                </h4>
+                                                                                <div className="grid grid-cols-2 gap-1 text-xs">
+                                                                                    <div className="text-muted-foreground">Total Tagihan (termasuk margin):</div>
+                                                                                    <div className="text-right font-medium">
+                                                                                        {formatCurrency(simTotal)}
+                                                                                    </div>
+                                                                                    <div className="text-muted-foreground">Sisa Dicicil:</div>
+                                                                                    <div className="text-right font-medium">
+                                                                                        {formatCurrency(simRemaining)}
+                                                                                    </div>
+                                                                                    <div className="text-muted-foreground font-semibold mt-1">Estimasi Angsuran/Bulan:</div>
+                                                                                    <div className="text-right font-bold text-sm text-green-600 mt-1">
+                                                                                        {formatCurrency(simInstallmentPerMonth)}
+                                                                                    </div>
+                                                                                </div>
+                                                                                <p className="text-[10px] text-gray-500 mt-2">
+                                                                                    {isCashGantungSim
+                                                                                        ? '*Tenor 1-3 bulan dikategorikan sebagai Cash Gantung (keuntungan toko hanya 15%). Pembayaran bersifat fleksibel (bisa dibayar suka-suka sebelum jatuh tempo akhir).'
+                                                                                        : '*Kredit reguler tenor 10 bulan. Pembayaran angsuran bulanan standar.'}
+                                                                                </p>
                                                                             </div>
-                                                                            <div className="text-muted-foreground font-semibold mt-1">Estimasi Angsuran/Bulan:</div>
-                                                                            <div className="text-right font-bold text-sm text-green-600 mt-1">
-                                                                                {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(
-                                                                                    Math.max(0, (paymentData.payment_method === 'credit' ? order.total_amount * 1.5 : order.total_amount) - (paymentData.with_down_payment ? (parseFloat(paymentData.down_payment) || 0) : 0)) / 10
-                                                                                )}
-                                                                            </div>
-                                                                        </div>
-                                                                        <p className="text-[10px] text-gray-500 mt-2">*Cicilan default 10 bulan. Nominal riil sepenuhnya ditentukan oleh Admin.</p>
-                                                                    </div>
+                                                                        );
+                                                                    })()}
                                                                 </div>
                                                             )}
                                                         </form>
