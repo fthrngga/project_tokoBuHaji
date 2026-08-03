@@ -42,7 +42,7 @@ interface HistoryLog {
     id: number;
     paid_at: string; // H:i
     customer_name: string;
-    installment_number: number;
+    installment_number: number | string;
     amount: number;
     notes: string;
 }

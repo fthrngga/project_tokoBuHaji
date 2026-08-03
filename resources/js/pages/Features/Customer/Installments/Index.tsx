@@ -197,7 +197,7 @@ interface Installment {
     installment_amount: number;
     history: {
         id: number;
-        installmentKe: number;
+        installmentKe: number | string;
         date: string;
         method: string;
         amount: number;

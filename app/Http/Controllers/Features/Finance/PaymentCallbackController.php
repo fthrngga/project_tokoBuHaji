@@ -79,10 +79,12 @@ class PaymentCallbackController extends Controller
                         $payment->order->update(['status' => 'processing']);
                     }
                 } elseif ($paymentLog->type === 'installment') {
-                    $payment->increment('installments_paid', 1);
-                    if ($payment->installments_paid >= $payment->duration_months) {
-                        $payment->update(['status' => 'paid_off']);
-                    }
+                    $actualVerified = $payment->paymentLogs()->where('type', 'installment')->where('status', 'verified')->sum('amount');
+                    $monthsPaidFully = $payment->installment_amount > 0 ? (int) floor($actualVerified / $payment->installment_amount) : 0;
+                    $payment->update([
+                        'installments_paid' => $monthsPaidFully,
+                        'status' => $monthsPaidFully >= $payment->duration_months ? 'paid_off' : $payment->status,
+                    ]);
                 }
             }
 

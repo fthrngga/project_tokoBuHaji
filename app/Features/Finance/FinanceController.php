@@ -316,18 +316,40 @@ class FinanceController extends Controller
             ->whereIn('status', ['ongoing', 'pending_approval']) 
             ->get()
             ->map(function ($credit) {
-                $expectedTotal = $credit->installments_paid * $credit->installment_amount;
                 $actualVerified = $credit->paymentLogs->where('type', 'installment')->where('status', 'verified')->sum('amount');
-                $tunggakan = max(0, $expectedTotal - $actualVerified);
+                $monthsPaidFully = $credit->installment_amount > 0 ? (int) floor($actualVerified / $credit->installment_amount) : 0;
+
+                // Hitung expectedTotal berdasar umur kredit (seperti di InstallmentController)
+                $isZeroDp = ($credit->down_payment == 0);
+                $monthsElapsed = (int) floor($credit->created_at->diffInMonths(now()));
+                if ($isZeroDp) {
+                    $monthsElapsed += 1;
+                }
+                $monthsElapsed = min($credit->duration_months, $monthsElapsed);
+                $expectedTotal = $monthsElapsed * $credit->installment_amount;
+
+                if ($actualVerified >= $expectedTotal) {
+                    $tunggakan = 0;
+                    $surplus = max(0, $actualVerified - ($monthsPaidFully * $credit->installment_amount));
+                    $nextBill = max(0, $credit->installment_amount - $surplus);
+                    $totalContractObligation = $credit->duration_months * $credit->installment_amount;
+                    $remainingDebt = max(0, $totalContractObligation - $actualVerified);
+                    $effectiveInstallmentAmount = $nextBill > 0 ? min($nextBill, $remainingDebt) : $credit->installment_amount;
+                } else {
+                    $tunggakan = max(0, $expectedTotal - $actualVerified);
+                    $totalContractObligation = $credit->duration_months * $credit->installment_amount;
+                    $remainingDebt = max(0, $totalContractObligation - $actualVerified);
+                    $effectiveInstallmentAmount = $credit->installment_amount;
+                }
 
                 return [
                     'id' => $credit->id, // Payment ID
                     'customer_name' => $credit->customer->user->name,
                     'customer_address' => $credit->order->address_detail ?? 'Alamat tidak tersedia',
                     'total_installments' => $credit->duration_months,
-                    'current_installment' => $credit->installments_paid + 1,
-                    'remaining_months' => max(0, $credit->duration_months - $credit->installments_paid),
-                    'installment_amount' => $credit->installment_amount,
+                    'current_installment' => min($credit->duration_months, $monthsPaidFully + 1),
+                    'remaining_months' => max(0, $credit->duration_months - $monthsPaidFully),
+                    'installment_amount' => $effectiveInstallmentAmount,
                     'tunggakan' => $tunggakan,
                 ];
             });
@@ -345,7 +367,7 @@ class FinanceController extends Controller
                     'created_at' => $log->created_at->format('H:i'), 
                     'paid_at' => $log->paid_at->format('H:i'), 
                     'customer_name' => $log->payment->customer->user->name ?? 'Unknown',
-                    'installment_number' => $log->installment_number,
+                    'installment_number' => $log->getInstallmentRangeLabel(),
                     'amount' => $log->amount,
                     'notes' => $log->admin_notes,
                     'months_paid' => $log->months_paid, 
@@ -389,12 +411,14 @@ class FinanceController extends Controller
             'admin_notes' => $validated['notes'],
         ]);
 
-        // 2. Update Payment Status / Counter
-        $payment->increment('installments_paid', $validated['months_paid']);
+        // 2. Update Payment Status / Counter (berdasarkan akumulasi nominal aktual yang sudah masuk)
+        $actualVerified = $payment->paymentLogs()->where('type', 'installment')->where('status', 'verified')->sum('amount');
+        $monthsPaidFully = $payment->installment_amount > 0 ? (int) floor($actualVerified / $payment->installment_amount) : 0;
         
-        if ($payment->installments_paid >= $payment->duration_months) {
-            $payment->update(['status' => 'paid_off']);
-        }
+        $payment->update([
+            'installments_paid' => $monthsPaidFully,
+            'status' => $monthsPaidFully >= $payment->duration_months ? 'paid_off' : $payment->status,
+        ]);
 
         // 3. Auto-Log Financial Transaction
         \App\Models\FinancialTransaction::create([

@@ -43,6 +43,7 @@ class InstallmentController extends Controller
                 $remainingDebt = 0;
                 $totalBillThisMonth = 0;
                 $monthsPaidFully = 0;
+                $remainingMonths = max(0, $payment->duration_months - $payment->installments_paid);
 
                 if ($isFlexible) {
                     $totalGantung = $payment->order->total_amount * 1.15;
@@ -57,24 +58,32 @@ class InstallmentController extends Controller
                     $monthsElapsed = min($payment->duration_months, $monthsElapsed);
                     $expectedTotal = $monthsElapsed * $payment->installment_amount;
                     
-                    $tunggakan = max(0, $expectedTotal - $actualVerifiedAmount);
-                    $remainder = $payment->installment_amount > 0 ? fmod($actualVerifiedAmount, $payment->installment_amount) : 0;
-                    $partialShortfall = $remainder > 0 ? $payment->installment_amount - $remainder : 0;
+                    // 1. Hitung sisa hutang pokok keseluruhan (Total Kontrak - Uang Masuk)
+                    $totalContractObligation = $payment->duration_months * $payment->installment_amount;
+                    $remainingDebt = max(0, $totalContractObligation - $actualVerifiedAmount);
 
-                    if ($partialShortfall > 0) {
-                        if ($tunggakan == 0) {
-                            $tunggakan = $partialShortfall + $payment->installment_amount;
-                        } else {
-                            $tunggakan = max($tunggakan, $partialShortfall + $payment->installment_amount);
-                        }
+                    // 2. Hitung berapa bulan penuh yang sudah dibayar
+                    $monthsPaidFully = $payment->installment_amount > 0 ? (int) floor($actualVerifiedAmount / $payment->installment_amount) : 0;
+
+                    // 3. Cek apakah ada tunggakan (hanya jika uang masuk kurang dari kewajiban s/d bulan ini)
+                    if ($actualVerifiedAmount >= $expectedTotal) {
+                        // Pelanggan bayar tepat waktu ATAU lebih cepat (overpayment/lump-sum)
+                        $tunggakan = 0;
+                        $tunggakan_months = 0;
+
+                        // Hitung kelebihan dari kelipatan bulan penuh (surplus)
+                        $surplus = max(0, $actualVerifiedAmount - ($monthsPaidFully * $payment->installment_amount));
+                        // Angsuran bulan berikutnya terpotong surplus
+                        $nextBill = max(0, $payment->installment_amount - $surplus);
+                        $totalBillThisMonth = min($nextBill, $remainingDebt);
+                        $effectiveInstallmentAmount = $nextBill > 0 ? min($nextBill, $remainingDebt) : $payment->installment_amount;
+                    } else {
+                        // Pelanggan memiliki kekurangan bayar dari kewajiban bulan-bulan sebelumnya
+                        $tunggakan = max(0, $expectedTotal - $actualVerifiedAmount);
+                        $tunggakan_months = $payment->installment_amount > 0 ? (int) ceil($tunggakan / $payment->installment_amount) : 0;
+                        $totalBillThisMonth = min($tunggakan, $remainingDebt);
+                        $effectiveInstallmentAmount = $payment->installment_amount;
                     }
-
-                    $tunggakan_months = $payment->installment_amount > 0 ? floor($tunggakan / $payment->installment_amount) : 0;
-
-                    $remainingMonths = max(0, $payment->duration_months - $payment->installments_paid);
-                    $remainingDebt = max(0, ($remainingMonths * $payment->installment_amount)); // Sisanya adalah sisa bulan x pokok
-                    $totalBillThisMonth = $payment->installment_amount + $tunggakan;
-                    $monthsPaidFully = $payment->installment_amount > 0 ? floor($actualVerifiedAmount / $payment->installment_amount) : 0;
                 }
 
                 // Determine Product Name (First Item)
@@ -125,7 +134,7 @@ class InstallmentController extends Controller
                     'dueDate' => $nextDueDateFormatted,
                     'daysUntilDue' => $daysUntilDue,
                     'dueStatus' => $dueStatus,
-                    'installment_amount' => $payment->installment_amount,
+                    'installment_amount' => $effectiveInstallmentAmount ?? $payment->installment_amount,
                     'tunggakan' => $tunggakan,
                     'tunggakan_months' => $tunggakan_months,
                     'tunggakanMonths' => $tunggakan_months,
@@ -136,7 +145,7 @@ class InstallmentController extends Controller
                     })->map(function ($log) {
                         return [
                             'id' => $log->id,
-                            'installmentKe' => $log->installment_number,
+                            'installmentKe' => $log->getInstallmentRangeLabel(),
                             'date' => $log->paid_at ? \Carbon\Carbon::parse($log->paid_at)->format('d-m-Y') : '-',
                             'method' => 'Transfer', // Simplified
                             'amount' => $log->amount,

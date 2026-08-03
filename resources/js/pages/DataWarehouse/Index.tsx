@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { TableauEmbed } from '@/components/TableauEmbed';
 
 const dashboards = [
-    { id: 'dashboard-1', name: 'Sales Performance', embedUrl: 'https://public.tableau.com/views/Visualisasi_PA_Vina_17834448439860/SalesPerformance' },
-    { id: 'dashboard-2', name: 'Profitability', embedUrl: 'https://public.tableau.com/views/Visualisasi_PA_Vina_17834448439860/ProfitabilityProfitabilitas' },
+    { id: 'dashboard-1', name: 'Sales Performance', embedUrl: 'https://public.tableau.com/views/Visualisasi_PA_Vina_17849834635440/SalesPerformance' },
+    { id: 'dashboard-2', name: 'Profitability', embedUrl: 'https://public.tableau.com/views/Visualisasi_PA_Vina_17849834635440/ProfitabilityProfitabilitas' },
 ];
 
 export default function DataWarehouseIndex() {

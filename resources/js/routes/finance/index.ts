@@ -161,7 +161,7 @@ arrears.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     arrears.form = arrearsForm
 /**
 * @see \App\Features\Finance\FinanceController::reports
- * @see app/Features/Finance/FinanceController.php:414
+ * @see app/Features/Finance/FinanceController.php:438
  * @route '/admin/finance/reports'
  */
 export const reports = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -176,7 +176,7 @@ reports.definition = {
 
 /**
 * @see \App\Features\Finance\FinanceController::reports
- * @see app/Features/Finance/FinanceController.php:414
+ * @see app/Features/Finance/FinanceController.php:438
  * @route '/admin/finance/reports'
  */
 reports.url = (options?: RouteQueryOptions) => {
@@ -185,7 +185,7 @@ reports.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Features\Finance\FinanceController::reports
- * @see app/Features/Finance/FinanceController.php:414
+ * @see app/Features/Finance/FinanceController.php:438
  * @route '/admin/finance/reports'
  */
 reports.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -194,7 +194,7 @@ reports.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 /**
 * @see \App\Features\Finance\FinanceController::reports
- * @see app/Features/Finance/FinanceController.php:414
+ * @see app/Features/Finance/FinanceController.php:438
  * @route '/admin/finance/reports'
  */
 reports.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -204,7 +204,7 @@ reports.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
     /**
 * @see \App\Features\Finance\FinanceController::reports
- * @see app/Features/Finance/FinanceController.php:414
+ * @see app/Features/Finance/FinanceController.php:438
  * @route '/admin/finance/reports'
  */
     const reportsForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -214,7 +214,7 @@ reports.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
             /**
 * @see \App\Features\Finance\FinanceController::reports
- * @see app/Features/Finance/FinanceController.php:414
+ * @see app/Features/Finance/FinanceController.php:438
  * @route '/admin/finance/reports'
  */
         reportsForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -223,7 +223,7 @@ reports.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
         })
             /**
 * @see \App\Features\Finance\FinanceController::reports
- * @see app/Features/Finance/FinanceController.php:414
+ * @see app/Features/Finance/FinanceController.php:438
  * @route '/admin/finance/reports'
  */
         reportsForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
