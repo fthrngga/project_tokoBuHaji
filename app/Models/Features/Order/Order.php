@@ -19,6 +19,7 @@ class Order extends Model
         'address_detail',
         'postal_code',
         'notes',
+        'allow_credit',
     ];
 
     public function user()

@@ -64,6 +64,7 @@ interface Order {
     province: string;
     city: string;
     postal_code: string;
+    allow_credit: boolean;
     items: OrderItem[];
     messages: Message[];
     created_at: string;
@@ -415,9 +416,11 @@ export default function Show({ order }: Props) {
                                                                     </SelectTrigger>
                                                                     <SelectContent>
                                                                         <SelectItem value="cash">Cash / Tunai</SelectItem>
-                                                                        <SelectItem value="credit" disabled={order.total_amount < 1000000}>
-                                                                            Kredit / Cicilan {order.total_amount < 1000000 && "(Min. Rp 1.000.000)"}
-                                                                        </SelectItem>
+                                                                        {order.allow_credit && (
+                                                                            <SelectItem value="credit" disabled={order.total_amount < 1000000}>
+                                                                                Kredit / Cicilan {order.total_amount < 1000000 && "(Min. Rp 1.000.000)"}
+                                                                            </SelectItem>
+                                                                        )}
                                                                     </SelectContent>
                                                                 </Select>
                                                             </div>

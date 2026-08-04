@@ -94,10 +94,6 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
             const stockToCheck = variant ? variant.stock : product.stock;
             
             if (existing) {
-                if (existing.quantity >= stockToCheck && stockToCheck > 0) {
-                    toast.error(`Stok tidak cukup! Hanya tersisa ${stockToCheck} unit.`);
-                    return prev;
-                }
                 return prev.map(item => item.cart_id === cartId ? { ...item, quantity: item.quantity + 1 } : item);
             }
             return [...prev, { 
@@ -116,14 +112,6 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
             if (item.cart_id === cartId) {
                 const newQuantity = item.quantity + delta;
                 if (newQuantity <= 0) return item;
-                const maxStock = item.product_variant_id ? 
-                    (item.variants?.find(v => v.id === item.product_variant_id)?.stock || 0) : 
-                    item.stock;
-
-                if (newQuantity > maxStock && maxStock > 0) {
-                    toast.error("Tidak dapat menambah melebihi stok yang tersedia.");
-                    return item;
-                }
                 return { ...item, quantity: newQuantity };
             }
             return item;
@@ -168,7 +156,19 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
             onSuccess: () => {
                 setCart([]);
                 reset();
-                toast.success("Transaksi POS berhasil diproses dan dicatat!");
+                
+                const hasPreorder = items.some(item => {
+                    const maxStock = item.product_variant_id ? 
+                        (cart.find(c => c.cart_id === `${item.id}-${item.product_variant_id}`)?.variants?.find(v => v.id === item.product_variant_id)?.stock || 0) : 
+                        (cart.find(c => c.id === item.id)?.stock || 0);
+                    return item.quantity > maxStock;
+                });
+
+                if (hasPreorder) {
+                    toast.success("Transaksi POS Pre-Order Berhasil! Beritahu pelanggan untuk melacak pesanan di halaman /track dengan ID Order dan No. HP mereka.", { duration: 8000 });
+                } else {
+                    toast.success("Transaksi POS berhasil diproses dan dicatat!");
+                }
             },
             onError: (err) => {
                 const errorMessage = Object.values(err)[0] as string;
@@ -222,8 +222,8 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
                                                     <Package className="h-8 w-8 text-slate-300" />
                                                 </div>
                                             )}
-                                            <div className="absolute top-2 right-2 bg-black/70 px-2 py-0.5 rounded text-[10px] font-bold shadow-sm text-foreground">
-                                                Stok: {product.stock}
+                                            <div className={`absolute top-2 right-2 px-2 py-0.5 rounded text-[10px] font-bold shadow-sm ${product.stock <= 0 ? 'bg-amber-500 text-white' : 'bg-black/70 text-foreground'}`}>
+                                                {product.stock <= 0 ? 'Pre-Order' : `Stok: ${product.stock}`}
                                             </div>
                                         </div>
                                         <div className="p-3 flex flex-col flex-1 justify-between">
@@ -279,6 +279,17 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
                                                 </div>
                                             )}
                                             <p className="text-xs text-slate-500">{formatCurrency(item.price)}</p>
+                                            {(() => {
+                                                const maxStock = item.product_variant_id ? 
+                                                    (item.variants?.find(v => v.id === item.product_variant_id)?.stock || 0) : 
+                                                    item.stock;
+                                                const preorderQty = Math.max(0, item.quantity - Math.max(0, maxStock));
+                                                return preorderQty > 0 ? (
+                                                    <Badge variant="outline" className="mt-1 bg-amber-50 text-amber-600 border-amber-200">
+                                                        {preorderQty} unit Pre-Order
+                                                    </Badge>
+                                                ) : null;
+                                            })()}
                                         </div>
                                         <div className="flex items-center gap-2 shrink-0">
                                             <Button variant="outline" size="icon" className="h-7 w-7 rounded-full" onClick={() => updateQuantity(item.cart_id, -1)}>

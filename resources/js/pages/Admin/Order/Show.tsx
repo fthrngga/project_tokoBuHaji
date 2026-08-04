@@ -55,6 +55,7 @@ interface Order {
         proof_of_payment_path?: string | null;
         [key: string]: any;
     } | null;
+    allow_credit: boolean;
     created_at: string;
 }
 
@@ -255,18 +256,37 @@ export default function Show({ order }: Props) {
                                         )}
                                     </div>
                                 ) : (
-                                    <form onSubmit={handleSendInvoice} className="space-y-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="shipping_cost">Shipping Cost (Rp)</Label>
-                                            <Input
-                                                id="shipping_cost"
-                                                type="number"
-                                                placeholder="e.g. 50000"
-                                                value={updateData.shipping_cost}
-                                                onChange={e => setUpdateData('shipping_cost', e.target.value)}
-                                                className="bg-background"
-                                            />
+                                    <div className="space-y-6">
+                                        <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border">
+                                            <div className="space-y-0.5">
+                                                <Label className="text-base font-semibold">Izinkan Opsi Kredit</Label>
+                                                <p className="text-sm text-muted-foreground">Berikan izin kepada customer ini untuk memilih metode cicilan.</p>
+                                            </div>
+                                            <Button 
+                                                variant={order.allow_credit ? "default" : "outline"}
+                                                onClick={() => {
+                                                    router.put(route('admin.orders.update', order.id), {
+                                                        toggle_credit: true,
+                                                        allow_credit: !order.allow_credit
+                                                    }, { preserveScroll: true });
+                                                }}
+                                            >
+                                                {order.allow_credit ? 'Diizinkan' : 'Dilarang'}
+                                            </Button>
                                         </div>
+
+                                        <form onSubmit={handleSendInvoice} className="space-y-4">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="shipping_cost">Shipping Cost (Rp)</Label>
+                                                <Input
+                                                    id="shipping_cost"
+                                                    type="number"
+                                                    placeholder="e.g. 50000"
+                                                    value={updateData.shipping_cost}
+                                                    onChange={e => setUpdateData('shipping_cost', e.target.value)}
+                                                    className="bg-background"
+                                                />
+                                            </div>
                                         <div className="space-y-2">
                                             <Label>Order Status</Label>
                                             <select
@@ -301,6 +321,7 @@ export default function Show({ order }: Props) {
                                             {updateProcessing ? "Updating..." : "Update Order"}
                                         </Button>
                                     </form>
+                                    </div>
                                 )}
                             </CardContent>
                         </Card>

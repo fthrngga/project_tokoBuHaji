@@ -28,6 +28,11 @@ class OrderController extends Controller
 
     public function update(Request $request, Order $order)
     {
+        if ($request->has('toggle_credit')) {
+            $order->update(['allow_credit' => $request->boolean('allow_credit')]);
+            return back()->with('success', 'Status izin kredit diperbarui.');
+        }
+
         $statusHierarchy = [
             'negotiation' => 1,
             'awaiting_payment' => 2,

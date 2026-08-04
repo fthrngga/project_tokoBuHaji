@@ -47,7 +47,10 @@ Route::middleware(['auth', 'verified', 'role:customer'])->group(function () {
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::get('/track', [\App\Http\Controllers\TrackOrderController::class, 'index'])->name('track.index');
+Route::post('/track', [\App\Http\Controllers\TrackOrderController::class, 'search'])->name('track.search');
+
+Route::middleware('auth')->group(function () {
     Route::post('/notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead');
     Route::get('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
 });

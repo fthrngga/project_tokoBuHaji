@@ -19,7 +19,6 @@ class POSController extends Controller
     {
         $products = Product::with(['images', 'category', 'variants'])
             ->where('is_published', true)
-            ->where('stock', '>', 0)
             ->get();
             
         $customers = User::where('role', 'customer')
@@ -93,13 +92,15 @@ class POSController extends Controller
             // 2. Kalkulasi Total & Kurangi Stok (Pessimistic Locking)
             $totalAmount = 0;
             $orderItemsData = [];
+            $hasPreorder = false;
             
             foreach ($request->items as $item) {
-                // lockForUpdate mencegah bentrok (race condition) jika ada pembeli online 
-                // membeli barang yang sama persis di detik yang sama.
+                // lockForUpdate mencegah bentrok (race condition)
                 $product = Product::lockForUpdate()->findOrFail($item['id']);
                 
                 $variant = null;
+                $currentStock = 0;
+                
                 if (!empty($item['product_variant_id'])) {
                     $variant = $product->variants()->lockForUpdate()->find($item['product_variant_id']);
                     if (!$variant) {
@@ -107,21 +108,18 @@ class POSController extends Controller
                             'error' => "Varian tidak ditemukan untuk produk '{$product->name}'"
                         ]);
                     }
-                    if ($variant->stock < $item['quantity']) {
-                        throw ValidationException::withMessages([
-                            'error' => "Stok varian tidak mencukupi untuk '{$product->name}'. Sisa stok varian: {$variant->stock}"
-                        ]);
-                    }
+                    $currentStock = $variant->stock;
                     $variant->decrement('stock', $item['quantity']);
                 } else {
-                    if ($product->stock < $item['quantity']) {
-                        throw ValidationException::withMessages([
-                            'error' => "Stok tidak mencukupi untuk '{$product->name}'. Sisa stok: {$product->stock}"
-                        ]);
-                    }
+                    $currentStock = $product->stock;
                 }
 
                 $product->decrement('stock', $item['quantity']);
+                
+                $preorderQty = max(0, $item['quantity'] - max(0, $currentStock));
+                if ($preorderQty > 0) {
+                    $hasPreorder = true;
+                }
 
                 $price = $variant ? $variant->selling_price : $product->selling_price;
                 $subtotal = $price * $item['quantity'];
@@ -131,6 +129,7 @@ class POSController extends Controller
                     'product_id' => $product->id,
                     'product_variant_id' => $item['product_variant_id'] ?? null,
                     'quantity' => $item['quantity'],
+                    'preorder_quantity' => $preorderQty,
                     'price' => $price,
                     'subtotal' => $subtotal,
                 ];
@@ -154,16 +153,22 @@ class POSController extends Controller
             }
 
             // 4. Buat Order & Detail Items
+            $orderStatus = $request->payment_type === 'credit' || $hasPreorder ? 'processing' : 'completed';
+            $orderNotes = 'Kasir: ' . auth()->user()->name;
+            if ($hasPreorder) {
+                $orderNotes .= ' | MENGANDUNG BARANG PRE-ORDER (Menunggu Restok)';
+            }
+
             $order = Order::create([
                 'user_id' => $userId,
-                'status' => $request->payment_type === 'credit' ? 'processing' : 'completed', // Transaksi POS tunai selesai, kredit processing (perlu pengantaran/konfirmasi)
+                'status' => $orderStatus,
                 'total_amount' => $request->payment_type === 'credit' ? ($totalAmount * 1.5) : $totalAmount,
                 'province' => 'Riau',
                 'city' => 'Pekanbaru',
                 'district' => 'Toko',
                 'village' => 'Toko',
                 'address_detail' => 'Pembelian Langsung di Toko (Walk-in/POS)',
-                'notes' => 'Kasir: ' . auth()->user()->name,
+                'notes' => $orderNotes,
             ]);
 
             foreach ($orderItemsData as $itemData) {
