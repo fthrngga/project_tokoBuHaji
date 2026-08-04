@@ -275,7 +275,7 @@ export default function Index({ defectiveProducts, customers }: Props) {
                                                         {item.notes?.startsWith('[PENARIKAN]') && item.status !== 'sold' ? (
                                                             <Button
                                                                 size="sm"
-                                                                className="gap-1.5 text-xs font-medium bg-emerald-600 hover:bg-emerald-700 text-white"
+                                                                className="gap-1.5 text-xs font-medium bg-emerald-600 hover:bg-emerald-700 text-foreground"
                                                                 onClick={() => handleOpenSellDialog(item)}
                                                             >
                                                                 <ArrowUpRight className="h-3.5 w-3.5" />
@@ -513,7 +513,7 @@ export default function Index({ defectiveProducts, customers }: Props) {
                         <Button type="button" variant="outline" onClick={() => setIsSellDialogOpen(false)}>
                             Batal
                         </Button>
-                        <Button type="submit" form="sell-form" disabled={sellForm.processing} className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white">
+                        <Button type="submit" form="sell-form" disabled={sellForm.processing} className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-foreground">
                             {sellForm.processing && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                             Proses Penjualan
                         </Button>

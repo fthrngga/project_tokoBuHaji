@@ -23,14 +23,14 @@ export default function SearchIndex({ results, query }: Props) {
                     <div className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
                         <div className="container mx-auto px-8 md:px-12 lg:px-24 py-16 lg:py-24">
                             <nav className="flex mb-4 text-sm text-gray-500 dark:text-gray-400">
-                                <Link href="/" className="hover:text-gray-900 dark:hover:text-white">Beranda</Link>
+                                <Link href="/" className="hover:text-gray-900 dark:hover:text-foreground">Beranda</Link>
                                 <span className="mx-2">/</span>
-                                <span className="text-gray-900 dark:text-white font-medium">Pencarian</span>
+                                <span className="text-gray-900 dark:text-foreground font-medium">Pencarian</span>
                             </nav>
 
                             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                                 <div>
-                                    <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-5xl lg:text-6xl">
+                                    <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-foreground sm:text-5xl lg:text-6xl">
                                         Hasil Pencarian
                                     </h1>
                                     <p className="mt-4 max-w-xl text-lg text-gray-500 dark:text-gray-400">
@@ -56,13 +56,13 @@ export default function SearchIndex({ results, query }: Props) {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                     </svg>
                                 </div>
-                                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Tidak ada hasil ditemukan</h2>
+                                <h2 className="text-2xl font-bold text-gray-900 dark:text-foreground">Tidak ada hasil ditemukan</h2>
                                 <p className="mt-2 text-gray-500 dark:text-gray-400 max-w-md mx-auto">
                                     Maaf, kami tidak dapat menemukan produk yang sesuai dengan pencarian "{query}". Coba gunakan kata kunci lain.
                                 </p>
                                 <Link
                                     href="/"
-                                    className="mt-8 inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-black hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+                                    className="mt-8 inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-foreground bg-black hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200"
                                 >
                                     Kembali ke Beranda
                                 </Link>

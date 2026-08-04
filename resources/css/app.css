@@ -61,56 +61,56 @@
     --color-sidebar-ring: var(--sidebar-ring);
 }
 
-:root, .dark {
-    /* Base: Deep Navy (#080f1a) */
-    --background: #080f1a;
-    --foreground: #F7F7FF;
+:root {
+    /* ── Base: Warm Gray (tidak terlalu putih, tidak terlalu gelap) ── */
+    --background: #F0F4F8;
+    --foreground: #111827;
 
-    /* Cards slightly lighter for elevation */
-    --card: #0c1626;
-    --card-foreground: #F7F7FF;
+    /* Cards: Pure white agar menonjol di atas background */
+    --card: #FFFFFF;
+    --card-foreground: #111827;
 
-    --popover: #0c1626;
-    --popover-foreground: #F7F7FF;
+    --popover: #FFFFFF;
+    --popover-foreground: #111827;
 
-    /* Primary: CTA Coral (#FE5F55) */
-    --primary: #FE5F55;
-    --primary-foreground: #ffffff;
+    /* Primary: Navy Blue — identitas brand utama (header, logo, tombol) */
+    --primary: #1A3C6D;
+    --primary-foreground: #FFFFFF;
 
-    /* Secondary: Steel Blue (#577399) or Light Blue (#BDD5EA) */
-    --secondary: #1a2639;
-    --secondary-foreground: #BDD5EA;
+    /* Secondary: Biru muda untuk chip/tag/hover bg */
+    --secondary: #E8F0FA;
+    --secondary-foreground: #1A3C6D;
 
-    --muted: #1a2639;
-    --muted-foreground: rgba(189,213,234,0.7);
+    --muted: #F1F5F9;
+    --muted-foreground: #6B7280;
 
-    --accent: #1a2639;
-    --accent-foreground: #F7F7FF;
+    /* Accent: Coral — CTA, badge harga, elemen mendesak */
+    --accent: #E85D4A;
+    --accent-foreground: #FFFFFF;
 
-    /* Destructive Coral */
-    --destructive: #FE5F55;
-    --destructive-foreground: #ffffff;
+    --destructive: #DC2626;
+    --destructive-foreground: #FFFFFF;
 
-    --border: rgba(87,115,153,0.3);
-    --input: rgba(87,115,153,0.3);
-    --ring: #FE5F55;
+    --border: #E2E8F0;
+    --input: #E2E8F0;
+    --ring: #2563EB;
 
-    --chart-1: #FE5F55;
-    --chart-2: #BDD5EA;
-    --chart-3: #577399;
-    --chart-4: #8aacca;
-    --chart-5: #1a2639;
+    --chart-1: #2563EB;
+    --chart-2: #E85D4A;
+    --chart-3: #10B981;
+    --chart-4: #F59E0B;
+    --chart-5: #8B5CF6;
 
     --radius: 0.75rem;
 
-    --sidebar: #080f1a;
-    --sidebar-foreground: #F7F7FF;
-    --sidebar-primary: #FE5F55;
-    --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #1a2639;
-    --sidebar-accent-foreground: #F7F7FF;
-    --sidebar-border: rgba(87,115,153,0.3);
-    --sidebar-ring: #FE5F55;
+    --sidebar: #FFFFFF;
+    --sidebar-foreground: #111827;
+    --sidebar-primary: #1A3C6D;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: #E8F0FA;
+    --sidebar-accent-foreground: #1A3C6D;
+    --sidebar-border: #E2E8F0;
+    --sidebar-ring: #1A3C6D;
 }
 
 @layer base {
@@ -142,12 +142,19 @@
 /* Premium Card shadow utility */
 @layer utilities {
     .card-shadow {
-        box-shadow: 0 1px 3px 0 oklch(0 0 0 / 0.07), 0 1px 2px -1px oklch(0 0 0 / 0.04);
+        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04);
     }
     .card-shadow-md {
-        box-shadow: 0 4px 12px -2px oklch(0 0 0 / 0.08), 0 2px 4px -2px oklch(0 0 0 / 0.05);
+        box-shadow: 0 4px 12px -2px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.05);
     }
     .card-shadow-lg {
-        box-shadow: 0 10px 30px -5px oklch(0 0 0 / 0.10), 0 4px 10px -5px oklch(0 0 0 / 0.06);
+        box-shadow: 0 10px 30px -5px rgb(0 0 0 / 0.10), 0 4px 10px -5px rgb(0 0 0 / 0.06);
+    }
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
     }
 }

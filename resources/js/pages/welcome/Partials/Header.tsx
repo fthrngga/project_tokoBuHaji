@@ -7,7 +7,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ShoppingCart, Search, LogOut, ShoppingBag, LayoutDashboard, User as UserIcon, CreditCard, X, MapPin, Menu } from 'lucide-react';
+import { ShoppingCart, Search, LogOut, ShoppingBag, LayoutDashboard, User as UserIcon, CreditCard, X, Menu } from 'lucide-react';
 import { route } from 'ziggy-js';
 import { useState, useEffect, useRef } from 'react';
 import React from 'react';
@@ -21,6 +21,11 @@ const NAV_LINKS = [
     { label: "Semua Produk", href: "/kategori" },
 ];
 
+// ── NAVY BLUE: #1A3C6D ──
+// Seperti Shopee = orange, website ini = Navy Blue
+const NAVY = "#1A3C6D";
+const NAVY_DARK = "#142E55";
+
 export default function Header({ user }: { user: User | null }) {
     const { cartCount } = usePage<SharedData>().props;
     const [scrolled, setScrolled] = useState(false);
@@ -29,7 +34,7 @@ export default function Header({ user }: { user: User | null }) {
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        const fn = () => setScrolled(window.scrollY > 20);
+        const fn = () => setScrolled(window.scrollY > 10);
         window.addEventListener('scroll', fn, { passive: true });
         return () => window.removeEventListener('scroll', fn);
     }, []);
@@ -57,32 +62,38 @@ export default function Header({ user }: { user: User | null }) {
             {/* ─── Search Overlay ─── */}
             {searchOpen && (
                 <div
-                    className="fixed inset-0 z-[200] flex items-start justify-center pt-[10vh] md:pt-[20vh] bg-[#080f1a]/95 backdrop-blur-xl"
+                    className="fixed inset-0 z-[200] flex items-start justify-center pt-[8vh] md:pt-[15vh]"
+                    style={{ background: "rgba(26,60,109,0.96)", backdropFilter: "blur(12px)" }}
                     onClick={e => { if (e.target === e.currentTarget) setSearchOpen(false); }}
                 >
-                    <div className="w-full max-w-[640px] px-4 md:px-6">
-                        {/* Close */}
-                        <div className="flex justify-end mb-8">
+                    <div className="w-full max-w-[600px] px-4 md:px-6">
+                        <div className="flex justify-end mb-6">
                             <button
                                 onClick={() => setSearchOpen(false)}
-                                className="text-[#bdd5ea]/40 hover:text-[#BDD5EA] transition-colors p-1"
+                                className="text-white/50 hover:text-white transition-colors p-1.5 rounded-full hover:bg-white/10"
                             >
-                                <X size={24} />
+                                <X size={20} />
                             </button>
                         </div>
                         <form onSubmit={handleSearch}>
-                            <div className="relative border-b border-[#577399]/30">
+                            <div className="relative bg-white rounded-2xl shadow-2xl overflow-hidden flex items-center gap-3 px-5 py-4">
+                                <Search size={18} className="text-muted-foreground flex-none" />
                                 <input
                                     ref={inputRef}
                                     type="text"
-                                    placeholder="Cari produk..."
+                                    placeholder="Cari produk, kategori..."
                                     value={q}
                                     onChange={e => setQ(e.target.value)}
-                                    className="w-full bg-transparent border-none outline-none text-2xl md:text-[40px] font-bold text-white tracking-tight pb-4 placeholder:text-white/20 focus:ring-0"
-                                    style={{ caretColor: "#FE5F55" }}
+                                    className="flex-1 bg-transparent border-none outline-none text-lg font-medium text-foreground placeholder:text-muted-foreground focus:ring-0"
+                                    style={{ caretColor: NAVY }}
                                 />
+                                {q && (
+                                    <button type="button" onClick={() => setQ('')} className="text-muted-foreground hover:text-foreground">
+                                        <X size={16} />
+                                    </button>
+                                )}
                             </div>
-                            <p className="mt-4 text-xs text-[#577399]/50 text-center">
+                            <p className="mt-3 text-xs text-white/40 text-center">
                                 Tekan Enter untuk mencari · Esc untuk menutup
                             </p>
                         </form>
@@ -90,37 +101,43 @@ export default function Header({ user }: { user: User | null }) {
                 </div>
             )}
 
-            {/* ─── Navbar ─── */}
+            {/* ─── Navbar — NAVY BLUE background ─── */}
             <header
-                className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-400 ${
-                    scrolled ? 'bg-[#080f1a]/95 backdrop-blur-xl border-b border-[#577399]/10' : 'bg-transparent border-b border-transparent'
-                }`}
+                className="fixed top-0 left-0 right-0 z-[100] transition-all duration-300"
+                style={{
+                    background: scrolled ? `${NAVY_DARK}F5` : NAVY,
+                    backdropFilter: scrolled ? "blur(12px)" : undefined,
+                    boxShadow: scrolled ? "0 2px 20px rgba(0,0,0,0.25)" : "0 1px 0 rgba(255,255,255,0.08)",
+                }}
             >
-                <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 h-[60px] md:h-[68px] flex items-center justify-between gap-4 md:gap-8">
-                    
+                <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 h-[60px] md:h-[64px] flex items-center justify-between gap-4 md:gap-8">
+
                     <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
                         {/* Mobile Menu Toggle */}
                         <Sheet>
                             <SheetTrigger asChild>
-                                <button className="md:hidden p-2 -ml-2 text-[#bdd5ea]/60 hover:text-white transition-colors">
+                                <button className="md:hidden p-2 -ml-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
                                     <Menu size={20} />
                                 </button>
                             </SheetTrigger>
-                            <SheetContent side="left" className="bg-[#080f1a] border-r border-[#577399]/20 p-0 w-[280px]">
+                            <SheetContent side="left" className="p-0 w-[280px]" style={{ background: NAVY_DARK, border: "1px solid rgba(255,255,255,0.1)" }}>
                                 <SheetTitle className="sr-only">Menu Navigasi</SheetTitle>
                                 <SheetDescription className="sr-only">Navigasi situs untuk perangkat seluler</SheetDescription>
-                                <div className="p-6 border-b border-[#577399]/20 flex items-center gap-3">
-                                    <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-[#3d5a80] text-white">
-                                        <AppLogoIcon className="size-5 fill-current" />
+                                <div className="p-5 border-b border-white/10 flex items-center gap-3">
+                                    <div className="flex aspect-square size-9 items-center justify-center rounded-lg bg-white/15">
+                                        <AppLogoIcon className="size-5 fill-current text-white" />
                                     </div>
-                                    <span className="text-[15px] font-extrabold text-white tracking-tight">Toko Pak Haji</span>
+                                    <div>
+                                        <p className="text-[14px] font-extrabold text-white tracking-tight leading-none">Toko Pak Haji</p>
+                                        <p className="text-[11px] text-white/50 mt-0.5">Elektronik & Mebel</p>
+                                    </div>
                                 </div>
-                                <div className="py-4 flex flex-col">
+                                <div className="py-3 flex flex-col">
                                     {NAV_LINKS.map(({ label, href }) => (
                                         <Link
                                             key={label}
                                             href={href}
-                                            className="px-6 py-3 text-[#bdd5ea]/70 hover:text-white hover:bg-[#577399]/10 transition-colors text-sm font-medium"
+                                            className="px-5 py-3 text-white/70 hover:text-white hover:bg-white/8 transition-colors text-sm font-medium"
                                         >
                                             {label}
                                         </Link>
@@ -130,26 +147,23 @@ export default function Header({ user }: { user: User | null }) {
                         </Sheet>
 
                         {/* Logo */}
-                        <Link href="/" className="flex items-center gap-2 md:gap-2.5 flex-shrink-0">
-                            <div className="flex aspect-square size-7 md:size-8 items-center justify-center rounded-md bg-[#3d5a80] text-white">
-                                <AppLogoIcon className="size-4 md:size-5 fill-current" />
+                        <Link href="/" className="flex items-center gap-2.5 flex-shrink-0">
+                            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-white/15">
+                                <AppLogoIcon className="size-5 fill-current text-white" />
                             </div>
-                            <span className="text-sm md:text-[15px] font-extrabold text-white tracking-tight hidden sm:block">
-                                Toko Pak Haji Elektronik
-                            </span>
-                            <span className="text-sm md:text-[15px] font-extrabold text-white tracking-tight sm:hidden block">
-                                Pak Haji
+                            <span className="text-[14px] font-extrabold text-white tracking-tight hidden sm:block">
+                                Haji Elektronik
                             </span>
                         </Link>
                     </div>
 
                     {/* Center nav */}
-                    <nav className="hidden md:flex items-center gap-1">
+                    <nav className="hidden md:flex items-center gap-0.5">
                         {NAV_LINKS.map(({ label, href }) => (
                             <Link
                                 key={label}
                                 href={href}
-                                className="px-3.5 py-1.5 rounded-full text-[13px] font-medium text-[#bdd5ea]/60 hover:text-white hover:bg-[#577399]/10 transition-all"
+                                className="px-4 py-2 rounded-lg text-[13px] font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all"
                             >
                                 {label}
                             </Link>
@@ -157,13 +171,13 @@ export default function Header({ user }: { user: User | null }) {
                     </nav>
 
                     {/* Right actions */}
-                    <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
-                        {/* Search button */}
+                    <div className="flex items-center gap-1 md:gap-1.5 flex-shrink-0">
                         <button
                             onClick={() => setSearchOpen(true)}
-                            className="w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center text-[#bdd5ea]/60 hover:text-white hover:bg-[#577399]/10 transition-all"
+                            className="w-9 h-9 rounded-lg flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all"
+                            aria-label="Cari"
                         >
-                            <Search size={16} />
+                            <Search size={17} />
                         </button>
 
                         {user ? (
@@ -172,12 +186,13 @@ export default function Header({ user }: { user: User | null }) {
                                 {/* Cart */}
                                 <Link
                                     href={route('cart.index')}
-                                    className="relative w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center text-[#bdd5ea]/60 hover:text-white hover:bg-[#577399]/10 transition-all"
+                                    className="relative w-9 h-9 rounded-lg flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all"
+                                    aria-label="Keranjang"
                                 >
-                                    <ShoppingCart size={16} />
+                                    <ShoppingCart size={17} />
                                     {cartCount > 0 && (
-                                        <span className="absolute top-[2px] md:top-[4px] right-[2px] md:right-[4px] w-3.5 h-3.5 md:w-4 md:h-4 rounded-full bg-[#FE5F55] text-white text-[8px] md:text-[9px] font-extrabold flex items-center justify-center">
-                                            {cartCount}
+                                        <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-accent text-accent-foreground text-[9px] font-extrabold flex items-center justify-center leading-none">
+                                            {cartCount > 9 ? '9+' : cartCount}
                                         </span>
                                     )}
                                 </Link>
@@ -185,43 +200,43 @@ export default function Header({ user }: { user: User | null }) {
                                 {/* Avatar dropdown */}
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <button className="w-7 h-7 md:w-8 md:h-8 ml-1 rounded-full bg-gradient-to-br from-[#577399] to-[#3d5a80] text-white text-[11px] md:text-[12px] font-extrabold flex items-center justify-center hover:opacity-80 transition-opacity">
+                                        <button className="w-8 h-8 ml-1 rounded-full bg-white/15 text-white text-[12px] font-extrabold flex items-center justify-center hover:bg-white/25 transition-colors border border-white/20">
                                             {user.name.charAt(0).toUpperCase()}
                                         </button>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="w-52 bg-[#0d1f33] border-[#577399]/20 text-[#BDD5EA]">
-                                        <div className="px-3 py-2.5 border-b border-[#577399]/15">
-                                            <p className="text-[13px] font-semibold text-white m-0 truncate">{user.name}</p>
-                                            <p className="text-[11px] text-[#577399] mt-0.5 m-0 truncate">{user.email as string}</p>
+                                    <DropdownMenuContent align="end" className="w-52 bg-card border-border shadow-xl">
+                                        <div className="px-3 py-2.5 border-b border-border">
+                                            <p className="text-[13px] font-semibold text-foreground m-0 truncate">{user.name}</p>
+                                            <p className="text-[11px] text-muted-foreground mt-0.5 m-0 truncate">{user.email as string}</p>
                                         </div>
                                         {(user.role as string) === 'admin' ? (
-                                            <DropdownMenuItem asChild className="focus:bg-[#577399]/20 focus:text-white cursor-pointer">
-                                                <Link href={route('dashboard')} className="flex items-center gap-2 text-[#BDD5EA] text-[13px]">
+                                            <DropdownMenuItem asChild className="focus:bg-secondary cursor-pointer">
+                                                <Link href={route('dashboard')} className="flex items-center gap-2 text-foreground text-[13px]">
                                                     <LayoutDashboard size={14} /> Dashboard
                                                 </Link>
                                             </DropdownMenuItem>
                                         ) : (
                                             <>
-                                                <DropdownMenuItem asChild className="focus:bg-[#577399]/20 focus:text-white cursor-pointer">
-                                                    <Link href={route('profile.edit')} className="flex items-center gap-2 text-[#BDD5EA] text-[13px]">
+                                                <DropdownMenuItem asChild className="focus:bg-secondary cursor-pointer">
+                                                    <Link href={route('profile.edit')} className="flex items-center gap-2 text-foreground text-[13px]">
                                                         <UserIcon size={14} /> Profil & Buku Alamat
                                                     </Link>
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem asChild className="focus:bg-[#577399]/20 focus:text-white cursor-pointer">
-                                                    <Link href={route('orders.index')} className="flex items-center gap-2 text-[#BDD5EA] text-[13px]">
+                                                <DropdownMenuItem asChild className="focus:bg-secondary cursor-pointer">
+                                                    <Link href={route('orders.index')} className="flex items-center gap-2 text-foreground text-[13px]">
                                                         <ShoppingBag size={14} /> Pesanan Saya
                                                     </Link>
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem asChild className="focus:bg-[#577399]/20 focus:text-white cursor-pointer">
-                                                    <Link href={route('customer.installments.index')} className="flex items-center gap-2 text-[#BDD5EA] text-[13px]">
+                                                <DropdownMenuItem asChild className="focus:bg-secondary cursor-pointer">
+                                                    <Link href={route('customer.installments.index')} className="flex items-center gap-2 text-foreground text-[13px]">
                                                         <CreditCard size={14} /> Angsuran
                                                     </Link>
                                                 </DropdownMenuItem>
                                             </>
                                         )}
-                                        <DropdownMenuSeparator className="bg-[#577399]/15" />
-                                        <DropdownMenuItem asChild className="focus:bg-[#FE5F55]/10 focus:text-[#FE5F55] cursor-pointer">
-                                            <Link href={route('logout')} method="post" as="button" className="w-full flex items-center gap-2 text-[#FE5F55] text-[13px]">
+                                        <DropdownMenuSeparator className="bg-border" />
+                                        <DropdownMenuItem asChild className="focus:bg-red-50 focus:text-red-600 cursor-pointer">
+                                            <Link href={route('logout')} method="post" as="button" className="w-full flex items-center gap-2 text-red-500 text-[13px]">
                                                 <LogOut size={14} /> Log Out
                                             </Link>
                                         </DropdownMenuItem>
@@ -229,16 +244,16 @@ export default function Header({ user }: { user: User | null }) {
                                 </DropdownMenu>
                             </>
                         ) : (
-                            <div className="flex items-center gap-1 md:gap-2">
+                            <div className="flex items-center gap-2">
                                 <Link
                                     href={route('login')}
-                                    className="px-3 py-1.5 md:px-4 md:py-1.5 rounded-full text-[12px] md:text-[13px] font-medium text-[#bdd5ea]/60 hover:text-white transition-colors"
+                                    className="px-4 py-2 rounded-lg text-[13px] font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors"
                                 >
                                     Masuk
                                 </Link>
                                 <Link
                                     href={route('register')}
-                                    className="px-4 py-1.5 md:px-[18px] md:py-2 rounded-full text-[12px] md:text-[13px] font-semibold text-white bg-[#FE5F55] hover:bg-[#e84a40] hover:-translate-y-[1px] transition-all"
+                                    className="px-4 py-2 rounded-full text-[13px] font-semibold bg-accent text-accent-foreground hover:bg-accent/90 transition-all"
                                 >
                                     Daftar
                                 </Link>
@@ -249,7 +264,7 @@ export default function Header({ user }: { user: User | null }) {
             </header>
 
             {/* Spacer */}
-            <div className="h-[60px] md:h-[68px]" />
+            <div className="h-[60px] md:h-[64px]" />
         </>
     );
 }

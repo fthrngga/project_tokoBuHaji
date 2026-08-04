@@ -79,7 +79,7 @@ export default function Reports({ summary = { income: 0, expense: 0, profit: 0 }
                     </div>
                     <div className="flex flex-wrap items-center gap-3">
                         <Button 
-                            className="bg-red-600 hover:bg-red-700 text-white shadow-sm" 
+                            className="bg-red-600 hover:bg-red-700 text-foreground shadow-sm" 
                             onClick={() => setIsExpenseModalOpen(true)}
                         >
                             <Plus className="w-4 h-4 mr-2" /> Catat Pengeluaran
@@ -306,7 +306,7 @@ export default function Reports({ summary = { income: 0, expense: 0, profit: 0 }
                             <Button type="button" variant="outline" onClick={() => setIsExpenseModalOpen(false)}>
                                 Batal
                             </Button>
-                            <Button type="submit" disabled={processing} className="bg-red-600 hover:bg-red-700 text-white font-semibold shadow-md">
+                            <Button type="submit" disabled={processing} className="bg-red-600 hover:bg-red-700 text-foreground font-semibold shadow-md">
                                 {processing ? 'Menyimpan...' : 'Simpan Pengeluaran'}
                             </Button>
                         </DialogFooter>

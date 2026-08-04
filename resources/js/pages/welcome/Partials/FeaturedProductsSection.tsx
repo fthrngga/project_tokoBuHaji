@@ -34,14 +34,14 @@ export default function FeaturedProductsSection({ products, hideTitle = false }:
                 {!hideTitle && (
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
                         <div>
-                            <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+                            <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-foreground sm:text-3xl">
                                 Koleksi Unggulan
                             </h2>
                             <p className="mt-2 text-slate-500 dark:text-slate-400">
                                 Kurasi produk terbaik untuk rumah Anda.
                             </p>
                         </div>
-                        <Link href="/products" className="hidden md:flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white hover:text-blue-600 transition-colors group">
+                        <Link href="/products" className="hidden md:flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-foreground hover:text-blue-600 transition-colors group">
                             Lihat Semua <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                         </Link>
                     </div>
@@ -68,7 +68,7 @@ export default function FeaturedProductsSection({ products, hideTitle = false }:
             
             {!hideTitle && (
                 <div className="mt-10 flex justify-center md:hidden">
-                    <Link href="/products" className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white hover:text-blue-600 transition-colors">
+                    <Link href="/products" className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-foreground hover:text-blue-600 transition-colors">
                         Lihat Semua <ArrowRight className="h-4 w-4" />
                     </Link>
                 </div>

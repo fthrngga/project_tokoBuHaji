@@ -122,7 +122,7 @@ export default function RestockApproval({ restockRequests }: { restockRequests: 
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Batal</AlertDialogCancel>
-                        <AlertDialogAction onClick={confirmAction} className={confirmModal.action === 'approve' ? 'bg-primary' : 'bg-red-600 hover:bg-red-700 text-white'}>
+                        <AlertDialogAction onClick={confirmAction} className={confirmModal.action === 'approve' ? 'bg-primary' : 'bg-red-600 hover:bg-red-700 text-foreground'}>
                             {confirmModal.action === 'approve' ? 'Ya, Setujui' : 'Ya, Tolak'}
                         </AlertDialogAction>
                     </AlertDialogFooter>

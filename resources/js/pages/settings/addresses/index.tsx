@@ -93,7 +93,7 @@ export default function Index({ addresses }: Props) {
                             
                             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                                 <DialogTrigger asChild>
-                                    <Button className="gap-2 bg-black hover:bg-gray-800 text-white">
+                                    <Button className="gap-2 bg-black hover:bg-gray-800 text-foreground">
                                         <Plus className="w-4 h-4" /> Tambah Alamat
                                     </Button>
                                 </DialogTrigger>
@@ -168,7 +168,7 @@ export default function Index({ addresses }: Props) {
                                         </div>
                                         
                                         <DialogFooter>
-                                            <Button type="submit" className="w-full bg-black text-white hover:bg-gray-800" disabled={processing}>Simpan Alamat</Button>
+                                            <Button type="submit" className="w-full bg-black text-foreground hover:bg-gray-800" disabled={processing}>Simpan Alamat</Button>
                                         </DialogFooter>
                                     </form>
                                 </DialogContent>
@@ -193,7 +193,7 @@ export default function Index({ addresses }: Props) {
                                             <div className="space-y-1">
                                                 <div className="flex items-center gap-2">
                                                     <span className="font-bold uppercase text-xs tracking-wider text-gray-500">{address.label}</span>
-                                                    {address.is_primary && <Badge className="bg-black text-white hover:bg-gray-800 text-[10px] h-5">Utama</Badge>}
+                                                    {address.is_primary && <Badge className="bg-black text-foreground hover:bg-gray-800 text-[10px] h-5">Utama</Badge>}
                                                 </div>
                                                 <CardTitle className="text-lg font-bold text-gray-900">{address.recipient_name}</CardTitle>
                                             </div>

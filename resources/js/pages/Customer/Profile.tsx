@@ -167,7 +167,7 @@ export default function Profile({ mustVerifyEmail, status, customer, addresses =
         <>
             <Head title="Profil Saya - Haji Elektronik" />
             
-            <div className="min-h-screen flex flex-col bg-[#080f1a] text-[#F7F7FF] font-sans">
+            <div className="min-h-screen flex flex-col bg-transparent text-foreground font-sans">
                 <Header user={auth.user} />
 
                 <main className="flex-1 py-12">
@@ -212,7 +212,7 @@ export default function Profile({ mustVerifyEmail, status, customer, addresses =
                             
                             {/* TAB: PROFIL */}
                             {activeTab === 'profile' && (
-                                <div className="bg-[#0d1f33] p-6 md:p-8 rounded-2xl border border-[#577399]/20">
+                                <div className="bg-card p-6 md:p-8 rounded-2xl border border-border/20">
                                     <div style={{ marginBottom: "32px" }}>
                                         <h1 style={{ fontSize: "24px", fontWeight: "bold", margin: "0 0 8px 0", color: "white" }}>Biodata Diri</h1>
                                         <p style={{ color: "rgba(189,213,234,0.6)", margin: 0, fontSize: "14px" }}>Kelola informasi data diri dan alamat penagihan utama Anda.</p>
@@ -309,10 +309,10 @@ export default function Profile({ mustVerifyEmail, status, customer, addresses =
                             {/* TAB: BUKU ALAMAT */}
                             {activeTab === 'addresses' && (
                                 <div className="flex flex-col gap-6">
-                                    <div className="bg-[#0d1f33] p-5 md:p-6 rounded-2xl border border-[#577399]/20 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div className="bg-card p-5 md:p-6 rounded-2xl border border-border/20 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                         <div>
-                                            <h1 className="text-xl md:text-2xl font-bold m-0 mb-2 text-white">Buku Alamat</h1>
-                                            <p className="text-[#bdd5ea]/60 m-0 text-xs md:text-sm">Kelola alamat pengiriman untuk memudahkan proses checkout Anda.</p>
+                                            <h1 className="text-xl md:text-2xl font-bold m-0 mb-2 text-foreground">Buku Alamat</h1>
+                                            <p className="text-muted-foreground/60 m-0 text-xs md:text-sm">Kelola alamat pengiriman untuk memudahkan proses checkout Anda.</p>
                                         </div>
                                         
                                         <Dialog open={isAddressModalOpen} onOpenChange={setIsAddressModalOpen}>
@@ -357,7 +357,7 @@ export default function Profile({ mustVerifyEmail, status, customer, addresses =
                                                                     </SelectTrigger>
                                                                     <SelectContent style={{ background: "#0d1f33", border: "1px solid rgba(87,115,153,0.3)", color: "white", maxHeight: "250px", overflowY: "auto" }}>
                                                                         {provinces.map(p => (
-                                                                            <SelectItem key={p.id} value={JSON.stringify({ id: p.id, name: p.name })} className="hover:bg-slate-800 focus:bg-slate-800 focus:text-white cursor-pointer">
+                                                                            <SelectItem key={p.id} value={JSON.stringify({ id: p.id, name: p.name })} className="hover:bg-slate-800 focus:bg-slate-800 focus:text-foreground cursor-pointer">
                                                                                 {p.name}
                                                                             </SelectItem>
                                                                         ))}
@@ -373,7 +373,7 @@ export default function Profile({ mustVerifyEmail, status, customer, addresses =
                                                                     </SelectTrigger>
                                                                     <SelectContent style={{ background: "#0d1f33", border: "1px solid rgba(87,115,153,0.3)", color: "white", maxHeight: "250px", overflowY: "auto" }}>
                                                                         {cities.map(c => (
-                                                                            <SelectItem key={c.id} value={JSON.stringify({ id: c.id, name: c.name })} className="hover:bg-slate-800 focus:bg-slate-800 focus:text-white cursor-pointer">
+                                                                            <SelectItem key={c.id} value={JSON.stringify({ id: c.id, name: c.name })} className="hover:bg-slate-800 focus:bg-slate-800 focus:text-foreground cursor-pointer">
                                                                                 {c.name}
                                                                             </SelectItem>
                                                                         ))}
@@ -392,7 +392,7 @@ export default function Profile({ mustVerifyEmail, status, customer, addresses =
                                                                     </SelectTrigger>
                                                                     <SelectContent style={{ background: "#0d1f33", border: "1px solid rgba(87,115,153,0.3)", color: "white", maxHeight: "250px", overflowY: "auto" }}>
                                                                         {districts.map(d => (
-                                                                            <SelectItem key={d.id} value={JSON.stringify({ id: d.id, name: d.name })} className="hover:bg-slate-800 focus:bg-slate-800 focus:text-white cursor-pointer">
+                                                                            <SelectItem key={d.id} value={JSON.stringify({ id: d.id, name: d.name })} className="hover:bg-slate-800 focus:bg-slate-800 focus:text-foreground cursor-pointer">
                                                                                 {d.name}
                                                                             </SelectItem>
                                                                         ))}
@@ -408,7 +408,7 @@ export default function Profile({ mustVerifyEmail, status, customer, addresses =
                                                                     </SelectTrigger>
                                                                     <SelectContent style={{ background: "#0d1f33", border: "1px solid rgba(87,115,153,0.3)", color: "white", maxHeight: "250px", overflowY: "auto" }}>
                                                                         {villages.map(v => (
-                                                                            <SelectItem key={v.id} value={JSON.stringify({ id: v.id, name: v.name })} className="hover:bg-slate-800 focus:bg-slate-800 focus:text-white cursor-pointer">
+                                                                            <SelectItem key={v.id} value={JSON.stringify({ id: v.id, name: v.name })} className="hover:bg-slate-800 focus:bg-slate-800 focus:text-foreground cursor-pointer">
                                                                                 {v.name}
                                                                             </SelectItem>
                                                                         ))}
@@ -452,27 +452,27 @@ export default function Profile({ mustVerifyEmail, status, customer, addresses =
 
                                     <div className="flex flex-col gap-4">
                                         {addresses.length === 0 ? (
-                                            <div className="bg-transparent border-2 border-dashed border-[#577399]/30 py-12 px-6 rounded-2xl flex flex-col items-center justify-center text-center gap-3">
+                                            <div className="bg-transparent border-2 border-dashed border-border/30 py-12 px-6 rounded-2xl flex flex-col items-center justify-center text-center gap-3">
                                                 <div className="w-16 h-16 bg-[#577399]/10 rounded-full flex items-center justify-center">
                                                     <MapPin size={32} color="rgba(189,213,234,0.5)" />
                                                 </div>
-                                                <p className="text-[#bdd5ea]/80 font-medium m-0">Anda belum memiliki daftar alamat.</p>
-                                                <p className="text-[#bdd5ea]/50 text-sm m-0">Tambahkan alamat untuk mempermudah pengiriman pesanan Anda.</p>
+                                                <p className="text-muted-foreground/80 font-medium m-0">Anda belum memiliki daftar alamat.</p>
+                                                <p className="text-muted-foreground/50 text-sm m-0">Tambahkan alamat untuk mempermudah pengiriman pesanan Anda.</p>
                                             </div>
                                         ) : (
                                             addresses.map((address) => (
-                                                <div key={address.id} className={`bg-[#0d1f33] rounded-xl p-5 flex flex-col gap-3 ${address.is_primary ? 'border border-[#FE5F55]' : 'border border-[#577399]/20'}`}>
+                                                <div key={address.id} className={`bg-card rounded-xl p-5 flex flex-col gap-3 ${address.is_primary ? 'border border-[#FE5F55]' : 'border border-border/20'}`}>
                                                     <div className="flex justify-between items-start">
                                                         <div className="flex flex-col gap-1">
                                                             <div className="flex items-center gap-2">
-                                                                <span className="text-xs font-bold uppercase tracking-widest text-[#bdd5ea]/60">{address.label}</span>
+                                                                <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">{address.label}</span>
                                                                 {address.is_primary && <span className="bg-[#FE5F55]/10 text-[#FE5F55] px-2 py-0.5 rounded-full text-[10px] font-bold">Utama</span>}
                                                             </div>
-                                                            <h3 className="text-lg font-bold text-white m-0">{address.recipient_name}</h3>
+                                                            <h3 className="text-lg font-bold text-foreground m-0">{address.recipient_name}</h3>
                                                         </div>
                                                         <div className="flex gap-2">
                                                             {!address.is_primary && (
-                                                                <Button variant="outline" size="sm" onClick={() => setPrimaryAddress(address.id)} className="border-[#577399]/30 text-[#BDD5EA] hover:bg-[#577399]/20">Set Utama</Button>
+                                                                <Button variant="outline" size="sm" onClick={() => setPrimaryAddress(address.id)} className="border-border/30 text-muted-foreground hover:bg-[#577399]/20">Set Utama</Button>
                                                             )}
                                                             <Button variant="ghost" size="icon" onClick={() => deleteAddress(address.id)} className="text-[#FE5F55] hover:bg-[#FE5F55]/10 hover:text-[#FE5F55]">
                                                                 <Trash2 size={16} />
@@ -480,10 +480,10 @@ export default function Profile({ mustVerifyEmail, status, customer, addresses =
                                                         </div>
                                                     </div>
                                                     <div className="flex flex-col gap-3 text-sm">
-                                                        <div className="flex items-center gap-2 text-[#BDD5EA] font-medium">
-                                                            <Phone size={16} className="text-[#bdd5ea]/60" /> {address.phone_number}
+                                                        <div className="flex items-center gap-2 text-muted-foreground font-medium">
+                                                            <Phone size={16} className="text-muted-foreground/60" /> {address.phone_number}
                                                         </div>
-                                                        <div className="bg-[#080f1a]/40 p-3 rounded-lg text-[#bdd5ea]/80 leading-relaxed">
+                                                        <div className="bg-transparent/40 p-3 rounded-lg text-muted-foreground/80 leading-relaxed">
                                                             {address.address_detail}<br/>
                                                             {address.village}, {address.district}<br/>
                                                             {address.city}, {address.province} {address.postal_code}
@@ -498,10 +498,10 @@ export default function Profile({ mustVerifyEmail, status, customer, addresses =
 
                             {/* TAB: KEAMANAN & PASSWORD */}
                             {activeTab === 'password' && (
-                                <div className="bg-[#0d1f33] p-6 md:p-8 rounded-2xl border border-[#577399]/20">
+                                <div className="bg-card p-6 md:p-8 rounded-2xl border border-border/20">
                                     <div className="mb-8">
-                                        <h1 className="text-xl md:text-2xl font-bold m-0 mb-2 text-white">Ubah Password</h1>
-                                        <p className="text-[#bdd5ea]/60 m-0 text-xs md:text-sm">Pastikan akun Anda menggunakan password yang panjang dan acak agar tetap aman.</p>
+                                        <h1 className="text-xl md:text-2xl font-bold m-0 mb-2 text-foreground">Ubah Password</h1>
+                                        <p className="text-muted-foreground/60 m-0 text-xs md:text-sm">Pastikan akun Anda menggunakan password yang panjang dan acak agar tetap aman.</p>
                                     </div>
                                     
                                     <form onSubmit={submitPassword} className="flex flex-col gap-6 max-w-[400px]">

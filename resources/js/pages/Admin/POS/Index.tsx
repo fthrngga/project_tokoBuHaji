@@ -222,7 +222,7 @@ export default function Index({ products, customers }: PageProps<{ products: Pro
                                                     <Package className="h-8 w-8 text-slate-300" />
                                                 </div>
                                             )}
-                                            <div className="absolute top-2 right-2 bg-black/70 px-2 py-0.5 rounded text-[10px] font-bold shadow-sm text-white">
+                                            <div className="absolute top-2 right-2 bg-black/70 px-2 py-0.5 rounded text-[10px] font-bold shadow-sm text-foreground">
                                                 Stok: {product.stock}
                                             </div>
                                         </div>

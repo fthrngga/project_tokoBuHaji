@@ -187,17 +187,17 @@ export default function Checkout({ cartItems, total, addresses }: Props) {
                     <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="mb-8">
                             <p className="text-xs font-bold uppercase tracking-[0.25em] text-orange-500 mb-2">— Pembelian</p>
-                            <h1 className="text-3xl font-extrabold text-white">Checkout Pesanan</h1>
+                            <h1 className="text-3xl font-extrabold text-foreground">Checkout Pesanan</h1>
                             <p className="mt-2 text-slate-400">Konfirmasi alamat pengiriman dan rincian pesanan Anda.</p>
                         </div>
 
                         <form onSubmit={handleSubmit} className="lg:grid lg:grid-cols-12 lg:gap-12 items-start">
                             {/* Kolom Kiri: Form Alamat */}
                             <div className="lg:col-span-7 space-y-8">
-                                <div className="overflow-hidden rounded-2xl bg-[#1a2d42] border border-[#577399]/20">
+                                <div className="overflow-hidden rounded-2xl bg-[#1a2d42] border border-border/20">
                                     <div className="flex items-center justify-between px-6 py-4 border-b border-[#577399]/15">
-                                        <h2 className="font-semibold text-white">Alamat Pengiriman</h2>
-                                        <Link href={route('profile', { tab: 'addresses' })} className="text-sm font-medium text-[#BDD5EA] hover:text-[#FE5F55] transition-colors">
+                                        <h2 className="font-semibold text-foreground">Alamat Pengiriman</h2>
+                                        <Link href={route('profile', { tab: 'addresses' })} className="text-sm font-medium text-muted-foreground hover:text-[#FE5F55] transition-colors">
                                             Kelola Alamat
                                         </Link>
                                     </div>
@@ -208,12 +208,12 @@ export default function Checkout({ cartItems, total, addresses }: Props) {
                                                         <div
                                                             key={addr.id}
                                                             onClick={() => setSelectedAddressId(addr.id)}
-                                                            className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedAddressId === addr.id ? 'border-[#577399] bg-[#577399]/15' : 'border-[#577399]/10 bg-[#577399]/5'}`}
+                                                            className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedAddressId === addr.id ? 'border-[#577399] bg-[#577399]/15' : 'border-border/10 bg-[#577399]/5'}`}
                                                         >
                                                             <div className="flex justify-between items-start gap-3">
                                                                 <div className="flex-1">
                                                                     <div className="flex items-center gap-2">
-                                                                        <p className="font-bold text-sm text-white">{addr.recipient_name}</p>
+                                                                        <p className="font-bold text-sm text-foreground">{addr.recipient_name}</p>
                                                                         <span className="rounded-full border border-white/20 px-2 py-0.5 text-[10px] text-slate-400">{addr.label}</span>
                                                                         {addr.is_primary && <span className="rounded-full bg-orange-500/20 border border-orange-500/30 px-2 py-0.5 text-[10px] font-semibold text-orange-400">Utama</span>}
                                                                     </div>
@@ -222,7 +222,7 @@ export default function Checkout({ cartItems, total, addresses }: Props) {
                                                                 </div>
                                                                 {selectedAddressId === addr.id && (
                                                                         <div className="flex-shrink-0 flex h-6 w-6 items-center justify-center rounded-full bg-[#577399]">
-                                                                            <Check className="w-3.5 h-3.5 text-white" />
+                                                                            <Check className="w-3.5 h-3.5 text-foreground" />
                                                                         </div>
                                                                 )}
                                                             </div>
@@ -246,27 +246,27 @@ export default function Checkout({ cartItems, total, addresses }: Props) {
 
                             {/* Kolom Kanan: Ringkasan Order */}
                             <div className="lg:col-span-5 mt-8 lg:mt-0 space-y-6">
-                                <div className="overflow-hidden rounded-2xl bg-[#1a2d42] border border-[#577399]/20">
-                                    <div className="border-b border-white/10 px-6 py-4">
-                                        <h2 className="font-semibold text-white">Rincian Pesanan</h2>
+                                <div className="overflow-hidden rounded-2xl bg-[#1a2d42] border border-border/20">
+                                    <div className="border-b border-border px-6 py-4">
+                                        <h2 className="font-semibold text-foreground">Rincian Pesanan</h2>
                                         <p className="text-xs text-slate-500 mt-0.5">{cartItems.length} item</p>
                                     </div>
                                     <div className="p-5">
                                         <div className="space-y-4 divide-y divide-white/5">
                                             {cartItems.map((item) => (
                                                 <div key={item.id} className="flex gap-3 items-start pt-4 first:pt-0">
-                                                    <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl border border-white/10 bg-slate-800">
+                                                    <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl border border-border bg-slate-800">
                                                         <img
                                                             src={item.product.images.length > 0 ? `/storage/${item.product.images[0].image_path}` : 'https://placehold.co/100x100/1e293b/94a3b8'}
                                                             className="h-full w-full object-contain p-1"
                                                         />
                                                     </div>
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="text-sm font-semibold text-white line-clamp-2">{item.product.name}</p>
+                                                        <p className="text-sm font-semibold text-foreground line-clamp-2">{item.product.name}</p>
                                                         {item.variant && (
                                                             <div className="mt-1 flex flex-wrap gap-1">
                                                                 {Object.entries(item.variant.options).map(([k, v]) => (
-                                                                    <span key={k} className="rounded border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] text-slate-400">
+                                                                    <span key={k} className="rounded border border-white/15 bg-card px-2 py-0.5 text-[10px] text-slate-400">
                                                                         {k}: {v}
                                                                     </span>
                                                                 ))}
@@ -274,24 +274,24 @@ export default function Checkout({ cartItems, total, addresses }: Props) {
                                                         )}
                                                         <div className="flex justify-between items-center mt-2">
                                                             <p className="text-xs text-slate-500">{item.quantity} × {formatCurrency(item.variant?.selling_price || item.product.selling_price)}</p>
-                                                            <p className="text-sm font-bold text-white">{formatCurrency(item.quantity * (item.variant?.selling_price || item.product.selling_price))}</p>
+                                                            <p className="text-sm font-bold text-foreground">{formatCurrency(item.quantity * (item.variant?.selling_price || item.product.selling_price))}</p>
                                                         </div>
                                                     </div>
                                                 </div>
                                             ))}
                                         </div>
 
-                                        <div className="mt-6 border-t border-white/10 pt-4 space-y-2.5">
+                                        <div className="mt-6 border-t border-border pt-4 space-y-2.5">
                                             <div className="flex justify-between text-sm">
                                                 <span className="text-slate-400">Total Harga Barang</span>
-                                                <span className="font-medium text-white">{formatCurrency(total)}</span>
+                                                <span className="font-medium text-foreground">{formatCurrency(total)}</span>
                                             </div>
                                             <div className="flex justify-between text-sm">
                                                 <span className="text-slate-400">Ongkos Kirim</span>
                                                 <span className="text-orange-400 italic text-xs">Negosiasi via chat</span>
                                             </div>
-                                            <div className="flex justify-between text-lg font-extrabold pt-3 border-t border-white/10">
-                                                <span className="text-white">Total Sementara</span>
+                                            <div className="flex justify-between text-lg font-extrabold pt-3 border-t border-border">
+                                                <span className="text-foreground">Total Sementara</span>
                                                 <span className="text-orange-400">{formatCurrency(total)}</span>
                                             </div>
                                         </div>
@@ -300,7 +300,7 @@ export default function Checkout({ cartItems, total, addresses }: Props) {
                                         <button
                                             type="submit"
                                             disabled={processing || loadingLocation || !selectedAddressId}
-                                            className="group relative mt-5 w-full overflow-hidden rounded-xl py-3.5 font-semibold text-white shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="group relative mt-5 w-full overflow-hidden rounded-xl py-3.5 font-semibold text-foreground shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                             style={{ background: 'linear-gradient(135deg, #FE5F55, #e84a40)', boxShadow: '0 8px 24px rgba(254,95,85,0.3)' }}
                                         >
                                             <span className="absolute inset-0 -translate-x-full transition-transform duration-500 group-hover:translate-x-0" style={{ background: 'linear-gradient(135deg, #e84a40, #FE5F55)' }} />

@@ -38,10 +38,10 @@ export default function ValuePropsSection() {
                             transition={{ duration: 0.5, delay: index * 0.1 }}
                             className="flex flex-col items-center text-center group"
                         >
-                            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white transition-colors duration-300 group-hover:bg-slate-900 group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-slate-900">
+                            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-foreground transition-colors duration-300 group-hover:bg-slate-900 group-hover:text-foreground dark:group-hover:bg-white dark:group-hover:text-slate-900">
                                 <feature.icon className="h-8 w-8" aria-hidden="true" />
                             </div>
-                            <h3 className="mt-6 text-lg font-semibold text-slate-900 dark:text-white">{feature.title}</h3>
+                            <h3 className="mt-6 text-lg font-semibold text-slate-900 dark:text-foreground">{feature.title}</h3>
                             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
                                 {feature.description}
                             </p>

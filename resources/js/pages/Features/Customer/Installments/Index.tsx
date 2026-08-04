@@ -177,7 +177,7 @@ function MidtransButton({ orderId, installmentAmount = 0, tunggakan = 0, tunggak
                 </div>
             </div>
 
-            <Button onClick={handlePay} className="w-full h-14 text-lg font-bold shadow-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white transition-all transform hover:scale-[1.02] active:scale-95" disabled={loading}>
+            <Button onClick={handlePay} className="w-full h-14 text-lg font-bold shadow-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-foreground transition-all transform hover:scale-[1.02] active:scale-95" disabled={loading}>
                 {loading ? 'Menghubungkan ke Midtrans...' : '💳 Lanjutkan ke Pembayaran'}
             </Button>
         </div>
@@ -273,8 +273,8 @@ export default function InstallmentIndex({ auth, installments }: { auth: any, in
                         </div>
 
                         {installments.length === 0 && (
-                            <div className="text-center py-12 bg-[#0d1e2e]/50 backdrop-blur-sm rounded-xl border border-[#577399]/20">
-                                <p className="text-[#bdd5ea]/80">Anda belum memiliki tagihan angsuran aktif.</p>
+                            <div className="text-center py-12 bg-card backdrop-blur-sm rounded-xl border border-border/20">
+                                <p className="text-muted-foreground/80">Anda belum memiliki tagihan angsuran aktif.</p>
                             </div>
                         )}
 
@@ -293,7 +293,7 @@ export default function InstallmentIndex({ auth, installments }: { auth: any, in
                                                 <Button 
                                                     key={payment.id} 
                                                     size="sm" 
-                                                    className="bg-amber-500 hover:bg-amber-600 text-white font-semibold shadow-sm transition-all hover:shadow"
+                                                    className="bg-amber-500 hover:bg-amber-600 text-foreground font-semibold shadow-sm transition-all hover:shadow"
                                                     onClick={() => {
                                                         if (payment.snap_token && window.snap) {
                                                             try {
@@ -497,7 +497,7 @@ export default function InstallmentIndex({ auth, installments }: { auth: any, in
                                             Kontrak ini sudah Lunas 100%
                                         </p>
                                         <a href={route('customer.installments.certificate', item.id)} target="_blank" rel="noreferrer">
-                                            <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white shadow">
+                                            <Button size="sm" className="bg-green-600 hover:bg-green-700 text-foreground shadow">
                                                 <Download className="w-4 h-4 mr-2" />
                                                 Unduh Surat Lunas
                                             </Button>
@@ -512,8 +512,8 @@ export default function InstallmentIndex({ auth, installments }: { auth: any, in
                 {/* LOGIC MODAL PEMBAYARAN */}
                 <Dialog open={!!selectedPaymentItem} onOpenChange={(open) => !open && setSelectedPaymentItem(null)}>
                     <DialogContent className="sm:max-w-xl p-0 overflow-hidden border-0 shadow-2xl">
-                        <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-6 text-white text-center">
-                            <DialogTitle className="text-2xl font-bold mb-2 text-white">Pembayaran Angsuran</DialogTitle>
+                        <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-6 text-foreground text-center">
+                            <DialogTitle className="text-2xl font-bold mb-2 text-foreground">Pembayaran Angsuran</DialogTitle>
                             <DialogDescription className="text-blue-100 text-base">
                                 Selesaikan pembayaran untuk <strong>{selectedPaymentItem?.productName}</strong>
                             </DialogDescription>

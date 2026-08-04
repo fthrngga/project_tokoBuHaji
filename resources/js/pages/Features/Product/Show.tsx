@@ -140,7 +140,7 @@ export default function Show({ product }: Props) {
                         className={`relative h-18 w-18 flex-shrink-0 overflow-hidden rounded-xl border-2 transition-all ${
                           selectedImage === "/storage/" + image.image_path
                             ? "border-orange-500 shadow-lg shadow-orange-500/20"
-                            : "border-white/10 hover:border-white/30 bg-slate-800/50"
+                            : "border-border hover:border-white/30 bg-slate-800/50"
                         }`}
                         style={{ height: '72px', width: '72px' }}
                       >
@@ -155,7 +155,7 @@ export default function Show({ product }: Props) {
                 )}
 
                 {/* Main Image */}
-                <div className="relative aspect-square w-full flex-1 overflow-hidden rounded-3xl bg-slate-800/50 border border-white/10 group">
+                <div className="relative aspect-square w-full flex-1 overflow-hidden rounded-3xl bg-slate-800/50 border border-border group">
                   <img
                     src={selectedImage}
                     alt={product.name}
@@ -164,7 +164,7 @@ export default function Show({ product }: Props) {
                   {/* Stock badge */}
                   {currentStock > 0 && currentStock <= 5 && (
                     <div className="absolute top-4 left-4">
-                      <span className="inline-flex items-center rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
+                      <span className="inline-flex items-center rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-foreground shadow-lg">
                         Sisa {currentStock} Unit
                       </span>
                     </div>
@@ -191,7 +191,7 @@ export default function Show({ product }: Props) {
                 )}
 
                 {/* Title */}
-                <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl leading-tight">
+                <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl leading-tight">
                   {product.name}
                 </h1>
 
@@ -199,7 +199,7 @@ export default function Show({ product }: Props) {
 
                 {/* Price */}
                 <div className="mt-6 p-5 rounded-2xl" style={{ background: 'rgba(87,115,153,0.12)', border: '1px solid rgba(87,115,153,0.25)' }}>
-                  <p className="text-4xl font-black text-white">
+                  <p className="text-4xl font-black text-foreground">
                     {formatCurrency(activePrice)}
                   </p>
                   <div className="mt-2 flex items-center gap-3">
@@ -224,7 +224,7 @@ export default function Show({ product }: Props) {
                   <div className="mt-6 space-y-5">
                     {product.custom_options.map((optionGroup) => (
                       <div key={optionGroup.name}>
-                        <p className="text-sm font-semibold text-white mb-2.5">
+                        <p className="text-sm font-semibold text-foreground mb-2.5">
                           {optionGroup.name}
                           {selectedOptions[optionGroup.name] && (
                             <span className="ml-2 text-orange-400 font-normal">: {selectedOptions[optionGroup.name]}</span>
@@ -270,19 +270,19 @@ export default function Show({ product }: Props) {
                 <div className="hidden lg:block mt-8 space-y-4">
                   <div className="flex items-center gap-3">
                     {/* Quantity control */}
-                    <div className="flex items-center rounded-xl border-2 border-white/15 bg-white/5">
+                    <div className="flex items-center rounded-xl border-2 border-white/15 bg-card">
                       <button
                         onClick={handleDecrease}
                         disabled={quantity <= 1}
-                        className="h-12 w-12 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 rounded-l-xl transition-colors disabled:opacity-30"
+                        className="h-12 w-12 flex items-center justify-center text-slate-300 hover:text-foreground hover:bg-secondary rounded-l-xl transition-colors disabled:opacity-30"
                       >
                         <Minus className="h-4 w-4" />
                       </button>
-                      <span className="w-12 text-center font-bold text-white text-lg">{quantity}</span>
+                      <span className="w-12 text-center font-bold text-foreground text-lg">{quantity}</span>
                       <button
                         onClick={handleIncrease}
                         disabled={quantity >= currentStock}
-                        className="h-12 w-12 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 rounded-r-xl transition-colors disabled:opacity-30"
+                        className="h-12 w-12 flex items-center justify-center text-slate-300 hover:text-foreground hover:bg-secondary rounded-r-xl transition-colors disabled:opacity-30"
                       >
                         <Plus className="h-4 w-4" />
                       </button>
@@ -292,11 +292,11 @@ export default function Show({ product }: Props) {
                     <button
                       onClick={addToCart}
                       disabled={!canAddToCart}
-                      className="group relative flex-1 h-12 overflow-hidden rounded-xl font-semibold text-white shadow-lg transition-all hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="group relative flex-1 h-12 overflow-hidden rounded-xl font-semibold text-foreground shadow-lg transition-all hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{ background: 'rgba(87,115,153,0.15)', border: '1px solid rgba(87,115,153,0.3)' }}
                     >
-                      <span className="absolute inset-0 bg-white/5 opacity-0 transition-opacity group-hover:opacity-100" />
-                      <span className="relative flex items-center justify-center gap-2 text-[#BDD5EA] text-sm lg:text-base">
+                      <span className="absolute inset-0 bg-card opacity-0 transition-opacity group-hover:opacity-100" />
+                      <span className="relative flex items-center justify-center gap-2 text-muted-foreground text-sm lg:text-base">
                         <ShoppingCart className="h-4 w-4 lg:h-5 lg:w-5" />
                         {cartLabel}
                       </span>
@@ -306,7 +306,7 @@ export default function Show({ product }: Props) {
                     <button
                       onClick={buyNow}
                       disabled={!canAddToCart}
-                      className="group relative flex-1 h-12 overflow-hidden rounded-xl font-semibold text-white shadow-lg transition-all hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="group relative flex-1 h-12 overflow-hidden rounded-xl font-semibold text-foreground shadow-lg transition-all hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{ background: 'linear-gradient(135deg, #FE5F55, #e84a40)', boxShadow: '0 8px 24px rgba(254,95,85,0.3)' }}
                     >
                       <span className="absolute inset-0 -translate-x-full transition-transform duration-500 group-hover:translate-x-0" style={{ background: 'linear-gradient(135deg, #e84a40, #FE5F55)' }} />
@@ -328,11 +328,11 @@ export default function Show({ product }: Props) {
 
             {/* Spesifikasi Section */}
             <div className="mt-20 lg:mt-28">
-              <Separator className="bg-white/10 mb-12" />
+              <Separator className="bg-secondary mb-12" />
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                 <div className="lg:col-span-1">
                   <p className="text-xs font-bold uppercase tracking-[0.25em] text-orange-500 mb-3">— Detail Produk</p>
-                  <h2 className="text-3xl font-extrabold text-white">Spesifikasi<br />Lengkap</h2>
+                  <h2 className="text-3xl font-extrabold text-foreground">Spesifikasi<br />Lengkap</h2>
                   <p className="mt-4 text-slate-400 text-sm leading-relaxed">
                     Semua informasi teknis yang Anda butuhkan sebelum memutuskan untuk membeli.
                   </p>
@@ -341,13 +341,13 @@ export default function Show({ product }: Props) {
                 <div className="lg:col-span-2">
                   <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Always-present specs */}
-                    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                    <div className="rounded-xl border border-border bg-card p-4">
                       <dt className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Berat</dt>
-                      <dd className="text-base font-bold text-white">{product.weight} gram</dd>
+                      <dd className="text-base font-bold text-foreground">{product.weight} gram</dd>
                     </div>
-                    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                    <div className="rounded-xl border border-border bg-card p-4">
                       <dt className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Stok Tersedia</dt>
-                      <dd className="text-base font-bold text-white">
+                      <dd className="text-base font-bold text-foreground">
                         {product.stock > 0 ? `${product.stock} unit` : 'Pre-order'}
                       </dd>
                     </div>
@@ -357,11 +357,11 @@ export default function Show({ product }: Props) {
                         ? JSON.parse(product.specifications)
                         : product.specifications;
                       return Object.entries(specs).map(([key, value]) => (
-                        <div key={key} className="rounded-xl border border-white/10 bg-white/5 p-4">
+                        <div key={key} className="rounded-xl border border-border bg-card p-4">
                           <dt className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1 capitalize">
                             {key.replace(/_/g, ' ')}
                           </dt>
-                          <dd className="text-base font-bold text-white">{String(value)}</dd>
+                          <dd className="text-base font-bold text-foreground">{String(value)}</dd>
                         </div>
                       ));
                     })()}
@@ -376,22 +376,22 @@ export default function Show({ product }: Props) {
         <Footer />
 
         {/* Mobile Sticky Add to Cart */}
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0d1e2e]/95 backdrop-blur-md border-t border-white/10 p-4 lg:hidden shadow-[0_-8px_30px_rgba(0,0,0,0.3)]">
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md border-t border-border p-4 lg:hidden shadow-[0_-8px_30px_rgba(0,0,0,0.3)]">
           <div className="flex items-center gap-3 max-w-[1024px] mx-auto">
             {/* Quantity control */}
-            <div className="flex items-center rounded-xl border-2 border-white/15 bg-white/5 shrink-0">
+            <div className="flex items-center rounded-xl border-2 border-white/15 bg-card shrink-0">
               <button
                 onClick={handleDecrease}
                 disabled={quantity <= 1}
-                className="h-12 w-10 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 rounded-l-xl transition-colors disabled:opacity-30"
+                className="h-12 w-10 flex items-center justify-center text-slate-300 hover:text-foreground hover:bg-secondary rounded-l-xl transition-colors disabled:opacity-30"
               >
                 <Minus className="h-4 w-4" />
               </button>
-              <span className="w-8 text-center font-bold text-white text-base">{quantity}</span>
+              <span className="w-8 text-center font-bold text-foreground text-base">{quantity}</span>
               <button
                 onClick={handleIncrease}
                 disabled={quantity >= currentStock}
-                className="h-12 w-10 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 rounded-r-xl transition-colors disabled:opacity-30"
+                className="h-12 w-10 flex items-center justify-center text-slate-300 hover:text-foreground hover:bg-secondary rounded-r-xl transition-colors disabled:opacity-30"
               >
                 <Plus className="h-4 w-4" />
               </button>
@@ -401,11 +401,11 @@ export default function Show({ product }: Props) {
             <button
               onClick={addToCart}
               disabled={!canAddToCart}
-              className="group relative flex-1 h-12 overflow-hidden rounded-xl font-semibold text-white shadow-lg transition-all hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative flex-1 h-12 overflow-hidden rounded-xl font-semibold text-foreground shadow-lg transition-all hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ background: 'rgba(87,115,153,0.15)', border: '1px solid rgba(87,115,153,0.3)' }}
             >
-              <span className="absolute inset-0 bg-white/5 opacity-0 transition-opacity group-hover:opacity-100" />
-              <span className="relative flex items-center justify-center gap-1.5 text-[#BDD5EA] text-xs sm:text-sm">
+              <span className="absolute inset-0 bg-card opacity-0 transition-opacity group-hover:opacity-100" />
+              <span className="relative flex items-center justify-center gap-1.5 text-muted-foreground text-xs sm:text-sm">
                 <ShoppingCart className="h-4 w-4" />
                 <span className="hidden sm:inline">{cartLabel}</span>
                 <span className="sm:hidden">+ Troli</span>
@@ -416,7 +416,7 @@ export default function Show({ product }: Props) {
             <button
               onClick={buyNow}
               disabled={!canAddToCart}
-              className="group relative flex-[1.2] h-12 overflow-hidden rounded-xl font-semibold text-white shadow-lg transition-all hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative flex-[1.2] h-12 overflow-hidden rounded-xl font-semibold text-foreground shadow-lg transition-all hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ background: 'linear-gradient(135deg, #FE5F55, #e84a40)', boxShadow: '0 4px 15px rgba(254,95,85,0.4)' }}
             >
               <span className="absolute inset-0 -translate-x-full transition-transform duration-500 group-hover:translate-x-0" style={{ background: 'linear-gradient(135deg, #e84a40, #FE5F55)' }} />

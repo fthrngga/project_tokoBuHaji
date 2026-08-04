@@ -168,7 +168,7 @@ export default function Index({ products, filters }: ProductIndexProps) {
                             </Select>
                         </div>
                     </div>
-                    <Button asChild className="gap-2 bg-black text-white hover:bg-gray-800">
+                    <Button asChild className="gap-2 bg-black text-foreground hover:bg-gray-800">
                         <Link href={route('products.create')}>
                             <PlusCircle className="h-4 w-4" />
                             <span className="hidden sm:inline">Add Product</span>
@@ -297,7 +297,7 @@ export default function Index({ products, filters }: ProductIndexProps) {
                                                 variant={link.active ? "default" : "outline"}
                                                 size="sm"
                                                 asChild
-                                                className={link.active ? "bg-black text-white" : ""}
+                                                className={link.active ? "bg-black text-foreground" : ""}
                                             >
                                                 <Link href={link.url} dangerouslySetInnerHTML={{ __html: link.label }} preserveScroll preserveState />
                                             </Button>

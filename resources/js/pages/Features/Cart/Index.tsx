@@ -302,7 +302,7 @@ export default function Index({ cartItems, total }: Props) {
 
                                         <div className="mt-8">
                                             <Button
-                                                className="w-full h-12 text-base rounded-lg bg-gray-700 hover:bg-gray-800 text-white"
+                                                className="w-full h-12 text-base rounded-lg bg-gray-700 hover:bg-gray-800 text-foreground"
                                                 onClick={handleCheckout}
                                                 disabled={selectedItems.size === 0}
                                             >
@@ -322,11 +322,11 @@ export default function Index({ cartItems, total }: Props) {
                                         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" /><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" /></svg>
                                     </div>
                                 </div>
-                                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Keranjang Belanja Kosong</h2>
+                                <h2 className="text-2xl font-bold text-gray-900 dark:text-foreground">Keranjang Belanja Kosong</h2>
                                 <p className="mt-2 text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
                                     Sepertinya Anda belum menambahkan produk apapun ke keranjang.
                                 </p>
-                                <Link href="/" className="mt-8 inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-black hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200">
+                                <Link href="/" className="mt-8 inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-foreground bg-black hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200">
                                     Mulai Belanja
                                 </Link>
                             </div>
@@ -338,14 +338,14 @@ export default function Index({ cartItems, total }: Props) {
 
                 {/* Mobile Sticky Checkout Bar */}
                 {cartItems.length > 0 && (
-                    <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0d1e2e]/95 backdrop-blur-md border-t border-white/10 p-4 lg:hidden shadow-[0_-8px_30px_rgba(0,0,0,0.3)] text-white">
+                    <div className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md border-t border-border p-4 lg:hidden shadow-[0_-8px_30px_rgba(0,0,0,0.3)] text-foreground">
                         <div className="flex items-center justify-between gap-4 max-w-[1024px] mx-auto">
                             <div className="flex flex-col">
                                 <span className="text-xs text-slate-400">Total Harga</span>
-                                <span className="text-lg font-bold text-white">{formatCurrency(checkedTotal)}</span>
+                                <span className="text-lg font-bold text-foreground">{formatCurrency(checkedTotal)}</span>
                             </div>
                             <Button
-                                className="h-12 px-6 rounded-xl font-bold bg-[#FE5F55] hover:bg-[#e84a40] text-white shadow-[0_4px_15px_rgba(254,95,85,0.4)]"
+                                className="h-12 px-6 rounded-xl font-bold bg-[#FE5F55] hover:bg-[#e84a40] text-foreground shadow-[0_4px_15px_rgba(254,95,85,0.4)]"
                                 onClick={handleCheckout}
                                 disabled={selectedItems.size === 0}
                             >
@@ -365,7 +365,7 @@ export default function Index({ cartItems, total }: Props) {
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                             <AlertDialogCancel>Batal</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700 text-white">
+                            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700 text-foreground">
                                 Hapus
                             </AlertDialogAction>
                         </AlertDialogFooter>

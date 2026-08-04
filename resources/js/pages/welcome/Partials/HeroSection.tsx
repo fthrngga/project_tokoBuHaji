@@ -1,170 +1,191 @@
 import { Link } from "@inertiajs/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const TICKER_ITEMS = ["Elektronik", "Perabotan", "Mebel", "Aksesori", "Terbaru"];
+// NAVY BRAND = #1A3C6D — identitas visual website
+// Seperti IKEA: headernya putih, tapi langsung keliatan "ini IKEA"
+// karena panel biru itu ada di bawah header, bukan di header itu sendiri.
+
+const SLIDES = [
+    {
+        id: 1,
+        eyebrow: "Elektronik",
+        title: "Laptop, TV & Perangkat\nRumah Pilihan",
+        desc: "Dari laptop kerja hingga smart TV. Garansi resmi, stok terjamin.",
+        cta: "Lihat Elektronik",
+        ctaHref: "/kategori/elektronik",
+        image: "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?q=80&w=1200&auto=format&fit=crop",
+    },
+    {
+        id: 2,
+        eyebrow: "Mebel & Furnitur",
+        title: "Sofa, Lemari &\nFurnitur Premium",
+        desc: "Koleksi mebel berkualitas untuk setiap sudut rumah Anda.",
+        cta: "Lihat Mebel",
+        ctaHref: "/kategori/mebel",
+        image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=1200&auto=format&fit=crop",
+    },
+    {
+        id: 3,
+        eyebrow: "Bayar Fleksibel",
+        title: "Cicilan Mudah\nTanpa Kartu Kredit",
+        desc: "Syarat ringan, persetujuan cepat. Bayar sesuai kemampuan Anda.",
+        cta: "Belanja Sekarang",
+        ctaHref: "/kategori",
+        image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=1200&auto=format&fit=crop",
+    },
+];
+
+const NAVY = "#1A3C6D";
+const NAVY_DARK = "#12284A";
 
 export default function HeroSection() {
-    const [loaded, setLoaded] = useState(false);
-    const tickerRef = useRef<HTMLDivElement>(null);
+    const [current, setCurrent] = useState(0);
+    const [prev, setPrev] = useState<number | null>(null);
+    const [animating, setAnimating] = useState(false);
+
+    const goTo = useCallback((idx: number) => {
+        if (animating || idx === current) return;
+        setPrev(current);
+        setAnimating(true);
+        setCurrent(idx);
+        setTimeout(() => { setPrev(null); setAnimating(false); }, 600);
+    }, [animating, current]);
+
+    const goPrev = () => goTo((current - 1 + SLIDES.length) % SLIDES.length);
+    const goNext = useCallback(() => goTo((current + 1) % SLIDES.length), [current, goTo]);
 
     useEffect(() => {
-        // Entrance animation
-        const t = setTimeout(() => setLoaded(true), 100);
-        return () => clearTimeout(t);
-    }, []);
+        const t = setInterval(goNext, 5500);
+        return () => clearInterval(t);
+    }, [goNext]);
+
+    const slide = SLIDES[current];
 
     return (
-        <>
-            <section
-                className="relative w-full overflow-hidden min-h-[100svh] bg-[#080f1a]"
-            >
-                {/* Fine grain noise texture */}
-                <div
-                    className="pointer-events-none absolute inset-0 opacity-[0.025]"
-                    style={{
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-                    }}
-                />
+        <section
+            className="w-full overflow-hidden"
+            style={{ height: "clamp(300px, 44vw, 460px)" }}
+        >
+            <div className="h-full flex flex-col md:flex-row">
 
-                {/* Subtle radial gradient bottom-right */}
+                {/* ─── LEFT: NAVY BRAND PANEL ─── */}
+                {/* Inilah identitas website — navy solid panel, bukan header berwarna */}
                 <div
-                    className="pointer-events-none absolute inset-0"
-                    style={{
-                        background: "radial-gradient(ellipse 60% 70% at 80% 50%, rgba(87,115,153,0.08) 0%, transparent 70%)",
-                    }}
-                />
-
-                {/* ─── Content Grid ─── */}
-                <div
-                    className="relative z-10 mx-auto grid items-center grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 px-6 md:px-12 max-w-[1440px] min-h-[100svh] pt-24 md:pt-0"
+                    className="relative flex-none md:w-[42%] lg:w-[40%] flex flex-col justify-center px-7 sm:px-10 md:px-12 lg:px-16 py-10 overflow-hidden"
+                    style={{ background: `linear-gradient(160deg, ${NAVY} 0%, ${NAVY_DARK} 100%)` }}
                 >
-                    {/* ── LEFT: Text ── */}
+                    {/* Subtle pattern */}
                     <div
-                        className="flex flex-col justify-center"
+                        className="absolute inset-0 opacity-[0.04]"
                         style={{
-                            opacity: loaded ? 1 : 0,
-                            transform: loaded ? "none" : "translateY(24px)",
-                            transition: "opacity 0.8s cubic-bezier(0.4,0,0.2,1), transform 0.8s cubic-bezier(0.4,0,0.2,1)",
+                            backgroundImage: `url("data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-rule='evenodd'%3E%3Ccircle cx='2' cy='2' r='1'/%3E%3C/g%3E%3C/svg%3E")`,
                         }}
+                    />
+
+                    {/* Content — animated per slide */}
+                    <div
+                        key={current}
+                        style={{ animation: "slideIn 0.5s cubic-bezier(0.4,0,0.2,1) forwards" }}
                     >
-                        {/* Eyebrow */}
-                        <div className="flex items-center gap-3 mb-6 md:mb-8">
-                            <div className="w-8 h-[1px] bg-[#577399]/60" />
-                            <span className="text-[11px] font-semibold tracking-widest uppercase text-[#577399]">
-                                Haji Elektronik
-                            </span>
-                        </div>
+                        {/* Eyebrow label */}
+                        <p className="text-[11px] font-bold tracking-[0.18em] uppercase text-white/45 mb-4">
+                            {slide.eyebrow}
+                        </p>
 
                         {/* Headline */}
-                        <h1 className="text-4xl sm:text-5xl md:text-[clamp(44px,5.5vw,88px)] font-extrabold leading-[1.05] md:leading-[1.02] tracking-tight text-white m-0">
-                            Elektronik{" "}
-                            <span className="bg-gradient-to-br from-[#BDD5EA] to-[#8aacca] text-transparent bg-clip-text">
-                                &amp; Mebel
-                            </span>
-                            <br />
-                            untuk Rumah Anda.
+                        <h1 className="text-2xl sm:text-3xl md:text-[clamp(24px,3vw,40px)] font-extrabold text-white leading-[1.15] tracking-tight whitespace-pre-line m-0 mb-4">
+                            {slide.title}
                         </h1>
 
-                        {/* Divider */}
-                        <div className="w-12 h-0.5 bg-[#FE5F55] rounded-sm my-6 md:my-8" />
-
-                        {/* Subtext */}
-                        <p className="text-sm md:text-base leading-relaxed text-[#bdd5ea]/50 max-w-[380px] m-0">
-                            Temukan produk elektronik dan perabotan berkualitas yang sesuai dengan kebutuhan dan gaya hidup Anda.
+                        {/* Description */}
+                        <p className="text-sm text-white/55 leading-relaxed m-0 mb-8 max-w-[280px]">
+                            {slide.desc}
                         </p>
 
                         {/* CTA */}
-                        <div className="flex items-center gap-5 mt-8 md:mt-10">
-                            <Link
-                                href="/kategori/elektronik"
-                                className="group relative inline-flex items-center gap-3 font-semibold text-white rounded-full overflow-hidden bg-[#FE5F55] px-6 md:px-8 py-3.5 md:py-[15px] text-sm tracking-tight transition-all duration-200 hover:-translate-y-[2px] hover:shadow-[0_12px_32px_rgba(254,95,85,0.4)]"
-                            >
-                                Lihat Koleksi
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="transition-transform duration-200 group-hover:translate-x-1">
-                                    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                            </Link>
-                            <Link
-                                href="/kategori"
-                                className="text-sm font-medium text-[#bdd5ea]/50 hover:text-[#BDD5EA] transition-colors tracking-tight"
-                            >
-                                Semua Kategori →
-                            </Link>
-                        </div>
-                    </div>
-
-                    {/* ── RIGHT: Image Composition ── */}
-                    <div
-                        className="relative flex items-center justify-center pb-24 md:pb-0"
-                        style={{
-                            opacity: loaded ? 1 : 0,
-                            transform: loaded ? "none" : "translateY(20px)",
-                            transition: "opacity 1s 0.2s cubic-bezier(0.4,0,0.2,1), transform 1s 0.2s cubic-bezier(0.4,0,0.2,1)",
-                        }}
-                    >
-                        {/* Main image card */}
-                        <div className="relative overflow-hidden w-full aspect-[4/5] max-w-[460px] rounded-2xl md:rounded-[24px] border border-[#577399]/15">
-                            <img
-                                src="https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?q=80&w=1200&auto=format&fit=crop"
-                                alt="Koleksi Produk"
-                                className="absolute inset-0 w-full h-full object-cover saturate-[0.75] brightness-[0.85]"
-                            />
-                            {/* Bottom fade */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-[#080f1a]/70 to-transparent to-50%" />
-                        </div>
-
-                        {/* Small floating card — bottom left */}
-                        <div className="absolute bottom-16 md:bottom-[10%] left-0 md:left-[-12%] bg-[#080f1a]/90 backdrop-blur-xl border border-[#577399]/20 rounded-xl md:rounded-2xl p-3 md:p-4 min-w-[140px] md:min-w-[160px] shadow-lg">
-                            <p className="text-[9px] md:text-[10px] tracking-widest uppercase text-[#577399] mb-1">Kategori</p>
-                            <p className="text-xs md:text-sm font-bold text-white m-0">Elektronik</p>
-                        </div>
-
-                        {/* Small floating card — top right */}
-                        <div className="absolute top-4 md:top-[8%] right-0 md:right-[-8%] bg-[#080f1a]/90 backdrop-blur-xl border border-[#FE5F55]/20 rounded-xl md:rounded-2xl p-3 md:p-4 min-w-[130px] md:min-w-[150px] shadow-lg">
-                            <p className="text-[9px] md:text-[10px] tracking-widest uppercase text-[#FE5F55] mb-1">Tersedia</p>
-                            <p className="text-xs md:text-sm font-bold text-white m-0">Mebel & Furnitur</p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Scroll indicator */}
-                <div
-                    className="hidden md:flex absolute bottom-8 left-1/2 -translate-x-1/2 flex-col items-center gap-2"
-                    style={{ opacity: loaded ? 0.4 : 0, transition: "opacity 1s 0.8s" }}
-                >
-                    <div
-                        className="w-[1px] h-10 bg-gradient-to-b from-transparent to-[#577399]/80 animate-scrollPulse"
-                    />
-                </div>
-            </section>
-
-            {/* ─── TICKER ─── */}
-            <div className="bg-[#FE5F55] overflow-hidden py-2 md:py-3">
-                <div
-                    ref={tickerRef}
-                    className="flex gap-0 w-max animate-ticker"
-                >
-                    {[...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
-                        <span
-                            key={i}
-                            className="inline-flex items-center text-[10px] md:text-[11px] font-bold tracking-widest uppercase text-white/90 px-6 md:px-8 border-r border-white/25"
+                        <Link
+                            href={slide.ctaHref}
+                            className="inline-flex items-center gap-2.5 font-bold text-sm px-6 py-3 rounded-full transition-all duration-200 hover:-translate-y-0.5"
+                            style={{
+                                background: "#E85D4A",
+                                color: "#FFFFFF",
+                                boxShadow: "0 4px 16px rgba(232,93,74,0.35)",
+                            }}
                         >
-                            {item}
-                        </span>
+                            {slide.cta}
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                        </Link>
+                    </div>
+
+                    {/* Dot Navigation + Arrows — inside the navy panel */}
+                    <div className="absolute bottom-5 left-7 sm:left-10 md:left-12 lg:left-16 flex items-center gap-4">
+                        <div className="flex items-center gap-1.5">
+                            {SLIDES.map((_, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => goTo(i)}
+                                    aria-label={`Slide ${i + 1}`}
+                                    className={`transition-all duration-300 rounded-full ${
+                                        i === current
+                                            ? 'w-5 h-1.5 bg-white'
+                                            : 'w-1.5 h-1.5 bg-white/30 hover:bg-white/50'
+                                    }`}
+                                />
+                            ))}
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <button
+                                onClick={goPrev}
+                                className="w-7 h-7 rounded-full border border-white/20 flex items-center justify-center text-white/50 hover:text-white hover:border-white/50 transition-all"
+                                aria-label="Previous"
+                            >
+                                <ChevronLeft size={14} />
+                            </button>
+                            <button
+                                onClick={goNext}
+                                className="w-7 h-7 rounded-full border border-white/20 flex items-center justify-center text-white/50 hover:text-white hover:border-white/50 transition-all"
+                                aria-label="Next"
+                            >
+                                <ChevronRight size={14} />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Slide counter */}
+                    <div className="absolute bottom-5 right-5 text-[10px] font-bold text-white/25 tracking-widest">
+                        {String(current + 1).padStart(2, '0')} / {String(SLIDES.length).padStart(2, '0')}
+                    </div>
+                </div>
+
+                {/* ─── RIGHT: PRODUCT IMAGE ─── */}
+                <div className="flex-1 relative overflow-hidden hidden md:block bg-[#E8EDF3]">
+                    {SLIDES.map((s, i) => (
+                        <img
+                            key={s.id}
+                            src={s.image}
+                            alt={s.eyebrow}
+                            loading={i === 0 ? "eager" : "lazy"}
+                            className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700"
+                            style={{ opacity: i === current ? 1 : 0 }}
+                        />
                     ))}
+                    {/* Very subtle left edge fade to merge with navy panel */}
+                    <div
+                        className="absolute inset-y-0 left-0 w-16 pointer-events-none z-10"
+                        style={{ background: `linear-gradient(to right, ${NAVY_DARK}60, transparent)` }}
+                    />
                 </div>
             </div>
 
             <style>{`
-                @keyframes ticker {
-                    from { transform: translateX(0); }
-                    to { transform: translateX(-50%); }
-                }
-                @keyframes scrollPulse {
-                    0%, 100% { opacity: 0.3; transform: scaleY(1); }
-                    50% { opacity: 1; transform: scaleY(1.1); }
+                @keyframes slideIn {
+                    from { opacity: 0; transform: translateY(14px); }
+                    to { opacity: 1; transform: translateY(0); }
                 }
             `}</style>
-        </>
+        </section>
     );
 }

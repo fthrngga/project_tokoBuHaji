@@ -44,45 +44,45 @@ export default function Index({ orders }: Props) {
     return (
         <>
             <Head title="Pesanan Saya - Haji Elektronik" />
-            <div className="flex min-h-screen w-full flex-col bg-[#080f1a] text-white">
+            <div className="flex min-h-screen w-full flex-col bg-transparent text-foreground">
                 <Header user={auth.user} />
 
                 <main className="flex-1 py-12">
                     <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
                         <div className="mb-10 text-center md:text-left">
-                            <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">Pesanan Saya</h1>
-                            <p className="mt-2 text-[#bdd5ea]/60 text-sm md:text-base">Pantau riwayat transaksi dan status pesanan Anda.</p>
+                            <h1 className="text-3xl md:text-4xl font-extrabold text-foreground tracking-tight">Pesanan Saya</h1>
+                            <p className="mt-2 text-muted-foreground/60 text-sm md:text-base">Pantau riwayat transaksi dan status pesanan Anda.</p>
                         </div>
 
                         {orders.length > 0 ? (
                             <div className="flex flex-col gap-4">
                                 {orders.map((order) => (
                                     <Link key={order.id} href={route('orders.show', order.id)} className="block group">
-                                        <div className="bg-[#0d1e2e]/80 backdrop-blur-sm border border-[#577399]/20 hover:border-[#FE5F55]/50 transition-all duration-300 rounded-2xl p-5 md:p-6 flex flex-col md:flex-row gap-4 md:items-center justify-between shadow-lg">
+                                        <div className="bg-card/80 backdrop-blur-sm border border-border/20 hover:border-[#FE5F55]/50 transition-all duration-300 rounded-2xl p-5 md:p-6 flex flex-col md:flex-row gap-4 md:items-center justify-between shadow-lg">
                                             
                                             {/* Order Info */}
                                             <div className="flex flex-col gap-2">
                                                 <div className="flex items-center gap-3">
-                                                    <span className="text-lg font-bold text-white group-hover:text-[#FE5F55] transition-colors">
+                                                    <span className="text-lg font-bold text-foreground group-hover:text-[#FE5F55] transition-colors">
                                                         Pesanan #{order.id}
                                                     </span>
                                                     {getStatusBadge(order.status)}
                                                 </div>
-                                                <p className="text-sm text-[#bdd5ea]/60">
+                                                <p className="text-sm text-muted-foreground/60">
                                                     Dibuat pada {format(new Date(order.created_at), "d MMMM yyyy", { locale: id })}
                                                 </p>
                                             </div>
 
                                             {/* Order Total & Arrow */}
-                                            <div className="flex items-center justify-between md:justify-end gap-6 mt-2 md:mt-0 pt-4 md:pt-0 border-t border-[#577399]/10 md:border-t-0">
+                                            <div className="flex items-center justify-between md:justify-end gap-6 mt-2 md:mt-0 pt-4 md:pt-0 border-t border-border/10 md:border-t-0">
                                                 <div className="flex flex-col md:text-right">
-                                                    <span className="text-xs text-[#bdd5ea]/50 uppercase tracking-wider mb-1">Total Belanja</span>
+                                                    <span className="text-xs text-muted-foreground/50 uppercase tracking-wider mb-1">Total Belanja</span>
                                                     <span className="text-lg font-bold text-emerald-400">
                                                         {formatCurrency(order.total_amount)}
                                                     </span>
                                                 </div>
                                                 <div className="w-10 h-10 rounded-full bg-[#577399]/10 flex items-center justify-center group-hover:bg-[#FE5F55] transition-colors duration-300">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#bdd5ea] group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-muted-foreground group-hover:text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                                     </svg>
                                                 </div>
@@ -92,16 +92,16 @@ export default function Index({ orders }: Props) {
                                 ))}
                             </div>
                         ) : (
-                            <div className="text-center py-20 bg-[#0d1e2e]/50 backdrop-blur-sm border border-[#577399]/20 rounded-3xl shadow-xl flex flex-col items-center justify-center">
+                            <div className="text-center py-20 bg-card backdrop-blur-sm border border-border/20 rounded-3xl shadow-xl flex flex-col items-center justify-center">
                                 <div className="w-20 h-20 bg-[#577399]/10 rounded-full flex items-center justify-center mb-6">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-[#bdd5ea]/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-muted-foreground/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                                     </svg>
                                 </div>
-                                <h3 className="text-xl font-bold text-white">Belum ada pesanan</h3>
-                                <p className="mt-2 text-[#bdd5ea]/60">Anda belum melakukan pembelian apapun.</p>
+                                <h3 className="text-xl font-bold text-foreground">Belum ada pesanan</h3>
+                                <p className="mt-2 text-muted-foreground/60">Anda belum melakukan pembelian apapun.</p>
                                 <div className="mt-8">
-                                    <Link href="/" className="inline-flex items-center px-6 py-3 rounded-xl font-semibold text-white transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5" style={{ background: 'linear-gradient(135deg, #FE5F55, #e84a40)', boxShadow: '0 4px 15px rgba(254,95,85,0.4)' }}>
+                                    <Link href="/" className="inline-flex items-center px-6 py-3 rounded-xl font-semibold text-foreground transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5" style={{ background: 'linear-gradient(135deg, #FE5F55, #e84a40)', boxShadow: '0 4px 15px rgba(254,95,85,0.4)' }}>
                                         Mulai Belanja Sekarang
                                     </Link>
                                 </div>

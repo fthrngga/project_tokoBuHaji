@@ -361,7 +361,7 @@ export default function FormPage({ auth, item, categories = [] }: PageProps<{ it
                                             {item && item.images.map(image => (
                                                 <div key={`existing-${image.id}`} className="relative group aspect-square">
                                                     <img src={`/storage/${image.image_path}`} alt="Gambar Produk" className="object-cover w-full h-full rounded-md" />
-                                                    <button type="button" onClick={() => setImageToDelete(image)} className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button type="button" onClick={() => setImageToDelete(image)} className="absolute top-1 right-1 bg-red-600 text-foreground rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <Trash2 className="h-3 w-3" />
                                                     </button>
                                                 </div>
@@ -369,7 +369,7 @@ export default function FormPage({ auth, item, categories = [] }: PageProps<{ it
                                             {imagePreviews.map((previewUrl, index) => (
                                                 <div key={`new-${index}`} className="relative group aspect-square">
                                                     <img src={previewUrl} alt="Pratinjau Gambar" className="object-cover w-full h-full rounded-md" />
-                                                    <button type="button" onClick={() => removeNewImage(index)} className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button type="button" onClick={() => removeNewImage(index)} className="absolute top-1 right-1 bg-red-600 text-foreground rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <X className="h-3 w-3" />
                                                     </button>
                                                 </div>

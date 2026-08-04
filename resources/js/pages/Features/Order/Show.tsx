@@ -568,7 +568,7 @@ export default function Show({ order }: Props) {
                                                                             <Button 
                                                                                 key={payment.id} 
                                                                                 size="sm" 
-                                                                                className="bg-amber-500 hover:bg-amber-600 text-white font-semibold shadow-sm w-full sm:w-auto"
+                                                                                className="bg-amber-500 hover:bg-amber-600 text-foreground font-semibold shadow-sm w-full sm:w-auto"
                                                                                 onClick={() => {
                                                                                     if (window.snap) {
                                                                                         window.snap.pay(payment.snap_token!, {
@@ -655,7 +655,7 @@ export default function Show({ order }: Props) {
                                                                                             <Button 
                                                                                                 key={payment.id} 
                                                                                                 size="sm" 
-                                                                                                className="bg-amber-500 hover:bg-amber-600 text-white font-semibold shadow-sm w-full sm:w-auto"
+                                                                                                className="bg-amber-500 hover:bg-amber-600 text-foreground font-semibold shadow-sm w-full sm:w-auto"
                                                                                                 onClick={() => {
                                                                                                     if (window.snap) {
                                                                                                         window.snap.pay(payment.snap_token!, {
@@ -731,7 +731,7 @@ export default function Show({ order }: Props) {
                                                                                             </p>
                                                                                             <Button 
                                                                                                 size="sm" 
-                                                                                                className="bg-amber-500 hover:bg-amber-600 text-white font-semibold shadow-sm w-full sm:w-auto"
+                                                                                                className="bg-amber-500 hover:bg-amber-600 text-foreground font-semibold shadow-sm w-full sm:w-auto"
                                                                                                 onClick={() => {
                                                                                                     if (midtransPendingInst.snap_token && window.snap) {
                                                                                                         window.snap.pay(midtransPendingInst.snap_token, {

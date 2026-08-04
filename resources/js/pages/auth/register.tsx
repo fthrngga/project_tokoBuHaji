@@ -39,7 +39,7 @@ export default function Register() {
                                     autoComplete="name"
                                     name="name"
                                     placeholder="Nama Lengkap"
-                                    className="pl-10 py-6 rounded-xl border-white/20 bg-[#0c1626] text-white focus-visible:ring-[#FE5F55] placeholder:text-gray-500"
+                                    className="pl-10 py-6 rounded-xl border-white/20 bg-[#0c1626] text-foreground focus-visible:ring-[#FE5F55] placeholder:text-gray-500"
                                 />
                                 <InputError message={errors.name} className="ml-1" />
                             </div>
@@ -56,7 +56,7 @@ export default function Register() {
                                     autoComplete="email"
                                     name="email"
                                     placeholder="Email Address"
-                                    className="pl-10 py-6 rounded-xl border-white/20 bg-[#0c1626] text-white focus-visible:ring-[#FE5F55] placeholder:text-gray-500"
+                                    className="pl-10 py-6 rounded-xl border-white/20 bg-[#0c1626] text-foreground focus-visible:ring-[#FE5F55] placeholder:text-gray-500"
                                 />
                                 <InputError message={errors.email} className="ml-1" />
                             </div>
@@ -73,7 +73,7 @@ export default function Register() {
                                     autoComplete="new-password"
                                     name="password"
                                     placeholder="Password"
-                                    className="pl-10 pr-10 py-6 rounded-xl border-white/20 bg-[#0c1626] text-white focus-visible:ring-[#FE5F55] placeholder:text-gray-500"
+                                    className="pl-10 pr-10 py-6 rounded-xl border-white/20 bg-[#0c1626] text-foreground focus-visible:ring-[#FE5F55] placeholder:text-gray-500"
                                 />
                                 <button
                                     type="button"
@@ -98,7 +98,7 @@ export default function Register() {
                                     autoComplete="new-password"
                                     name="password_confirmation"
                                     placeholder="Konfirmasi Password"
-                                    className="pl-10 pr-10 py-6 rounded-xl border-white/20 bg-[#0c1626] text-white focus-visible:ring-[#FE5F55] placeholder:text-gray-500"
+                                    className="pl-10 pr-10 py-6 rounded-xl border-white/20 bg-[#0c1626] text-foreground focus-visible:ring-[#FE5F55] placeholder:text-gray-500"
                                 />
                                 <button
                                     type="button"
@@ -113,7 +113,7 @@ export default function Register() {
 
                             <Button 
                                 type="submit" 
-                                className="mt-2 w-full py-6 rounded-xl text-base font-semibold bg-[#FE5F55] text-white hover:bg-[#e0534a] border-none transition-all shadow-[0_4px_14px_rgba(254,95,85,0.3)] hover:shadow-[0_6px_20px_rgba(254,95,85,0.4)] hover:-translate-y-0.5" 
+                                className="mt-2 w-full py-6 rounded-xl text-base font-semibold bg-[#FE5F55] text-foreground hover:bg-[#e0534a] border-none transition-all shadow-[0_4px_14px_rgba(254,95,85,0.3)] hover:shadow-[0_6px_20px_rgba(254,95,85,0.4)] hover:-translate-y-0.5" 
                                 tabIndex={5}
                             >
                                 {processing && <LoaderCircle className="mr-2 h-5 w-5 animate-spin" />}
@@ -123,7 +123,7 @@ export default function Register() {
 
                         <div className="text-center text-sm mt-2" style={{ color: "rgba(189,213,234,0.7)" }}>
                             Sudah punya akun?{' '}
-                            <TextLink href={login()} tabIndex={6} className="font-semibold text-white hover:text-[#FE5F55] transition-colors">
+                            <TextLink href={login()} tabIndex={6} className="font-semibold text-foreground hover:text-[#FE5F55] transition-colors">
                                 Masuk
                             </TextLink>
                         </div>
