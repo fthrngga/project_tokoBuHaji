@@ -1,7 +1,7 @@
 import React from 'react';
 import { Head, useForm, router, Link } from '@inertiajs/react';
-import Header from '@/Pages/welcome/Partials/Header';
-import Footer from '@/Pages/welcome/Partials/Footer';
+import Header from '@/pages/welcome/Partials/Header';
+import Footer from '@/pages/welcome/Partials/Footer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
