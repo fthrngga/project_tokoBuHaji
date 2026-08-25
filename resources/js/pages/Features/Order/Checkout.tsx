@@ -180,24 +180,24 @@ export default function Checkout({ cartItems, total, addresses }: Props) {
             <Head title="Checkout Pesanan - Haji Elektronik" />
             <Toaster richColors closeButton position="top-center" />
 
-        <div className="flex min-h-screen w-full flex-col" style={{ background: '#0d1e2e', color: '#F7F7FF' }}>
+        <div className="flex min-h-screen w-full flex-col bg-slate-50">
                 <Header user={auth.user} />
 
                 <main className="flex-1 py-10">
                     <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="mb-8">
-                            <p className="text-xs font-bold uppercase tracking-[0.25em] text-orange-500 mb-2">— Pembelian</p>
-                            <h1 className="text-3xl font-extrabold text-foreground">Checkout Pesanan</h1>
-                            <p className="mt-2 text-slate-400">Konfirmasi alamat pengiriman dan rincian pesanan Anda.</p>
+                            <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#FE5F55] mb-2">— Pembelian</p>
+                            <h1 className="text-3xl font-extrabold text-[#1A3C6D]">Checkout Pesanan</h1>
+                            <p className="mt-2 text-slate-500">Konfirmasi alamat pengiriman dan rincian pesanan Anda.</p>
                         </div>
 
                         <form onSubmit={handleSubmit} className="lg:grid lg:grid-cols-12 lg:gap-12 items-start">
                             {/* Kolom Kiri: Form Alamat */}
                             <div className="lg:col-span-7 space-y-8">
-                                <div className="overflow-hidden rounded-2xl bg-[#1a2d42] border border-border/20">
-                                    <div className="flex items-center justify-between px-6 py-4 border-b border-[#577399]/15">
-                                        <h2 className="font-semibold text-foreground">Alamat Pengiriman</h2>
-                                        <Link href={route('profile', { tab: 'addresses' })} className="text-sm font-medium text-muted-foreground hover:text-[#FE5F55] transition-colors">
+                                <div className="overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm">
+                                    <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+                                        <h2 className="font-semibold text-[#1A3C6D]">Alamat Pengiriman</h2>
+                                        <Link href={route('profile', { tab: 'addresses' })} className="text-sm font-medium text-slate-500 hover:text-[#FE5F55] transition-colors">
                                             Kelola Alamat
                                         </Link>
                                     </div>
@@ -208,21 +208,21 @@ export default function Checkout({ cartItems, total, addresses }: Props) {
                                                         <div
                                                             key={addr.id}
                                                             onClick={() => setSelectedAddressId(addr.id)}
-                                                            className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedAddressId === addr.id ? 'border-[#577399] bg-[#577399]/15' : 'border-border/10 bg-[#577399]/5'}`}
+                                                            className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedAddressId === addr.id ? 'border-[#FE5F55] bg-orange-50' : 'border-slate-200 bg-white hover:border-[#FE5F55]/50'}`}
                                                         >
                                                             <div className="flex justify-between items-start gap-3">
                                                                 <div className="flex-1">
                                                                     <div className="flex items-center gap-2">
-                                                                        <p className="font-bold text-sm text-foreground">{addr.recipient_name}</p>
-                                                                        <span className="rounded-full border border-white/20 px-2 py-0.5 text-[10px] text-slate-400">{addr.label}</span>
-                                                                        {addr.is_primary && <span className="rounded-full bg-orange-500/20 border border-orange-500/30 px-2 py-0.5 text-[10px] font-semibold text-orange-400">Utama</span>}
+                                                                        <p className="font-bold text-sm text-slate-900">{addr.recipient_name}</p>
+                                                                        <span className="rounded-full border border-slate-200 px-2 py-0.5 text-[10px] text-slate-500">{addr.label}</span>
+                                                                        {addr.is_primary && <span className="rounded-full bg-orange-100 border border-orange-200 px-2 py-0.5 text-[10px] font-semibold text-[#FE5F55]">Utama</span>}
                                                                     </div>
                                                                     <p className="text-xs text-slate-500 mt-1">{addr.phone_number}</p>
-                                                                    <p className="text-sm text-slate-400 mt-2 leading-relaxed line-clamp-2">{addr.address_detail}, {addr.city}, {addr.province}</p>
+                                                                    <p className="text-sm text-slate-600 mt-2 leading-relaxed line-clamp-2">{addr.address_detail}, {addr.city}, {addr.province}</p>
                                                                 </div>
                                                                 {selectedAddressId === addr.id && (
-                                                                        <div className="flex-shrink-0 flex h-6 w-6 items-center justify-center rounded-full bg-[#577399]">
-                                                                            <Check className="w-3.5 h-3.5 text-foreground" />
+                                                                        <div className="flex-shrink-0 flex h-6 w-6 items-center justify-center rounded-full bg-[#FE5F55]">
+                                                                            <Check className="w-3.5 h-3.5 text-white" />
                                                                         </div>
                                                                 )}
                                                             </div>
@@ -231,10 +231,10 @@ export default function Checkout({ cartItems, total, addresses }: Props) {
                                                 </div>
                                             ) : (
                                                 <div className="text-center py-8">
-                                                    <p className="text-sm text-slate-400 mb-4">Anda belum memiliki alamat tersimpan.</p>
+                                                    <p className="text-sm text-slate-500 mb-4">Anda belum memiliki alamat tersimpan.</p>
                                                     <Link
                                                         href={route('profile', { tab: 'addresses' })}
-                                                        className="inline-flex items-center gap-2 rounded-xl border border-orange-500/40 bg-orange-500/10 px-5 py-2.5 text-sm font-medium text-orange-400 hover:bg-orange-500/20 transition-all"
+                                                        className="inline-flex items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 px-5 py-2.5 text-sm font-medium text-[#FE5F55] hover:bg-orange-100 transition-all"
                                                     >
                                                         Tambah Alamat Baru
                                                     </Link>
@@ -246,27 +246,27 @@ export default function Checkout({ cartItems, total, addresses }: Props) {
 
                             {/* Kolom Kanan: Ringkasan Order */}
                             <div className="lg:col-span-5 mt-8 lg:mt-0 space-y-6">
-                                <div className="overflow-hidden rounded-2xl bg-[#1a2d42] border border-border/20">
-                                    <div className="border-b border-border px-6 py-4">
-                                        <h2 className="font-semibold text-foreground">Rincian Pesanan</h2>
+                                <div className="overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm">
+                                    <div className="border-b border-slate-200 px-6 py-4">
+                                        <h2 className="font-semibold text-[#1A3C6D]">Rincian Pesanan</h2>
                                         <p className="text-xs text-slate-500 mt-0.5">{cartItems.length} item</p>
                                     </div>
                                     <div className="p-5">
-                                        <div className="space-y-4 divide-y divide-white/5">
+                                        <div className="space-y-4 divide-y divide-slate-100">
                                             {cartItems.map((item) => (
                                                 <div key={item.id} className="flex gap-3 items-start pt-4 first:pt-0">
-                                                    <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl border border-border bg-slate-800">
+                                                    <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
                                                         <img
-                                                            src={item.product.images.length > 0 ? `/storage/${item.product.images[0].image_path}` : 'https://placehold.co/100x100/1e293b/94a3b8'}
+                                                            src={item.product.images.length > 0 ? `/storage/${item.product.images[0].image_path}` : 'https://placehold.co/100x100/f8fafc/94a3b8'}
                                                             className="h-full w-full object-contain p-1"
                                                         />
                                                     </div>
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="text-sm font-semibold text-foreground line-clamp-2">{item.product.name}</p>
+                                                        <p className="text-sm font-semibold text-slate-900 line-clamp-2">{item.product.name}</p>
                                                         {item.variant && (
                                                             <div className="mt-1 flex flex-wrap gap-1">
                                                                 {Object.entries(item.variant.options).map(([k, v]) => (
-                                                                    <span key={k} className="rounded border border-white/15 bg-card px-2 py-0.5 text-[10px] text-slate-400">
+                                                                    <span key={k} className="rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] text-slate-600">
                                                                         {k}: {v}
                                                                     </span>
                                                                 ))}
@@ -274,25 +274,25 @@ export default function Checkout({ cartItems, total, addresses }: Props) {
                                                         )}
                                                         <div className="flex justify-between items-center mt-2">
                                                             <p className="text-xs text-slate-500">{item.quantity} × {formatCurrency(item.variant?.selling_price || item.product.selling_price)}</p>
-                                                            <p className="text-sm font-bold text-foreground">{formatCurrency(item.quantity * (item.variant?.selling_price || item.product.selling_price))}</p>
+                                                            <p className="text-sm font-bold text-slate-900">{formatCurrency(item.quantity * (item.variant?.selling_price || item.product.selling_price))}</p>
                                                         </div>
                                                     </div>
                                                 </div>
                                             ))}
                                         </div>
 
-                                        <div className="mt-6 border-t border-border pt-4 space-y-2.5">
+                                        <div className="mt-6 border-t border-slate-200 pt-4 space-y-2.5">
                                             <div className="flex justify-between text-sm">
-                                                <span className="text-slate-400">Total Harga Barang</span>
-                                                <span className="font-medium text-foreground">{formatCurrency(total)}</span>
+                                                <span className="text-slate-500">Total Harga Barang</span>
+                                                <span className="font-medium text-slate-900">{formatCurrency(total)}</span>
                                             </div>
                                             <div className="flex justify-between text-sm">
-                                                <span className="text-slate-400">Ongkos Kirim</span>
-                                                <span className="text-orange-400 italic text-xs">Negosiasi via chat</span>
+                                                <span className="text-slate-500">Ongkos Kirim</span>
+                                                <span className="text-orange-500 italic text-xs">Negosiasi via chat</span>
                                             </div>
-                                            <div className="flex justify-between text-lg font-extrabold pt-3 border-t border-border">
-                                                <span className="text-foreground">Total Sementara</span>
-                                                <span className="text-orange-400">{formatCurrency(total)}</span>
+                                            <div className="flex justify-between text-lg font-extrabold pt-3 border-t border-slate-200">
+                                                <span className="text-[#1A3C6D]">Total Sementara</span>
+                                                <span className="text-orange-600">{formatCurrency(total)}</span>
                                             </div>
                                         </div>
 
@@ -300,7 +300,7 @@ export default function Checkout({ cartItems, total, addresses }: Props) {
                                         <button
                                             type="submit"
                                             disabled={processing || loadingLocation || !selectedAddressId}
-                                            className="group relative mt-5 w-full overflow-hidden rounded-xl py-3.5 font-semibold text-foreground shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="group relative mt-5 w-full overflow-hidden rounded-xl py-3.5 font-semibold text-white shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                             style={{ background: 'linear-gradient(135deg, #FE5F55, #e84a40)', boxShadow: '0 8px 24px rgba(254,95,85,0.3)' }}
                                         >
                                             <span className="absolute inset-0 -translate-x-full transition-transform duration-500 group-hover:translate-x-0" style={{ background: 'linear-gradient(135deg, #e84a40, #FE5F55)' }} />
@@ -314,12 +314,12 @@ export default function Checkout({ cartItems, total, addresses }: Props) {
                                 </div>
 
                                 {/* Info box */}
-                                <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
-                                    <h4 className="text-sm font-semibold text-amber-400 mb-2">ℹ️ Informasi Penting</h4>
-                                    <ul className="space-y-1.5 text-xs text-amber-300/80">
-                                        <li className="flex items-start gap-2"><span className="text-amber-500 mt-0.5">•</span> Ongkos kirim ditentukan setelah Anda mengkonfirmasi alamat.</li>
-                                        <li className="flex items-start gap-2"><span className="text-amber-500 mt-0.5">•</span> Admin akan menghubungi Anda melalui fitur pesan untuk kesepakatan akhir.</li>
-                                        <li className="flex items-start gap-2"><span className="text-amber-500 mt-0.5">•</span> Pembayaran dilakukan setelah ada kesepakatan total biaya.</li>
+                                <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+                                    <h4 className="text-sm font-semibold text-[#1A3C6D] mb-2">ℹ️ Informasi Penting</h4>
+                                    <ul className="space-y-1.5 text-xs text-slate-600">
+                                        <li className="flex items-start gap-2"><span className="text-blue-500 mt-0.5">•</span> Ongkos kirim ditentukan setelah Anda mengkonfirmasi alamat.</li>
+                                        <li className="flex items-start gap-2"><span className="text-blue-500 mt-0.5">•</span> Admin akan menghubungi Anda melalui fitur pesan untuk kesepakatan akhir.</li>
+                                        <li className="flex items-start gap-2"><span className="text-blue-500 mt-0.5">•</span> Pembayaran dilakukan setelah ada kesepakatan total biaya.</li>
                                     </ul>
                                 </div>
                             </div>

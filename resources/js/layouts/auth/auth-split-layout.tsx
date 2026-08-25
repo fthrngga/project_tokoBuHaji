@@ -33,7 +33,7 @@ export default function AuthSplitLayout({ children, title, description }: PropsW
             </div>
 
             {/* Right Side: Auth Form */}
-            <div className="w-full lg:p-8 h-full flex flex-col items-center justify-center relative" style={{ background: "#080f1a", color: "#F7F7FF", fontFamily: "Inter, system-ui, sans-serif" }}>
+            <div className="w-full lg:p-8 h-full flex flex-col items-center justify-center relative" style={{ background: "#1A3C6D", color: "#F7F7FF", fontFamily: "Inter, system-ui, sans-serif" }}>
                 <div className="mx-auto flex w-full flex-col justify-center space-y-8 sm:w-[380px] p-8 sm:p-0">
                     <Link href={home()} className="relative z-20 flex items-center justify-center lg:hidden mb-4">
                         <AppLogoIcon className="h-10 fill-current text-[#F7F7FF] sm:h-12" />

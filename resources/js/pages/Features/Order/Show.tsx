@@ -405,27 +405,35 @@ export default function Show({ order }: Props) {
                                                         </div>
 
                                                         <form id="payment-form" onSubmit={handlePaymentSubmit} className="grid gap-4">
-                                                            <div className="space-y-2">
-                                                                <Label>Metode Pembayaran</Label>
-                                                                <Select
-                                                                    value={paymentData.payment_method}
-                                                                    onValueChange={(val) => setPaymentData('payment_method', val)}
-                                                                >
-                                                                    <SelectTrigger>
-                                                                        <SelectValue placeholder="Pilih metode" />
-                                                                    </SelectTrigger>
-                                                                    <SelectContent>
-                                                                        <SelectItem value="cash">Cash / Tunai</SelectItem>
-                                                                        {order.allow_credit && (
-                                                                            <SelectItem value="credit" disabled={order.total_amount < 1000000}>
-                                                                                Kredit / Cicilan {order.total_amount < 1000000 && "(Min. Rp 1.000.000)"}
-                                                                            </SelectItem>
-                                                                        )}
-                                                                    </SelectContent>
-                                                                </Select>
-                                                            </div>
+                                                            {!Boolean(order.allow_credit) ? (
+                                                                <div className="rounded-md bg-amber-50 p-3 border border-amber-200 text-amber-800 text-xs">
+                                                                    <p className="font-semibold">ℹ️ Metode Pembayaran: Cash / Tunai</p>
+                                                                    <p className="text-amber-700 mt-0.5">Pesanan ini dikhususkan untuk pembayaran tunai (Kredit belum diizinkan oleh Admin).</p>
+                                                                </div>
+                                                            ) : order.total_amount < 1000000 ? (
+                                                                <div className="rounded-md bg-amber-50 p-3 border border-amber-200 text-amber-800 text-xs">
+                                                                    <p className="font-semibold">ℹ️ Metode Pembayaran: Cash / Tunai</p>
+                                                                    <p className="text-amber-700 mt-0.5">Pembayaran Kredit/Cicilan memerlukan minimum transaksi Rp 1.000.000.</p>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="space-y-2">
+                                                                    <Label>Metode Pembayaran</Label>
+                                                                    <Select
+                                                                        value={paymentData.payment_method}
+                                                                        onValueChange={(val) => setPaymentData('payment_method', val)}
+                                                                    >
+                                                                        <SelectTrigger>
+                                                                            <SelectValue placeholder="Pilih metode" />
+                                                                        </SelectTrigger>
+                                                                        <SelectContent>
+                                                                            <SelectItem value="cash">Cash / Tunai</SelectItem>
+                                                                            <SelectItem value="credit">Kredit / Cicilan</SelectItem>
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                </div>
+                                                            )}
 
-                                                            {paymentData.payment_method === 'cash' && (
+                                                            {(paymentData.payment_method === 'cash' || !Boolean(order.allow_credit) || order.total_amount < 1000000) && (
                                                                 <div className="space-y-2">
                                                                     <Label>Jenis Pembayaran Cash</Label>
                                                                     <Select
@@ -444,7 +452,7 @@ export default function Show({ order }: Props) {
                                                                 </div>
                                                             )}
 
-                                                            {['credit', 'cash_gantung'].includes(paymentData.payment_method) && (
+                                                            {Boolean(order.allow_credit) && order.total_amount >= 1000000 && ['credit', 'cash_gantung'].includes(paymentData.payment_method) && (
                                                                 <div className="space-y-4 border rounded-md p-4">
                                                                     <div className="space-y-2">
                                                                         <Label>Pilih Tenor / Jangka Waktu</Label>

@@ -21,8 +21,15 @@ class RoleMiddleware
             return redirect('login');
         }
 
+        $user = $request->user();
+
+        // Jika rute meminta role 'admin', maka semua staff (super_admin, owner, admin) diizinkan
+        if (in_array('admin', $roles) && $user->isAdmin()) {
+            return $next($request);
+        }
+
         // Periksa apakah peran user ada di dalam daftar peran yang diizinkan
-        if (!in_array($request->user()->role, $roles)) {
+        if (!in_array($user->role, $roles)) {
             // Jika tidak, tolak akses
             abort(403, 'Unauthorized Action');
         }

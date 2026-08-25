@@ -30,6 +30,34 @@ class DatabaseSeeder extends Seeder
             'role' => 'customer',
         ]);
 
+        User::factory()->create([
+            'name' => 'Super Admin',
+            'email' => 'superadmin@gmail.com',
+            'password' => Hash::make('11223344'),
+            'role' => 'super_admin',
+        ]);
+
+        User::factory()->create([
+            'name' => 'Owner',
+            'email' => 'owner@gmail.com',
+            'password' => Hash::make('11223344'),
+            'role' => 'owner',
+        ]);
+
+        User::factory()->create([
+            'name' => 'Sales Team',
+            'email' => 'sales@gmail.com',
+            'password' => Hash::make('11223344'),
+            'role' => 'sales',
+        ]);
+
+        User::factory()->create([
+            'name' => 'Finance Team',
+            'email' => 'finance@gmail.com',
+            'password' => Hash::make('11223344'),
+            'role' => 'finance',
+        ]);
+
         $this->call([
             CategorySeeder::class,
             ProductSeeder::class,

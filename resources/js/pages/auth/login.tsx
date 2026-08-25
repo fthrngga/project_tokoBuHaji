@@ -28,7 +28,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                         <div className="grid gap-5">
                             {/* Email / Username */}
                             <div className="grid gap-2 relative">
-                                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50">
                                     <User className="w-5 h-5" strokeWidth={1.5} />
                                 </div>
                                 <Input
@@ -40,14 +40,14 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     tabIndex={1}
                                     autoComplete="email"
                                     placeholder="Email / Username"
-                                    className="pl-10 py-6 rounded-xl border-white/20 bg-[#0c1626] text-foreground focus-visible:ring-[#FE5F55] placeholder:text-gray-500"
+                                    className="pl-10 py-6 rounded-xl border-white/20 bg-white/10 text-white focus-visible:ring-[#FE5F55] placeholder:text-white/40"
                                 />
                                 <InputError message={errors.email} className="ml-1" />
                             </div>
 
                             {/* Password */}
                             <div className="grid gap-2 relative">
-                                <div className="absolute left-3 top-[22px] -translate-y-1/2 text-gray-500">
+                                <div className="absolute left-3 top-[22px] -translate-y-1/2 text-white/50">
                                     <Lock className="w-5 h-5" strokeWidth={1.5} />
                                 </div>
                                 <Input
@@ -58,12 +58,12 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     tabIndex={2}
                                     autoComplete="current-password"
                                     placeholder="Password"
-                                    className="pl-10 pr-10 py-6 rounded-xl border-white/20 bg-[#0c1626] text-foreground focus-visible:ring-[#FE5F55] placeholder:text-gray-500"
+                                    className="pl-10 pr-10 py-6 rounded-xl border-white/20 bg-white/10 text-white focus-visible:ring-[#FE5F55] placeholder:text-white/40"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-[22px] -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+                                    className="absolute right-3 top-[22px] -translate-y-1/2 text-white/50 hover:text-white transition-colors"
                                     tabIndex={-1}
                                 >
                                     {showPassword ? <EyeOff className="w-5 h-5" strokeWidth={1.5} /> : <Eye className="w-5 h-5" strokeWidth={1.5} />}

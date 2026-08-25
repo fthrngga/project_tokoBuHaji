@@ -209,34 +209,34 @@ export default function Header({ user }: { user: User | null }) {
                                             <p className="text-[13px] font-semibold text-foreground m-0 truncate">{user.name}</p>
                                             <p className="text-[11px] text-muted-foreground mt-0.5 m-0 truncate">{user.email as string}</p>
                                         </div>
-                                        {(user.role as string) === 'admin' ? (
-                                            <DropdownMenuItem asChild className="focus:bg-secondary cursor-pointer">
-                                                <Link href={route('dashboard')} className="flex items-center gap-2 text-foreground text-[13px]">
+                                        {['admin', 'super_admin', 'owner', 'sales', 'finance'].includes(user.role as string) ? (
+                                            <DropdownMenuItem asChild className="focus:bg-[#1A3C6D] focus:text-white cursor-pointer transition-colors text-slate-700">
+                                                <Link href={route('dashboard')} className="flex items-center gap-2 text-[13px] w-full">
                                                     <LayoutDashboard size={14} /> Dashboard
                                                 </Link>
                                             </DropdownMenuItem>
                                         ) : (
                                             <>
-                                                <DropdownMenuItem asChild className="focus:bg-secondary cursor-pointer">
-                                                    <Link href={route('profile.edit')} className="flex items-center gap-2 text-foreground text-[13px]">
+                                                <DropdownMenuItem asChild className="focus:bg-[#1A3C6D] focus:text-white cursor-pointer transition-colors text-slate-700">
+                                                    <Link href={route('profile.edit')} className="flex items-center gap-2 text-[13px] w-full">
                                                         <UserIcon size={14} /> Profil & Buku Alamat
                                                     </Link>
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem asChild className="focus:bg-secondary cursor-pointer">
-                                                    <Link href={route('orders.index')} className="flex items-center gap-2 text-foreground text-[13px]">
+                                                <DropdownMenuItem asChild className="focus:bg-[#1A3C6D] focus:text-white cursor-pointer transition-colors text-slate-700">
+                                                    <Link href={route('orders.index')} className="flex items-center gap-2 text-[13px] w-full">
                                                         <ShoppingBag size={14} /> Pesanan Saya
                                                     </Link>
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem asChild className="focus:bg-secondary cursor-pointer">
-                                                    <Link href={route('customer.installments.index')} className="flex items-center gap-2 text-foreground text-[13px]">
+                                                <DropdownMenuItem asChild className="focus:bg-[#1A3C6D] focus:text-white cursor-pointer transition-colors text-slate-700">
+                                                    <Link href={route('customer.installments.index')} className="flex items-center gap-2 text-[13px] w-full">
                                                         <CreditCard size={14} /> Angsuran
                                                     </Link>
                                                 </DropdownMenuItem>
                                             </>
                                         )}
                                         <DropdownMenuSeparator className="bg-border" />
-                                        <DropdownMenuItem asChild className="focus:bg-red-50 focus:text-red-600 cursor-pointer">
-                                            <Link href={route('logout')} method="post" as="button" className="w-full flex items-center gap-2 text-red-500 text-[13px]">
+                                        <DropdownMenuItem asChild className="focus:bg-red-50 focus:text-red-600 cursor-pointer transition-colors text-red-500">
+                                            <Link href={route('logout')} method="post" as="button" className="flex items-center gap-2 text-[13px] w-full">
                                                 <LogOut size={14} /> Log Out
                                             </Link>
                                         </DropdownMenuItem>

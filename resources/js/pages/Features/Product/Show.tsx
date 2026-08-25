@@ -109,7 +109,7 @@ export default function Show({ product }: Props) {
     <>
       <Head title={`${product.name} — Haji Elektronik`} />
       <Toaster richColors closeButton position="top-center" />
-      <div className="flex min-h-screen w-full flex-col" style={{ background: '#0d1e2e', color: '#F7F7FF' }}>
+      <div className="flex min-h-screen w-full flex-col bg-slate-50">
         <Header user={auth.user} />
 
         <main className="flex-1 py-8 pb-24">
@@ -119,7 +119,7 @@ export default function Show({ product }: Props) {
             <div className="mb-8">
               <Link
                 href="/"
-                className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-orange-400 transition-colors"
+                className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-[#1A3C6D] transition-colors"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Kembali ke Beranda
@@ -139,8 +139,8 @@ export default function Show({ product }: Props) {
                         onClick={() => setSelectedImage("/storage/" + image.image_path)}
                         className={`relative h-18 w-18 flex-shrink-0 overflow-hidden rounded-xl border-2 transition-all ${
                           selectedImage === "/storage/" + image.image_path
-                            ? "border-orange-500 shadow-lg shadow-orange-500/20"
-                            : "border-border hover:border-white/30 bg-slate-800/50"
+                            ? "border-[#1A3C6D] shadow-lg"
+                            : "border-slate-200 hover:border-[#1A3C6D]/50 bg-white"
                         }`}
                         style={{ height: '72px', width: '72px' }}
                       >
@@ -155,7 +155,7 @@ export default function Show({ product }: Props) {
                 )}
 
                 {/* Main Image */}
-                <div className="relative aspect-square w-full flex-1 overflow-hidden rounded-3xl bg-slate-800/50 border border-border group">
+                <div className="relative aspect-square w-full flex-1 overflow-hidden rounded-3xl bg-white shadow-sm border border-slate-200 group">
                   <img
                     src={selectedImage}
                     alt={product.name}
@@ -184,26 +184,26 @@ export default function Show({ product }: Props) {
                 {/* Category */}
                 {product.category && (
                   <div className="mb-3">
-                    <span className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide" style={{ borderColor: 'rgba(87,115,153,0.4)', background: 'rgba(87,115,153,0.15)', color: '#BDD5EA' }}>
+                    <span className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide" style={{ borderColor: 'rgba(26,60,109,0.2)', background: 'rgba(26,60,109,0.05)', color: '#1A3C6D' }}>
                       {product.category.name}
                     </span>
                   </div>
                 )}
 
                 {/* Title */}
-                <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl leading-tight">
+                <h1 className="text-3xl font-extrabold tracking-tight text-[#1A3C6D] sm:text-4xl leading-tight">
                   {product.name}
                 </h1>
 
                 {/* Rating — removed fake data */}
 
                 {/* Price */}
-                <div className="mt-6 p-5 rounded-2xl" style={{ background: 'rgba(87,115,153,0.12)', border: '1px solid rgba(87,115,153,0.25)' }}>
-                  <p className="text-4xl font-black text-foreground">
+                <div className="mt-6 p-5 rounded-2xl bg-white shadow-sm border border-slate-200 border-l-4" style={{ borderLeftColor: '#1A3C6D' }}>
+                  <p className="text-4xl font-black text-[#1A3C6D]">
                     {formatCurrency(activePrice)}
                   </p>
                   <div className="mt-2 flex items-center gap-3">
-                    <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold" style={{ border: '1px solid rgba(74,222,128,0.3)', background: 'rgba(74,222,128,0.1)', color: '#4ade80' }}>
+                    <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold" style={{ border: '1px solid rgba(74,222,128,0.3)', background: 'rgba(74,222,128,0.1)', color: '#16a34a' }}>
                       <Package className="h-3 w-3" />
                       {currentStock > 0 ? `${currentStock} unit tersedia` : 'Pre-order'}
                     </span>
@@ -213,7 +213,7 @@ export default function Show({ product }: Props) {
                 {/* Description */}
                 {product.description && (
                   <div className="mt-6">
-                    <p className="text-slate-400 leading-relaxed text-sm">
+                    <p className="text-slate-600 leading-relaxed text-sm">
                       {product.description}
                     </p>
                   </div>
@@ -224,21 +224,21 @@ export default function Show({ product }: Props) {
                   <div className="mt-6 space-y-5">
                     {product.custom_options.map((optionGroup) => (
                       <div key={optionGroup.name}>
-                        <p className="text-sm font-semibold text-foreground mb-2.5">
+                        <p className="text-sm font-semibold text-slate-900 mb-2.5">
                           {optionGroup.name}
                           {selectedOptions[optionGroup.name] && (
-                            <span className="ml-2 text-orange-400 font-normal">: {selectedOptions[optionGroup.name]}</span>
+                            <span className="ml-2 text-orange-500 font-normal">: {selectedOptions[optionGroup.name]}</span>
                           )}
                         </p>
                         <div className="flex flex-wrap gap-2">
                           {optionGroup.options.map((optValue) => {
                             const isSelected = selectedOptions[optionGroup.name] === optValue;
                             return (
-                      <button
+                              <button
                                 key={optValue}
                                 onClick={() => setSelectedOptions(prev => ({ ...prev, [optionGroup.name]: optValue }))}
                                 className={`px-5 py-2.5 text-sm rounded-xl border-2 font-medium transition-all`}
-                                style={isSelected ? { borderColor: '#577399', background: 'rgba(87,115,153,0.2)', color: '#BDD5EA' } : { borderColor: 'rgba(87,115,153,0.2)', background: 'rgba(87,115,153,0.05)', color: '#8aacca' }}
+                                style={isSelected ? { borderColor: '#1A3C6D', background: 'rgba(26,60,109,0.05)', color: '#1A3C6D' } : { borderColor: '#e2e8f0', background: '#ffffff', color: '#64748b' }}
                               >
                                 {optValue}
                               </button>
